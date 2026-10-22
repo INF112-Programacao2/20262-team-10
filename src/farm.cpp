@@ -29,9 +29,12 @@ void Farm::adicionarAnimal(Animal* a) {
 
         //coloca o animal na ultima posicao de index
         rebanhoNovaAlocacao[qtdAtualDeAnimais] = a;
+        qtdAtualDeAnimais++;
 
+        //deleta os enderecos antigos que faltavam o ultimo que rebanho aponta
         delete[] rebanho;
 
+        //agora rebanho aponta exatamente para os enderecos de todos os animais, incluindo o inserido;
         rebanho = rebanhoNovaAlocacao;
 
         std::cout << "animal de indice: --" << a->getId()  << "-- foi aidicionado com sucesso!"
@@ -41,3 +44,37 @@ void Farm::adicionarAnimal(Animal* a) {
         std::cout << "Na sua fazenda nao cabem mais animais para o atual padrao mantido" << std::endl;
     }
 };
+
+void Farm::removerAnimal(Animal* a) {
+    int indexAnimalRemovido = -1;
+
+    for (int i = 0; i < qtdAtualDeAnimais; i++) {
+        if (rebanho[i]->getId() == a->getId()) {
+            indexAnimalRemovido = i;
+            break;
+        }
+    }
+
+    if (indexAnimalRemovido == -1) {
+        std::cout << "Erro: Animal nao encontrado no rebanho." << std::endl;
+        return;
+    }
+
+    Animal** rebanhoNovaAlocacao = new Animal*[qtdAtualDeAnimais-1];
+
+    for (int i = 0; i < indexAnimalRemovido; i++) {
+        rebanhoNovaAlocacao[i] = rebanho[i];
+    }
+
+    for (int i = indexAnimalRemovido + 1; i < qtdAtualDeAnimais; i++) {
+        rebanhoNovaAlocacao[i - 1] = rebanho[i];
+    }
+
+    delete rebanho[indexAnimalRemovido];
+    delete[] rebanho;
+
+    rebanho = rebanhoNovaAlocacao;
+
+    qtdAtualDeAnimais--;
+    std::cout << "Animal removido com sucesso!" << std::endl;
+}
