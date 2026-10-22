@@ -9,6 +9,7 @@ class Farm {
     private:
         std::string nome;
         std::string localizacao;
+        //valor em hectare
         double area;
         int capacidadeMaxima;
         //a pessoa nao deve passar a quantidade maxima, mas sim ser calculado com base em caracteristicas
@@ -17,13 +18,23 @@ class Farm {
         Animal** rebanho;
     
     public:
-        //aqui estao os valores de inicializacao, o qa vai ser removido
-        //s - nome, l - localizacao, a-area, c-capacidade maxima, qa-quantidade maxima de animais
-        Farm(std::string s, std::string l, double a, int c, int qa);
+        //construtor
+        //       s - nome, l - localizacao, a-area,  outros atributos são calculados;
+        Farm(std::string s, std::string l, double a);
+
+
+        //manejo de animais
         void adicionarAnimal(Animal* a);
         void removerAnimal(Animal* a);
+
+        //funcoes de calculo
         double calcularLotacaoArea();
         double calcularLucroGeralDiario();
+
+        //gets
+        int getQuantidadeAnimais();
+
+
         ~Farm();
 };
 
