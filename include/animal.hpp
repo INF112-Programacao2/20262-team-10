@@ -16,6 +16,9 @@ public:
     virtual double calcularGastoDiario() = 0;
     virtual double calcularReceitaDiaria() = 0;
     virtual ~Animal();
+
+    //gets
+    std::string getId();
 };
 
 #endif
