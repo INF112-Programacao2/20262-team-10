@@ -2,6 +2,7 @@
 #define FARM_HPP
 
 #include "animal.hpp"
+#include "area.hpp"
 #include <iostream>
 
 
@@ -10,29 +11,21 @@ class Farm {
         std::string nome;
         std::string localizacao;
         //valor em hectare
-        double area;
-        int capacidadeMaxima;
+        Area** area;
         //a pessoa nao deve passar a quantidade maxima, mas sim ser calculado com base em caracteristicas
         //da fazenda
-        int qtdAtualDeAnimais;
-        Animal** rebanho;
+        int qtdTotalDeAnimais;
+
     
     public:
         //construtor
-        //       s - nome, l - localizacao, a-area,  outros atributos são calculados;
-        Farm(std::string s, std::string l, double a);
+        //       s - nome, l - localizacao  outros atributos são calculados;
+        Farm(std::string s, std::string l);
 
-
-        //manejo de animais
-        void adicionarAnimal(Animal* a);
-        void removerAnimal(Animal* a);
-
-        //funcoes de calculo
-        double calcularLotacaoArea();
         double calcularLucroGeralDiario();
 
         //gets
-        int getQuantidadeAnimais();
+        int getQuantidadeTotalAnimais();
 
 
         ~Farm();
