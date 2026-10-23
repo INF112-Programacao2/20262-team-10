@@ -7,6 +7,7 @@ Farm::Farm(std::string s, std::string l) {
     nome = s;
     localizacao = l;
     qtdAreas = 0;
+    area = nullptr;
 }
 
 void Farm::adicionarArea(Area* a) {
@@ -16,6 +17,7 @@ void Farm::adicionarArea(Area* a) {
         for (int i = 0; i < qtdAreas; i++) {
             areaNovaAlocacao[i] = area[i];
 
+        }
         //coloca o animal na ultima posicao de index
         areaNovaAlocacao[qtdAreas] = a;
         qtdAreas++;
@@ -29,7 +31,7 @@ void Farm::adicionarArea(Area* a) {
         std::cout << "nova area: --" << a->getNomeArea()  << "-- foi aidicionada com sucesso!"
         << std::endl;
 };
-}
+
 
 void Farm::removerArea(Area* a) {
     int indexAreaRemovido = -1;
@@ -78,7 +80,8 @@ void Farm::removerArea(Area* a) {
 
 
 int Farm::getQuantidadeTotalAnimais() {
-
-    //calcula a quantidade total de animais com base na quantidade de cada area;
-    //for na area somando a quantidade de animais de cada
+    for (int i = 0; i < qtdAreas; i++) {
+        qtdTotalDeAnimais+= area[i]->getQtdAnimais();
+    }
+    return qtdTotalDeAnimais;
 }
