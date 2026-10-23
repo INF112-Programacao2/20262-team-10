@@ -12,6 +12,7 @@ class Farm {
         std::string localizacao;
         //valor em hectare
         Area** area;
+        int qtdAreas;
         //a pessoa nao deve passar a quantidade maxima, mas sim ser calculado com base em caracteristicas
         //da fazenda
         int qtdTotalDeAnimais;
@@ -23,6 +24,9 @@ class Farm {
         Farm(std::string s, std::string l);
 
         double calcularLucroGeralDiario();
+
+        void adicionarArea(Area* a);
+        void removerArea(Area* a);
 
         //gets
         int getQuantidadeTotalAnimais();

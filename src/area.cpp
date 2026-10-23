@@ -2,14 +2,17 @@
 #include "area.hpp"
 #include "animal.hpp"
 
-Area::Area() {
+Area::Area(std::string n, std::string estado, double a) {
+    nome = n;
+    estadoPasto = estado;
+    area = a;
     qtdAtualDeAnimais = 0;
     //aqui separa o primeiro array de 1 posicao
     rebanho = new Animal*[qtdAtualDeAnimais+1];
     //sistema adequado de no max ate 3 cabecas por hec
+    //tem que fazer a logica if else para cada qualidade do pasto
     capacidadeMaxima = area*3;
 }
-
 
 void Area::adicionarAnimal(Animal* a) {
     if (qtdAtualDeAnimais < capacidadeMaxima) {
@@ -71,4 +74,12 @@ void Area::removerAnimal(Animal* a) {
 
     qtdAtualDeAnimais--;
     std::cout << "Animal removido com sucesso!" << std::endl;
+}
+
+std::string Area::getNomeArea() {
+    return nome;
+}
+
+int Area::getQtdAnimais() {
+    return qtdAtualDeAnimais;
 }
