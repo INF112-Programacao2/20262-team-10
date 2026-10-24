@@ -3,30 +3,54 @@
 
 #include "animal.hpp"
 #include "area.hpp"
+#include "user.hpp"
 #include <iostream>
 
 
 class Farm {
     private:
+        //identificadores
         std::string nome;
         std::string localizacao;
+        User* proprietario;
         //valor em hectare
         Area** area;
         int qtdAreas;
-        //a pessoa nao deve passar a quantidade maxima, mas sim ser calculado com base em caracteristicas
-        //da fazenda
-        int qtdTotalDeAnimais;
 
+        //resumo de dados
+        int qtdTotalDeAnimais;
+        int qtdBaixas;
+
+        //setor financeiro
+        double saldoCaixa;
+
+        double lucroAcumuladoVendas;
+        double prejuizoAcumuladoMortes;
+
+        //simulacao futuras
+        int diaAtualSimulacao;
     
     public:
-        //construtor
-        //       s - nome, l - localizacao  outros atributos são calculados;
-        Farm(std::string s, std::string l);
+        Farm(std::string nome, std::string localizacao, User* proprietario);
+        ~Farm();
 
+        //financeiro
+        double calcularGastoTotalDiarioFazenda();
+        double calcularReceitaTotalDiariaFazenda();
         double calcularLucroGeralDiario();
+        void emitirRelatorioBreakEvenEVendas();
+        //vai passar o valor de venda? Precisa calcular quanto vai vende?
+        bool venderAnimal(std::string id);
 
+
+        //area-gado
         void adicionarArea(Area* a);
         void removerArea(Area* a);
+        Animal* buscarAnimalGlobal(Animal* a);
+        bool transferirAnimalEntreAreas(Animal* a, Area ar);
+        bool enviarParaQuarentena(std::string motivo, std::string idAnimal, int dias);
+        bool liberarDaQuarentena(std::string idAnimal);
+
 
         //gets
         int getQuantidadeTotalAnimais();
