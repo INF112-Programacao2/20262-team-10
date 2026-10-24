@@ -5,14 +5,27 @@
 
 class User {
     private:
-        std::string login;
-        std::string senha;
+        std::string idUsuario;
+        std::string login; //usuario
+        std::string senhaHash;
         std::string nomeProprietario;
+        std::string perfilAcesso;
+        
+        double cotacaoDolar;
+        double precoLeite;
+        double precoSacaRacao;
+        double precoArrobaBoi;
 
     public:
-        bool autenticar(std::string l, std::string s);
-
-
+        User(std::string login, std::string senha, std::string nome, std::string perfil);
+        ~User();
+        bool autenticar(std::string login, std::string senha);
+        void atualizarCotacoes();
+        
+        //gets
+        double getPrecoLeite();
+        double getSacaRacao();
+        double getPrecoArroba();
 };
 
 #endif 

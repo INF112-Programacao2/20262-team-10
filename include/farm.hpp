@@ -13,8 +13,7 @@ class Farm {
         std::string nome;
         std::string localizacao;
         User* proprietario;
-        //valor em hectare
-        Area** area;
+        Area** area; //valor em hectares
         int qtdAreas;
 
         //resumo de dados
