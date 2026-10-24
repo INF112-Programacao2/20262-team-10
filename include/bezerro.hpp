@@ -10,7 +10,7 @@ private:
     bool desmamado;
 public:
     Bezerro(std::string id, char s, double p);
-    Bezerro(std::string id, char s, double p, int iM, int qtdF, int qtdV);
+    Bezerro(std::string id, char s, double p, int iM, int qtdF, int qtdV, double cLL, double gPMD, int iDM, bool d);
     ~Bezerro();
     double calculoGastoDiario();
     double calcularReceitaDiaria();
