@@ -3,12 +3,13 @@
 
 #include <iostream>
 
-// Farm::Farm(std::string s, std::string l) {
-//     nome = s;
-//     localizacao = l;
-//     qtdAreas = 0;
-//     area = nullptr;
-// }
+Farm::Farm(std::string s, std::string l, User* propr) {
+    nome = s;
+    localizacao = l;
+    qtdAreas = 0;
+    proprietario = propr;
+    area = nullptr;
+}
 
 void Farm::adicionarArea(Area* a) {
         Area** areaNovaAlocacao = new Area*[qtdAreas+1];
