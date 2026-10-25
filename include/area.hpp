@@ -6,7 +6,7 @@
 #include <iostream>
 
 class Area {
-    private:
+    protected:
         std::string nome; //nome da area, ex-pasto1,pasto2,curral
         std::string estadoPasto; //seco, ruim, intermediario, bom, muito bom
         double area; //em hectares
