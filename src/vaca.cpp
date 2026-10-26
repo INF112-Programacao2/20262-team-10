@@ -1,17 +1,15 @@
 #include <iostream>
 #include "vaca.hpp"
 
-Vaca::Vaca(std::string id, char s, double p) : Animal(id, s, p) {}
 Vaca::Vaca(std::string id, char s, double p, int iM, int qtdF, int qtdV) : Animal(id, s, p, iM, qtdF, qtdV) {}
 
 Vaca::~Vaca(){
 
 }
 
-bool Vaca::getLactacao() const{
-    return emLactacao;
-}
-
-double Vaca::getProducao() const{
-    return producaoLeiteDia;
-}
+//gets
+double Vaca:: getProducaoLeiteDia()const {return producaoLeiteDia;}
+bool Vaca:: getEmLactacao()const {return emLactacao;}
+//sets
+void Vaca:: setProducaoLeiteDia(double p) {producaoLeiteDia=p;}
+void Vaca:: setEmLactacao(bool l) {emLactacao=l;}

@@ -9,11 +9,25 @@ private:
     int idadeDesmameMeses;
     bool desmamado;
 public:
+    //construtor para animal nascido
     Bezerro(std::string id, char s, double p);
+    //construtor para animal adquirido
     Bezerro(std::string id, char s, double p, int iM, int qtdF, int qtdV, double cLL, double gPMD, int iDM, bool d);
     ~Bezerro();
-    double calculoGastoDiario();
-    double calcularReceitaDiaria();
+    //gets
+    double getConsumoLeiteLitros()const;
+    double getGanhoPesoMedioDiario()const;
+    int getIdadeDesmameMeses()const;
+    bool getDesmamado()const;
+    //sets
+    void setConsumoLeiteLitros(double c);
+    void setGanhoPesoMedioDiario(double g);
+    void setIdadeDesmameMeses(int i);
+    void setDesmamado(bool d);
+    //metodos herança
+    double calcularGastoDiario() override;
+    double calcularReceitaDiaria() override;
+    //metodos exclusivos
     double calcularValorVendaMercado();
     void imprimirFichaCompleta() const;
     void realizarDesmame();
