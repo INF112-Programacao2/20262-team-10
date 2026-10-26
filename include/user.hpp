@@ -24,6 +24,7 @@ class User {
         
         //gets
         double getPrecoLeite();
+        double getCotacao();
         double getSacaRacao();
         double getPrecoArroba();
 };

@@ -17,7 +17,7 @@ User::User(std::string log, std::string senha,
     senhaHash = senha;
     idUsuario = nom;
     perfilAcesso = perfil;
-    cotacaoDolar = 5.0; //valor para nao quebrar
+    cotacaoDolar = -2; //valor para nao quebrar
 }
 
 void User::atualizarCotacoes() {
@@ -50,5 +50,17 @@ void User::atualizarCotacoes() {
         std::string valorStr = conteudoCompleto.substr(posInicial, posFinal - posInicial);
         this->cotacaoDolar = std::stod(valorStr);
     }
+
+    if (cotacaoDolar == -2) {
+        std::cout << std::endl; std::cout << "---------------------" << std::endl;
+        std::cout << "Atencao valor da cotacao apresenta erro e nao foi modificado" << std::endl;
+    } else {
+        std::cout << "cotacao do dolar atualizada com sucesso" << std::endl;
+    }
+
+};
+
+double User::getCotacao() {
+    return cotacaoDolar;
 };
 
