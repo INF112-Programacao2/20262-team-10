@@ -23,7 +23,17 @@ public:
 
     //gets
     std::string getId() const;
+    std::string getEstadoSaude() const;
+    std::string getTemperamento() const;
+    char getSexo() const;
+    double getPeso() const;
+    int getIdadeMeses() const;
+    int getQtdFilhos() const;
+    int getQtdvacinas() const;
     bool getQuarentena() const;
+    Animal* getPai() const;
+    Animal* getMae() const;
+    Animal** getFilhos() const;
 };
 
 #endif
