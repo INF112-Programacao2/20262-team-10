@@ -16,7 +16,11 @@ char Animal::getSexo() const {return sexo;}
 double Animal::getPeso() const {return peso;}
 int Animal::getIdadeMeses() const {return idadeMeses;}    
 int Animal::getQtdFilhos() const {return qtdFilhos;}
-bool Animal::getQuarentena() const{return EmQuarentena;} 
+int Animal::getQtdvacinas() const {return qtdVacinas;}
+bool Animal::getQuarentena() const{return EmQuarentena;}
+Animal* Animal::getPai() const{return pai;} 
+Animal* Animal::getMae() const{return mae;}
+Animal** Animal::getFilhos() const{return filhos;}
 
 Animal::~Animal() {
     
