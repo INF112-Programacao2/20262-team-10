@@ -96,7 +96,7 @@ O desenvolvimento foi arquitetado em 5 módulos independentes e paralelos. Ningu
 
 ```bash
 # Exemplo de compilação via terminal
-g++ -Wall -std=c++11 src/*.cpp -o FarmManager
+make
 
 # Executando no Linux / Mac
 ./FarmManager
