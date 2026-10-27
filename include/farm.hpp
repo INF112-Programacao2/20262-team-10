@@ -55,6 +55,7 @@ class Farm {
 
         //gets
         int getQuantidadeTotalAnimais();
+        std::string getAreaAtual() const;
 };
 
 #endif

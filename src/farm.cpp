@@ -96,3 +96,5 @@ void Farm::selecionarArea(std::string n) {
         }
     }
 }
+
+std::string Farm::getAreaAtual() const {return areaAtual;}
