@@ -18,10 +18,18 @@ User::User(std::string log, std::string senha,
     idUsuario = nom;
     perfilAcesso = perfil;
     cotacaoDolar = -2; //valor para nao quebrar
-}
+    precoArrobaBoi = 384,55;
+    precoLeite = 2,88;
+};
 
 void User::atualizarCotacoes() {
+
+//garante que vai funcionar no windows tambem
+#ifdef _WIN32
+    system("curl -s https://economia.awesomeapi.com.br/last/USD-BRL > cotacao.txt");
+#else
     system("curl -s \"https://economia.awesomeapi.com.br/last/USD-BRL\" > cotacao.txt");
+#endif
 
     std::ifstream arquivo("cotacao.txt");
     if (!arquivo.is_open()) {
@@ -62,5 +70,13 @@ void User::atualizarCotacoes() {
 
 double User::getCotacao() {
     return cotacaoDolar;
+};
+
+void User::setPrecoLeite (double p) {
+    precoLeite = p;
+};
+
+void User::setPrecoArroba(double p) {
+    precoArrobaBoi = p;
 };
 

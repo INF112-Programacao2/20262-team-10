@@ -27,6 +27,10 @@ class User {
         double getCotacao();
         double getSacaRacao();
         double getPrecoArroba();
+
+        //sets
+        void setPrecoArroba(double p);
+        void setPrecoLeite(double p);
 };
 
 #endif 
