@@ -9,6 +9,7 @@ Farm::Farm(std::string s, std::string l, User* propr) {
     qtdAreas = 0;
     proprietario = propr;
     area = nullptr;
+    areaAtual = "";
 }
 
 void Farm::adicionarArea(Area* a) {
@@ -85,4 +86,13 @@ int Farm::getQuantidadeTotalAnimais() {
         qtdTotalDeAnimais+= area[i]->getQtdAnimais();
     }
     return qtdTotalDeAnimais;
+}
+
+void Farm::selecionarArea(std::string n) {
+    for(int i=0; i < qtdAreas; i++){
+        if(area[i]->getNomeArea() == n){
+            std :: cout << "Area: "<< area[i]->getNomeArea() << " Selecionada" << std :: endl;
+            areaAtual = n;
+        }
+    }
 }

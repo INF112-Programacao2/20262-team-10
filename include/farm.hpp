@@ -12,6 +12,7 @@ class Farm {
         //identificadores
         std::string nome;
         std::string localizacao;
+        std::string areaAtual;
         User* proprietario;
         Area** area; //valor em hectares
         int qtdAreas;
@@ -45,6 +46,7 @@ class Farm {
         //area-gado
         void adicionarArea(Area* a);
         void removerArea(Area* a);
+        void selecionarArea(std::string n); //passa o nome da area que deseja selecionar
         Animal* buscarAnimalGlobal(Animal* a);
         bool transferirAnimalEntreAreas(Animal* a, Area ar);
         bool enviarParaQuarentena(std::string motivo, std::string idAnimal, int dias);
