@@ -65,26 +65,17 @@ O desenvolvimento foi arquitetado em 5 módulos independentes e paralelos. Ningu
 
 ---
 
-## 💻 Diagrama Simplificado de Classes
+## 💻 Diagrama Arquitetural de Classes
 
-```text
-+-------------------+       +-------------------+       +-----------------------+
-|      Usuario      |       |      Fazenda      |       |   RegistroSanitario   |
-+-------------------+       +-------------------+       +-----------------------+
-| - login           |<------| - areaHectares    |       | - nomeVacina          |
-| - cotacaoDolar    |       | - Animal** rebanho|------>| - diasCarencia        |
-+-------------------+       +-------------------+       +-----------------------+
-                                      |
-                                      V
-                            <<abstract>> Animal
-                      (pai*, mae*, filhos**, RegistroSanitario*)
-                               /      |      \
-                              /       |       \
-                             /        |        \
-                          Vaca      Touro     Bezerro
-```
-
----
+<div align="center">
+  <a href="docs/Diagrama_Classes_FarmManager.pdf" target="_blank">
+    <img src="docs/diagrama_preview.png" alt="Diagrama de Classes Mestre (PDF)" width="850">
+  </a>
+  <br>
+  <p>
+    <i>Clique na miniatura acima para abrir a modelagem UML completa com zoom, ou <a href="docs/Diagrama_Classes_FarmManager.pdf">baixe o arquivo PDF aqui</a>.</i>
+  </p>
+</div>
 
 ## 🛠️ Como Compilar e Executar
 
