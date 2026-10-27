@@ -98,11 +98,7 @@ O desenvolvimento foi arquitetado em 5 módulos independentes e paralelos. Ningu
 # Exemplo de compilação via terminal
 make
 
-# Executando no Linux / Mac
-./FarmManager
-
-# Executando no Windows
-FarmManager.exe
+execute o arquivo gerado em ./bin
 ```
 
 ---
