@@ -42,7 +42,6 @@ class Farm {
         //vai passar o valor de venda? Precisa calcular quanto vai vende?
         bool venderAnimal(std::string id);
 
-
         //area-gado
         void adicionarArea(Area* a);
         void removerArea(Area* a);
