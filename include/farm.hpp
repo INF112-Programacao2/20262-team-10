@@ -53,9 +53,6 @@ class Farm {
 
         //gets
         int getQuantidadeTotalAnimais();
-
-
-        ~Farm();
 };
 
 #endif
