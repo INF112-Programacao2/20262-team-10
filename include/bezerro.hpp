@@ -27,11 +27,13 @@ public:
     //metodos herança
     double calcularGastoDiario() override;
     double calcularReceitaDiaria() override;
+    std::string getTipo() const override;
+    bool podeSerPromovido() const override;
     //metodos exclusivos
     double calcularValorVendaMercado();
     void imprimirFichaCompleta() const;
     void realizarDesmame();
-    bool atingiuIdadeAdulta();
+    bool atingiuIdadeAdulta() const;
     std::string recomendarDestinoMaturidade();
 };
 

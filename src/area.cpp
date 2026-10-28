@@ -83,3 +83,12 @@ std::string Area::getNomeArea() {
 int Area::getQtdAnimais() {
     return qtdAtualDeAnimais;
 }
+/*
+void Area::promoverAnimal() {
+    for(int i=0; i< qtdAtualDeAnimais; i++){
+        if(rebanho[i]->getIdadeMeses() > 12){
+            
+        }
+    }
+}
+*/

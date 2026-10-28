@@ -21,6 +21,8 @@ public:
     //metodos herança
     double calcularGastoDiario () override;
     double calcularReceitaDiaria() override;
+    std::string getTipo() const override;
+    bool podeSerPromovido() const override;
 };
 
 #endif

@@ -9,6 +9,8 @@ Boicorte::~Boicorte() {}
 double Boicorte:: getrendimentoCarcaca()const {return rendimentoCarcaca;}
 double Boicorte:: getmetaAbatePeso()const {return metaAbatePeso;}
 std::string Boicorte:: getFaseEngorda()const {return faseEngorda;}
+std::string Boicorte:: getTipo() const {return "boicorte";}
+bool Boicorte:: podeSerPromovido() const {return false;}
 //sets
 void Boicorte:: setrendimentoCarcaca(double r) {rendimentoCarcaca=r;}
 void Boicorte:: setmetaAbatePeso(double m) {metaAbatePeso=m;}

@@ -24,6 +24,8 @@ public:
     //metodos herança
     double calcularGastoDiario() override;
     double calcularReceitaDiaria() override;
+    std::string getTipo() const override;
+    bool podeSerPromovido() const override;
     //metodos exclusivos
     bool prontoAbate();
     double calcularValorVendaMercado();

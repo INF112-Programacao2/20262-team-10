@@ -15,6 +15,8 @@ double Bezerro:: getConsumoLeiteLitros()const {return consumoLeiteLitros;}
 double Bezerro:: getGanhoPesoMedioDiario()const {return ganhoPesoMedioDiario;}
 int Bezerro:: getIdadeDesmameMeses()const {return idadeDesmameMeses;}
 bool Bezerro:: getDesmamado()const {return desmamado;}
+std::string Bezerro:: getTipo() const {return "bezerro";}
+bool Bezerro:: podeSerPromovido() const {if(atingiuIdadeAdulta()){return true;}return false;}
 //sets
 void Bezerro:: setConsumoLeiteLitros(double c) {consumoLeiteLitros=c;}
 void Bezerro:: setGanhoPesoMedioDiario(double g) {ganhoPesoMedioDiario=g;}
@@ -31,7 +33,7 @@ void Bezerro::realizarDesmame() {
     }
 }
 
-bool Bezerro::atingiuIdadeAdulta(){
+bool Bezerro::atingiuIdadeAdulta() const {
     if(idadeMeses >=12){
         return true;
     }

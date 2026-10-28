@@ -10,6 +10,8 @@ double Touro:: getValorDoseSemen()const {return valorDoseSemen;}
 double Touro:: getMerito()const {return meritoGeneticoPTA;}
 int Touro:: getDosesEstoque()const {return dosesEstoque;}
 int Touro:: getQtdCoberturas()const {return qtdCoberturas;}
+std::string Touro::getTipo() const {return "touro";}
+bool Touro::podeSerPromovido() const {return false;} 
 //sets
 void Touro:: setValorDoseSemen(double v) {valorDoseSemen=v;}
 void Touro:: setMerito(double m) {meritoGeneticoPTA=m;}

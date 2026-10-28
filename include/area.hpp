@@ -24,6 +24,7 @@ class Area {
 
         void adicionarAnimal(Animal* a);
         void removerAnimal(Animal* a);
+        void promoverAnimal();
         //gets
         int getCapacidadeMaxima();
         std::string getNomeArea();
