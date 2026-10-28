@@ -89,7 +89,17 @@ O desenvolvimento foi arquitetado em 5 módulos independentes e paralelos. Ningu
 # Exemplo de compilação via terminal
 make
 
-execute o arquivo gerado em ./bin
+execute o arquivo main gerado em ./bin com o seguinte comando:
+./bin/main
+
+ATENÇÃO DEVS
+-> caso sua compilação tenha gerado muitos erros, não esqueça de usar o seguinte comando antes de compilar novamente:
+make clean
+
+-> ele foi implementado para remover todos os arquivos gerados durante a compilação
+-> ao fazer alterações que não geraram erros rode apenas o make, ele vai compilar apenas os arquivos alterados e linkar na main atualizando-a
+
+
 ```
 
 ---
