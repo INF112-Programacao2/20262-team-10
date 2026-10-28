@@ -11,18 +11,15 @@ class RegistroSanitario{
         int dia_aplicacao;
         int numeroDose;
 
-
-
     public: 
 
-        RegistroSanitario(int id, std::string nome; int dia_aplic, int numero_d);
+        RegistroSanitario(int id, std::string nome, int dia_aplic, int numero_d);
 
         int getId();
         std::string get_nomeVacina();
         int getDiaAplic();
         int getNumeroDose();
 
-      
 };
 #endif
 
