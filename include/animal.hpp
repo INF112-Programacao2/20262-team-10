@@ -17,8 +17,8 @@ public:
     Animal(std::string id, char s, double p);
     //inicializador sobrecarga ex: animal comprado
     Animal(std::string id, char s, double p, int iM, int qtdF, int qtdV);
-    virtual double calcularGastoDiario() = 0;
-    virtual double calcularReceitaDiaria() = 0;
+    //virtual double calcularGastoDiario() = 0;
+    //virtual double calcularReceitaDiaria() = 0;
     virtual ~Animal();
 
     //gets

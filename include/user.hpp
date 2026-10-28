@@ -18,15 +18,15 @@ class User {
 
     public:
         User(std::string login, std::string senha, std::string nome, std::string perfil);
-        ~User();
+        //~User();
         bool autenticar(std::string login, std::string senha);
         void atualizarCotacoes();
         
         //gets
-        double getPrecoLeite();
+       // double getPrecoLeite();
         double getCotacao();
         double getSacaRacao();
-        double getPrecoArroba();
+       // double getPrecoArroba();
 
         //sets
         void setPrecoArroba(double p);

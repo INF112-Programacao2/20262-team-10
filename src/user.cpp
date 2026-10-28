@@ -26,12 +26,12 @@ void User::atualizarCotacoes() {
 
 //garante que vai funcionar no windows tambem
 #ifdef _WIN32
-    system("curl -s https://economia.awesomeapi.com.br/last/USD-BRL > cotacao.txt");
+    system("curl -s https://economia.awesomeapi.com.br/last/USD-BRL > ./data/cotacao.txt");
 #else
-    system("curl -s \"https://economia.awesomeapi.com.br/last/USD-BRL\" > cotacao.txt");
+    system("curl -s \"https://economia.awesomeapi.com.br/last/USD-BRL\" > ./data/cotacao.txt");
 #endif
 
-    std::ifstream arquivo("cotacao.txt");
+    std::ifstream arquivo("./docs/cotacao.txt");
     if (!arquivo.is_open()) {
         std::cerr << "Erro ao abrir o arquivo de cotacao." << '\n';
         return;

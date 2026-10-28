@@ -19,8 +19,8 @@ public:
     void setProducaoLeiteDia(double p);
     void setEmLactacao(bool l);
     //metodos herança
-    double calcularGastoDiario () override;
-    double calcularReceitaDiaria() override;
+    //double calcularGastoDiario () override;
+    //double calcularReceitaDiaria() override;
     std::string getTipo() const override;
     bool podeSerPromovido() const override;
 };

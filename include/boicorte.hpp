@@ -22,8 +22,8 @@ public:
     void setmetaAbatePeso(double m);
     void setFaseEngorda(std::string f);
     //metodos herança
-    double calcularGastoDiario() override;
-    double calcularReceitaDiaria() override;
+    //double calcularGastoDiario() override;
+    //double calcularReceitaDiaria() override;
     std::string getTipo() const override;
     bool podeSerPromovido() const override;
     //metodos exclusivos
