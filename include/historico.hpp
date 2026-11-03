@@ -3,20 +3,26 @@
 
 #include <string>
 #include "registro.hpp"
+#include "vacina.hpp"
+
 class HistoricoSanitario{
     private:
 
         RegistroSanitario** registros;
+        int capacidadeTotal;
+        int quantidadeAtual;
+
+        void aumentarCapacidade();
 
     public: 
 
-        HistoricoSanitario(int id, std::string nome, int dia_aplic, int numero_d);
+        HistoricoSanitario();
 
-        int getId();
-        std::string get_nomeVacina();
-        int getDiaAplic();
-        int getNumeroDose();
- 
+        ~HistoricoSanitario();
+
+        bool registrarVacina(int idAnimal, const Vacina& vacina, int dia);
+
+
 };
 
 #endif

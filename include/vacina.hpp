@@ -8,16 +8,16 @@ class Vacina{
 
         std::string nomeVacina;
         std::string tipoVacina; 
-        int intervalo_dosesVacina;
+        int intervaloDosesVacina;
 
 
     public:
 
         Vacina(std::string nome, std::string tipo, int intervalo_doses);
 
-        std::string getNome();
-        std::string getTipo();
-        int getIntervalo();
+        std::string get_Nome() const;
+        std::string get_Tipo() const;
+        int get_Intervalo() const;
 };
 
 #endif
