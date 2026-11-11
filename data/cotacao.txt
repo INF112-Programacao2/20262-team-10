@@ -1,1 +1,1 @@
-{"USDBRL":{"code":"USD","codein":"BRL","name":"Dólar Americano/Real Brasileiro","high":"5.583","low":"5.5526","varBid":"-0.0227","pctChange":"-0.4066","bid":"5.5602","ask":"5.5612","timestamp":"1794426812","create_date":"2026-11-11 16:53:32"}}
+{"USDBRL":{"code":"USD","codein":"BRL","name":"Dólar Americano/Real Brasileiro","high":"5.583","low":"5.5531","varBid":"0.0001","pctChange":"0.00179","bid":"5.583","ask":"5.5835","timestamp":"1794436919","create_date":"2026-11-11 19:41:59"}}

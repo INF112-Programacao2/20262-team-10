@@ -12,6 +12,8 @@ Farm::Farm(std::string s, std::string l, User* propr) {
     areaAtual = "";
 }
 
+Farm::~Farm() {}
+
 void Farm::adicionarArea(Area* a) {
         Area** areaNovaAlocacao = new Area*[qtdAreas+1];
 

@@ -87,7 +87,9 @@ int Area::getQtdAnimais() {
 
 void Area::promoverAnimal() { //incluir conexão com a função recomendar destino(Touro/corte)
     for(int i=0; i< qtdAtualDeAnimais; i++){
-        if(rebanho[i]->getIdadeMeses() >= 12 && rebanho[i]->getTipo() != "touro" && rebanho[i]->getTipo() != "vaca" && rebanho[i]->getTipo() != "boicorte"){
+        if(rebanho[i] == nullptr)
+            continue;
+        if(rebanho[i]->podeSerPromovido() && rebanho[i]->getTipo() == "bezerro"){
             std :: cout << "O animal já esta na idade apropriada para promoçãoz\n";
             std :: cout << "Gostaria de realizar a promoção[Y/N]?";
             unsigned char resposta; 
@@ -98,6 +100,14 @@ void Area::promoverAnimal() { //incluir conexão com a função recomendar desti
                     rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), rebanho[i]->getQtdFilhos(), rebanho[i]->getQtdvacinas(), 0);
                     delete rebanho[i];
                     rebanho[i] = t;
+                    std :: cout << "Bezerro promovido a touro com sucesso!\n";
+                }
+                if(rebanho[i]->getSexo() == 'F'){
+                    Vaca* v = new Vaca(rebanho[i]->getId(), rebanho[i]->getSexo(),
+                    rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), rebanho[i]->getQtdFilhos(), rebanho[i]->getQtdvacinas());
+                    delete rebanho[i];
+                    rebanho[i] = v;
+                    std :: cout << "Bezerro promovido a Vaca com sucesso!\n";
                 }
             }
         }
