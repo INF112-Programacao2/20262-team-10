@@ -1,6 +1,7 @@
 #include <iostream>
 #include "area.hpp"
 #include "animal.hpp"
+#include "touro.hpp"
 
 Area::Area(std::string n, std::string estado, double a) {
     nome = n;
@@ -83,12 +84,23 @@ std::string Area::getNomeArea() {
 int Area::getQtdAnimais() {
     return qtdAtualDeAnimais;
 }
-/*
-void Area::promoverAnimal() {
+
+void Area::promoverAnimal() { //incluir conexão com a função recomendar destino(Touro/corte)
     for(int i=0; i< qtdAtualDeAnimais; i++){
-        if(rebanho[i]->getIdadeMeses() > 12){
-            
+        if(rebanho[i]->getIdadeMeses() >= 12 && rebanho[i]->getTipo() != "touro" && rebanho[i]->getTipo() != "vaca" && rebanho[i]->getTipo() != "boicorte"){
+            std :: cout << "O animal já esta na idade apropriada para promoçãoz\n";
+            std :: cout << "Gostaria de realizar a promoção[Y/N]?";
+            unsigned char resposta; 
+            std :: cin >> resposta;
+            if(resposta=='Y' || resposta=='y'){
+                if(rebanho[i]->getSexo() == 'M'){
+                    Touro* t = new Touro(rebanho[i]->getId(), rebanho[i]->getSexo(),
+                    rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), rebanho[i]->getQtdFilhos(), rebanho[i]->getQtdvacinas(), 0);
+                    delete rebanho[i];
+                    rebanho[i] = t;
+                }
+            }
         }
     }
 }
-*/
+
