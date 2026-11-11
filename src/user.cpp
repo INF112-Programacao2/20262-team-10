@@ -18,8 +18,8 @@ User::User(std::string log, std::string senha,
     idUsuario = nom;
     perfilAcesso = perfil;
     cotacaoDolar = -2; //valor para nao quebrar
-    precoArrobaBoi = 384,55;
-    precoLeite = 2,88;
+    precoArrobaBoi = 384.55;
+    precoLeite = 2.88;
 };
 
 void User::atualizarCotacoes() {
