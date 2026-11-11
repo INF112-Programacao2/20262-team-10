@@ -6,7 +6,7 @@
 class RegistroSanitario{
     private:
 
-        int idAnimal;
+        std::string idAnimal;
         std::string nomeVacina; 
         int diaAplicacao;
         int numeroDose;

@@ -1,4 +1,4 @@
-/*
+
 #include <iostream>
 #include "historico.hpp"
 
@@ -21,7 +21,17 @@ HistoricoSanitario::~HistoricoSanitario(){
 }
 
 void HistoricoSanitario::aumentarCapacidade(){
-    capacidadeTotal = 500;
+    int novaCapacidade = capacidadeTotal + 500;
+   
+    RegistroSanitario** novosRegistros = new RegistroSanitario*[novaCapacidade];
+
+    for(int i = 0; i < quantidadeAtual; i++) {
+        novosRegistros[i] = registros[i];
+    }
+
+    delete[] registros; 
+    registros = novosRegistros;
+    capacidadeTotal = novaCapacidade;
 }
 
 bool HistoricoSanitario::registrarVacina(int idAnimal, const Vacina& vacina, int dia){
