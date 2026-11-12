@@ -100,3 +100,27 @@ void Farm::selecionarArea(std::string n) {
 }
 
 std::string Farm::getAreaAtual() const {return areaAtual;}
+
+
+
+void Farm::emitirRelatorioBreakEvenEVendas(){
+
+    double custoDiario = calcularGastoTotalDiarioFazenda();
+    double precoLeite = proprietario->getPrecoLeite(); 
+    double precoArroba = proprietario->getPrecoArroba(); 
+
+    if(precoLeite <= 0 or precoArroba <= 0){
+        std::cout << "Erro: Preços de venda invalidos." << std::endl;
+        return;
+    }
+
+    double litrosLeiteNecessarios = custoDiario / precoLeite;
+    double arrobasNecessarias = custoDiario / precoArroba;
+
+    std::cout << "\n=== RELATORIO DE BREAK EVEN DIARIO ===" << std::endl;
+    std::cout << "Custo Total Diario da Fazenda: R$ " << custoDiario << std::endl;
+    std::cout << "Para não ter prejuizo hoje, a fazenda precisa vender:" << std::endl;
+    std::cout << "-> " << litrosLeiteNecessarios << " Litros de Leite, OU" << std::endl;            //relatório provisório - teste
+    std::cout << "-> " << arrobasNecessarias << " Arrobas de Carne." << std::endl;
+    std::cout << "======================================\n" << std::endl;
+}
