@@ -1,51 +1,52 @@
-/*
 #include <iostream>
 #include "historico.hpp"
 
 HistoricoSanitario::HistoricoSanitario(){
 
-    capacidadeTotal = 10000;
-    quantidadeAtual = 0;
+    capacidadeTotal_ = 5;
+    quantidadeAtual_ = 0;
 
-    registros = new RegistroSanitario*[capacidadeTotal];
+    registros_ = new RegistroSanitario*[capacidadeTotal_];
 }
 
 HistoricoSanitario::~HistoricoSanitario(){
 
-    for(int i=0; i < quantidadeAtual; i++){
-        delete registros[i];
+    for(int i=0; i < quantidadeAtual_; i++){
+        delete registros_[i];
     }
 
-    delete[] registros;
+    delete[] registros_;
         
 }
 
 void HistoricoSanitario::aumentarCapacidade(){
-    int novaCapacidade = capacidadeTotal + 500;
+    int novaCapacidade = capacidadeTotal_ + 500;
    
     RegistroSanitario** novosRegistros = new RegistroSanitario*[novaCapacidade];
 
-    for(int i = 0; i < quantidadeAtual; i++) {
-        novosRegistros[i] = registros[i];
+    for(int i=0; i<quantidadeAtual_; i++){
+        novosRegistros[i] = registros_[i];
     }
 
-    delete[] registros; 
-    registros = novosRegistros;
-    capacidadeTotal = novaCapacidade;
+    delete[] registros_; 
+    registros_ = novosRegistros;
+    capacidadeTotal_ = novaCapacidade;
 }
 
-bool HistoricoSanitario::registrarVacina(int idAnimal, const Vacina& vacina, int dia){
+bool HistoricoSanitario::registrarVacina(const Vacina& vacina, int dia){
 
-    if(quantidadeAtual > capacidadeTotal){
+    if(quantidadeAtual_ >= capacidadeTotal_){
         aumentarCapacidade();
     }
 
     int dosesAnteriores = 0;
+    for(int i = 0; i < quantidadeAtual_; i++){
+        if(registros_[i]->get_nomeVacina() == vacina.get_Nome()){
+            dosesAnteriores++;
+        }
+    }
 
-    registros[quantidadeAtual] = new RegistroSanitario(idAnimal, vacina.get_Nome(), dia, dosesAnteriores+1);
-
-    quantidadeAtual++;
-
+    registros_[quantidadeAtual_] = new RegistroSanitario(vacina, dia, dosesAnteriores + 1);
+    quantidadeAtual_++;
     return true;
 }
-*/
