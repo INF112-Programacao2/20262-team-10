@@ -1,24 +1,30 @@
 #ifndef REGISTRO_HPP
 #define REGISTRO_HPP
 
+#include "vacina.hpp"
+
 #include <string>
 
 class RegistroSanitario{
     private:
 
-        std::string idAnimal;
-        std::string nomeVacina; 
-        int diaAplicacao;
-        int numeroDose;
+        Vacina vacina_;
+        int diaAplicacao_;
+        int numeroDose_;
+        int diasCarenciaRestantes_;
 
     public: 
 
-        RegistroSanitario(int id, std::string nome, int dia_aplic, int numero_d);
+        RegistroSanitario(const Vacina& vacina, int diaAplicacao, int numeroDose);
 
-        int get_Id() const;
         std::string get_nomeVacina() const;
         int get_DiaAplic() const;
         int get_NumeroDose() const;
+
+        double get_Custo() const;
+        int get_DiasCarenciaRestantes() const;
+        void avancarDia();
+        bool emCarencia() const;
 
 };
 #endif

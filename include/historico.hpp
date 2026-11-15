@@ -8,9 +8,9 @@
 class HistoricoSanitario{
     private:
 
-        RegistroSanitario** registros;
-        int capacidadeTotal;
-        int quantidadeAtual;
+        RegistroSanitario** registros_;
+        int capacidadeTotal_;
+        int quantidadeAtual_;
 
         void aumentarCapacidade();
 
@@ -20,7 +20,15 @@ class HistoricoSanitario{
 
         ~HistoricoSanitario();
 
-        bool registrarVacina(int idAnimal, const Vacina& vacina, int dia);
+        bool registrarVacina(const Vacina& vacina, int dia);
+
+        void avancarDia();
+
+        bool emCarencia() const;
+
+        int get_DiasCarenciaRestantes() const;
+
+        double get_CustoTotal() const;
 
 
 };
