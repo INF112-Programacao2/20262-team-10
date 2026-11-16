@@ -1,5 +1,6 @@
 #include <iostream>
 #include "area.hpp"
+#include "farm.hpp"
 #include "animal.hpp"
 #include "touro.hpp"
 
@@ -86,6 +87,8 @@ int Area::getQtdAnimais() {
 }
 
 void Area::promoverAnimal() { //incluir conexão com a função recomendar destino(Touro/corte)
+    if (rebanho == nullptr) throw std::runtime_error("Rebanho da area nao foi alocado!");
+    
     for(int i=0; i< qtdAtualDeAnimais; i++){
         if(rebanho[i] == nullptr)
             continue;
@@ -113,4 +116,3 @@ void Area::promoverAnimal() { //incluir conexão com a função recomendar desti
         }
     }
 }
-

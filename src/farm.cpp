@@ -99,5 +99,14 @@ void Farm::selecionarArea(std::string n) {
     }
 }
 
+void Farm::promoverAnimalGlobal() {
+    if(area==nullptr) throw std::runtime_error("Area da fazenda não foi alocada!");
+
+    for(int i=0 ; i < qtdAreas ; i++){
+        if(area[i]==nullptr) continue;
+        area[i]->promoverAnimal();
+    } 
+}
+
 std::string Farm::getAreaAtual() const {return areaAtual;}
 

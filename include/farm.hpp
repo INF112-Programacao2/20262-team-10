@@ -50,7 +50,7 @@ class Farm {
         bool transferirAnimalEntreAreas(Animal* a, Area ar);
         bool enviarParaQuarentena(std::string motivo, std::string idAnimal, int dias);
         bool liberarDaQuarentena(std::string idAnimal);
-
+        void promoverAnimalGlobal();
 
         //gets
         int getQuantidadeTotalAnimais();
