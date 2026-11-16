@@ -21,12 +21,8 @@ int main () {
     Bezerro* b1 = new Bezerro("141", 'M', 100, 13, 0, 0, 1, 1.0, 1, false);
     area1.adicionarAnimal(b1);
     //area1.promoverAnimal(); nao usar ainda
-<<<<<<< HEAD
     area1.removerAnimal(b1->getId());
     std::cout << "o teste da cotacao do arroba retornou: " << usuarioTeste->getCotacaoArroba() << std::endl;
-=======
-    area1.removerAnimal("141");
->>>>>>> 19fa12bbed2df1550fc7822441af072843bba42a
     std :: cout << area1.getQtdAnimais() << std :: endl;
 
     delete usuarioTeste;
