@@ -15,6 +15,7 @@ class User {
         double precoLeite;
         double precoSacaRacao;
         double precoArrobaBoi;
+        double precoArrobaVaca;
 
     public:
         User(std::string login, std::string senha, std::string nome, std::string perfil);
@@ -23,12 +24,12 @@ class User {
         void atualizarCotacaoDolar();
         void atualizarCotacaoBoi();
         
-        //gets
+
        // double getPrecoLeite();
         double getCotacaoDolar();
-        double getCotacaoArroba();
+        double getCotacaoArrobaBoi();
         double getSacaRacao();
-       // double getPrecoArroba();
+        double getCotacaoArrobaVaca();
 
         //sets
         void setPrecoArroba(double p);

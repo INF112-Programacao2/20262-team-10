@@ -111,21 +111,44 @@ void User::atualizarCotacaoBoi() {
         }
     }
 
-    if (this->precoArrobaBoi <= 0) { 
+    std::string chaveVaca = "\"vaca_gorda\":";
+    size_t posVaca = conteudoCompleto.find(chaveVaca);
+
+    if (posVaca != std::string::npos) {
+        posVaca += chaveVaca.length();
+        while (posVaca < conteudoCompleto.length() && std::isspace(conteudoCompleto[posVaca])) posVaca++;
+        
+        size_t posFinalVaca = conteudoCompleto.find(",", posVaca);
+        if (posFinalVaca == std::string::npos) { // Caso seja o último item do JSON
+            posFinalVaca = conteudoCompleto.find("}", posVaca);
+        }
+        
+        if (posFinalVaca != std::string::npos) {
+            std::string valorStr = conteudoCompleto.substr(posVaca, posFinalVaca - posVaca);
+            this->precoArrobaVaca = std::stod(valorStr); 
+        }
+    }
+
+    // Validações
+    if (this->precoArrobaBoi <= 0 || this->precoArrobaVaca <= 0) { 
         std::cout << std::endl << "----------------------" << std::endl;
-        std::cout << "Atencao valor da cotacao do boi apresenta erro e nao foi modificado" << std::endl;
+        std::cout << "Atencao: Um ou mais valores de cotacao apresentam erro ou nao foram encontrados." << std::endl;
     } else {
-        std::cout << "Cotacao do boi atualizada com sucesso." << std::endl;
-        std::cout << "Lembre-se a cotacao do arroba do boi gordo foi atualizada com base no preco de Sao Paulo" << std::endl;
+        std::cout << "Cotacoes de boi e vaca atualizadas com sucesso!" << std::endl;
     }
 }
+
 
 double User::getCotacaoDolar() {
     return cotacaoDolar;
 };
 
-double User::getCotacaoArroba() {
+double User::getCotacaoArrobaBoi() {
     return precoArrobaBoi;
+}
+
+double User::getCotacaoArrobaVaca() {
+    return precoArrobaVaca;
 }
 
 void User::setPrecoLeite (double p) {
