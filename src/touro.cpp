@@ -17,3 +17,7 @@ void Touro:: setValorDoseSemen(double v) {valorDoseSemen=v;}
 void Touro:: setMerito(double m) {meritoGeneticoPTA=m;}
 void Touro:: setDosesEstoque(int d) {dosesEstoque=d;}
 void Touro:: setQtdCoberturas(int q) {qtdCoberturas=q;}
+
+double Touro::calcularGastoDiario(double /*precoLeite*/, double precoRacao) {
+    return peso * 0.020 * precoRacao;
+}

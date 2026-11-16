@@ -8,10 +8,17 @@ Boicorte::~Boicorte() {}
 //gets
 double Boicorte:: getrendimentoCarcaca()const {return rendimentoCarcaca;}
 double Boicorte:: getmetaAbatePeso()const {return metaAbatePeso;}
-std::string Boicorte:: getFaseEngorda()const {return faseEngorda;}
+bool Boicorte:: getFaseEngorda()const {return faseEngorda;}
 std::string Boicorte:: getTipo() const {return "boicorte";}
 bool Boicorte:: podeSerPromovido() const {return false;}
 //sets
 void Boicorte:: setrendimentoCarcaca(double r) {rendimentoCarcaca=r;}
 void Boicorte:: setmetaAbatePeso(double m) {metaAbatePeso=m;}
-void Boicorte:: setFaseEngorda(std::string f) {faseEngorda=f;}
+void Boicorte:: setFaseEngorda(bool f) {faseEngorda=f;}
+
+double Boicorte::calcularGastoDiario(double /*precoLeite*/, double precoRacao) {
+    if(faseEngorda){
+        return peso * 0.026 * precoRacao;
+    }
+    return peso * 0.021 * precoRacao;
+}

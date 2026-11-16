@@ -25,7 +25,7 @@ public:
     void setIdadeDesmameMeses(int i);
     void setDesmamado(bool d);
     //metodos herança
-    //double calcularGastoDiario() override;
+    double calcularGastoDiario() override;
     //double calcularReceitaDiaria() override;
     std::string getTipo() const override;
     bool podeSerPromovido() const override;

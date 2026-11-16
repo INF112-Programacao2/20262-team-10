@@ -6,7 +6,7 @@ class Boicorte : public Animal{
 private:
     double rendimentoCarcaca;
     double metaAbatePeso;
-    std::string faseEngorda;
+    bool faseEngorda;
 public:
     //construtor para animal adquirido
     Boicorte(std::string id, char s, double p, int iM, int qtdF, int qtdV);
@@ -16,13 +16,13 @@ public:
     //gets
     double getrendimentoCarcaca()const;
     double getmetaAbatePeso()const;
-    std::string getFaseEngorda()const;
+    bool getFaseEngorda()const;
     //sets
     void setrendimentoCarcaca(double r);
     void setmetaAbatePeso(double m);
     void setFaseEngorda(std::string f);
     //metodos herança
-    //double calcularGastoDiario() override;
+    double calcularGastoDiario(double precoLeite, double precoRacao) override;
     //double calcularReceitaDiaria() override;
     std::string getTipo() const override;
     bool podeSerPromovido() const override;

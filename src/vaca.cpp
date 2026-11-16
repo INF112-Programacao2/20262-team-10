@@ -15,3 +15,10 @@ bool Vaca::podeSerPromovido() const {return false;}
 //sets
 void Vaca:: setProducaoLeiteDia(double p) {producaoLeiteDia=p;}
 void Vaca:: setEmLactacao(bool l) {emLactacao=l;}
+
+double Vaca::calcularGastoDiario(double /*precoLeite*/, double precoRacao) {
+    if(emLactacao){ //vacas em lactacao tem consumo por kilo corporal mais elevado
+        return peso * 0.028 * precoRacao;
+    }
+    return peso * 0.022 * precoRacao;
+}
