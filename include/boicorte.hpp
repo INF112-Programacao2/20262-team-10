@@ -20,7 +20,7 @@ public:
     //sets
     void setrendimentoCarcaca(double r);
     void setmetaAbatePeso(double m);
-    void setFaseEngorda(std::string f);
+    void setFaseEngorda(bool f);
     //metodos herança
     double calcularGastoDiario(double precoLeite, double precoRacao) override;
     //double calcularReceitaDiaria() override;

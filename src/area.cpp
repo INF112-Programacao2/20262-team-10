@@ -106,7 +106,7 @@ void Area::promoverAnimal() { //incluir conexão com a função recomendar desti
                     std :: cout << "Bezerro promovido a touro com sucesso!\n";
                 }
                 if(rebanho[i]->getSexo() == 'F'){
-                    Vaca* v = new Vaca(rebanho[i]->getId(), rebanho[i]->getSexo());
+                    Vaca* v = new Vaca(rebanho[i]->getId(), rebanho[i]->getSexo(),
                     rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), rebanho[i]->getQtdFilhos(), rebanho[i]->getQtdvacinas());
                     delete rebanho[i];
                     rebanho[i] = v;
