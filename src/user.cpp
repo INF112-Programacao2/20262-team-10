@@ -64,6 +64,7 @@ void User::atualizarCotacaoDolar() {
         std::cout << "Atencao valor da cotacao apresenta erro e nao foi modificado" << std::endl;
     } else {
         std::cout << "cotacao do dolar atualizada com sucesso" << std::endl;
+        std::cout << "a nova cotacao retornou:  " << cotacaoDolar << std::endl;
     }
 
 };
@@ -135,6 +136,7 @@ void User::atualizarCotacaoArroba() {
         std::cout << "Atencao: Um ou mais valores de cotacao apresentam erro ou nao foram encontrados." << std::endl;
     } else {
         std::cout << "Cotacoes de boi e vaca atualizadas com sucesso!" << std::endl;
+          std::cout << "o teste da cotacao do arroba do boi retornou: " << precoArrobaBoi << " e o da vaca: "<< precoArrobaVaca << std::endl;
     }
 }
 

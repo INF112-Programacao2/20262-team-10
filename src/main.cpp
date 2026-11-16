@@ -13,7 +13,6 @@ int main () {
     std::cout << "--- Tabela de Precos Locais ---" << std::endl;
     usuarioTeste->atualizarCotacaoDolar();
     usuarioTeste->atualizarCotacaoArroba();
-    std::cout << "o teste da cotacao retornou:  " << usuarioTeste->getCotacaoDolar() << std::endl;
     // std::cout << "Preco do Leite: R$ " << usuarioTeste.getPrecoLeite() << std::endl;
     //std::cout << "Preco da Arroba: R$ " << usuarioTeste.getPrecoArroba() << std::endl;
     Farm fazendinha("fazenda joao rock", "vicosa" , usuarioTeste);
@@ -22,7 +21,6 @@ int main () {
     area1.adicionarAnimal(b1);
     //area1.promoverAnimal(); nao usar ainda
     area1.removerAnimal(b1->getId());
-    std::cout << "o teste da cotacao do arroba do boi retornou: " << usuarioTeste->getCotacaoArrobaBoi() << " e o da vaca: "<< usuarioTeste->getCotacaoArrobaVaca() << std::endl;
     std :: cout << area1.getQtdAnimais() << std :: endl;
 
     delete usuarioTeste;
