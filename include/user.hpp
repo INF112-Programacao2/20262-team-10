@@ -23,16 +23,19 @@ class User {
         bool autenticar(std::string login, std::string senha);
         void atualizarCotacaoDolar();
         void atualizarCotacaoArroba();
+        void atualizarCotacoes();
         
 
-       // double getPrecoLeite();
+        double getPrecoLeite();
         double getCotacaoDolar();
         double getCotacaoArrobaBoi();
         double getSacaRacao();
         double getCotacaoArrobaVaca();
 
         //sets
-        void setPrecoArroba(double p);
+        void setPrecoArrobaBoi(double p);
+        void setPrecoArrobaVaca(double p);
+        void setCotacaoDolar(double p);
         void setPrecoLeite(double p);
 };
 

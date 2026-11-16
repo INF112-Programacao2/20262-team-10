@@ -157,7 +157,24 @@ void User::setPrecoLeite (double p) {
     precoLeite = p;
 };
 
-void User::setPrecoArroba(double p) {
+void User::setPrecoArrobaBoi(double p) {
     precoArrobaBoi = p;
 };
+
+void User::setPrecoArrobaVaca(double p) {
+    precoArrobaVaca = p;
+};
+
+void User::atualizarCotacoes() {
+    atualizarCotacaoArroba();
+    atualizarCotacaoDolar();
+    std::cout << "Qual o preco que voce vende o litro do leite: ";
+    std::cin >> precoLeite;
+    std::cout << "Litro do leite atualizado com sucesso para: " << precoLeite << std::endl;
+}
+
+void User::setCotacaoDolar(double p) {
+    cotacaoDolar = p;
+};
+
 
