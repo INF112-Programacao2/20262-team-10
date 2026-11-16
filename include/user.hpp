@@ -20,11 +20,13 @@ class User {
         User(std::string login, std::string senha, std::string nome, std::string perfil);
         //~User();
         bool autenticar(std::string login, std::string senha);
-        void atualizarCotacoes();
+        void atualizarCotacaoDolar();
+        void atualizarCotacaoBoi();
         
         //gets
        // double getPrecoLeite();
-        double getCotacao();
+        double getCotacaoDolar();
+        double getCotacaoArroba();
         double getSacaRacao();
        // double getPrecoArroba();
 

@@ -22,7 +22,7 @@ User::User(std::string log, std::string senha,
     precoLeite = 2.88;
 };
 
-void User::atualizarCotacoes() {
+void User::atualizarCotacaoDolar() {
 
 //garante que vai funcionar no windows tambem
 #ifdef _WIN32
@@ -31,7 +31,7 @@ void User::atualizarCotacoes() {
     system("curl -s \"https://economia.awesomeapi.com.br/last/USD-BRL\" > ./data/cotacao.txt");
 #endif
 
-    std::ifstream arquivo("./docs/cotacao.txt");
+    std::ifstream arquivo("./data/cotacao.txt");
     if (!arquivo.is_open()) {
         std::cerr << "Erro ao abrir o arquivo de cotacao." << '\n';
         return;
@@ -68,9 +68,65 @@ void User::atualizarCotacoes() {
 
 };
 
-double User::getCotacao() {
+void User::atualizarCotacaoBoi() {
+#ifdef _WIN32
+    system("curl -s https://agrodocai.com.br/api/v1/cotacao > ./data/cotacao_boi.txt");
+#else
+    system("curl -s \"https://agrodocai.com.br/api/v1/cotacao\" > ./data/cotacao_boi.txt");
+#endif
+
+    std::ifstream arquivo("./data/cotacao_boi.txt"); 
+    if (!arquivo.is_open()) {
+        std::cerr << "Erro ao abrir o arquivo de cotacao do boi.\n";
+        return;
+    }
+
+    std::string linha;
+    std::string conteudoCompleto = "";
+    while (std::getline(arquivo, linha)) {
+        conteudoCompleto += linha;
+    }
+    arquivo.close();
+
+    // A chave na API é boi_gordo_cepea_sp
+    std::string chave = "\"boi_gordo_cepea_sp\":";
+    size_t posInicial = conteudoCompleto.find(chave);
+
+    if (posInicial != std::string::npos) {
+        // Pula os caracteres da chave para chegar no início do número
+        posInicial += chave.length();
+        
+        //pula espacos em branco
+        while (posInicial < conteudoCompleto.length() && std::isspace(conteudoCompleto[posInicial])) {
+            posInicial++;
+        }
+
+        size_t posFinal = conteudoCompleto.find(",", posInicial);
+        
+        //npos significa final da string
+        if (posFinal != std::string::npos) {
+            std::string valorStr = conteudoCompleto.substr(posInicial, posFinal - posInicial);
+            
+            this->precoArrobaBoi = std::stod(valorStr); 
+        }
+    }
+
+    if (this->precoArrobaBoi <= 0) { 
+        std::cout << std::endl << "----------------------" << std::endl;
+        std::cout << "Atencao valor da cotacao do boi apresenta erro e nao foi modificado" << std::endl;
+    } else {
+        std::cout << "Cotacao do boi atualizada com sucesso." << std::endl;
+        std::cout << "Lembre-se a cotacao do arroba do boi gordo foi atualizada com base no preco de Sao Paulo" << std::endl;
+    }
+}
+
+double User::getCotacaoDolar() {
     return cotacaoDolar;
 };
+
+double User::getCotacaoArroba() {
+    return precoArrobaBoi;
+}
 
 void User::setPrecoLeite (double p) {
     precoLeite = p;
