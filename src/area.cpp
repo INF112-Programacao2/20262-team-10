@@ -43,11 +43,11 @@ void Area::adicionarAnimal(Animal* a) {
     }
 };
 
-void Area::removerAnimal(Animal* a) {
+void Area::removerAnimal(string idAnimal) {
     int indexAnimalRemovido = -1;
 
     for (int i = 0; i < qtdAtualDeAnimais; i++) {
-        if (rebanho[i]->getId() == a->getId()) {
+        if (rebanho[i]->getId() == idAnimal) {
             indexAnimalRemovido = i;
             break;
         }

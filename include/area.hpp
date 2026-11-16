@@ -2,20 +2,21 @@
 #define AREA_HPP
 
 #include "animal.hpp"
+using std::string;
 
 #include <iostream>
 
 class Area {
     protected:
-        std::string nome; //nome da area, ex-pasto1,pasto2,curral
-        std::string estadoPasto; //seco, ruim, intermediario, bom, muito bom
+        string nome; //nome da area, ex-pasto1,pasto2,curral
+        string estadoPasto; //seco, ruim, intermediario, bom, muito bom
         double area; //em hectares
         int capacidadeMaxima; //calculado com base na qualidade do pasto, usado para recomendar compra de racao
         Animal** rebanho;
         int qtdAtualDeAnimais; //quantidade atual de animais de determinada area
 
     public:
-        Area(std::string nome, std::string estadoPasto, double area);
+        Area(string nome, string estadoPasto, double area);
 
         //manejo de animais
         
@@ -23,7 +24,7 @@ class Area {
         double calcularLotacaoArea();
 
         void adicionarAnimal(Animal* a);
-        void removerAnimal(Animal* a);
+        void removerAnimal(string idAnimal);
         void promoverAnimal();
         //gets
         int getCapacidadeMaxima();
