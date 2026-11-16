@@ -20,7 +20,7 @@ int main () {
     Bezerro* b1 = new Bezerro("141", 'M', 100, 13, 0, 0, 1, 1.0, 1, false);
     area1.adicionarAnimal(b1);
     //area1.promoverAnimal(); nao usar ainda
-    area1.removerAnimal(b1);
+    area1.removerAnimal("141");
     std :: cout << area1.getQtdAnimais() << std :: endl;
 
     delete usuarioTeste;
