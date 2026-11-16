@@ -12,7 +12,7 @@ int main () {
 
     std::cout << "--- Tabela de Precos Locais ---" << std::endl;
     usuarioTeste->atualizarCotacaoDolar();
-    usuarioTeste->atualizarCotacaoBoi();
+    usuarioTeste->atualizarCotacaoArroba();
     std::cout << "o teste da cotacao retornou:  " << usuarioTeste->getCotacaoDolar() << std::endl;
     // std::cout << "Preco do Leite: R$ " << usuarioTeste.getPrecoLeite() << std::endl;
     //std::cout << "Preco da Arroba: R$ " << usuarioTeste.getPrecoArroba() << std::endl;

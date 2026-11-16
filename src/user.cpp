@@ -68,7 +68,7 @@ void User::atualizarCotacaoDolar() {
 
 };
 
-void User::atualizarCotacaoBoi() {
+void User::atualizarCotacaoArroba() {
 #ifdef _WIN32
     system("curl -s https://agrodocai.com.br/api/v1/cotacao > ./data/cotacao_boi.txt");
 #else

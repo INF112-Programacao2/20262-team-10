@@ -22,7 +22,7 @@ class User {
         //~User();
         bool autenticar(std::string login, std::string senha);
         void atualizarCotacaoDolar();
-        void atualizarCotacaoBoi();
+        void atualizarCotacaoArroba();
         
 
        // double getPrecoLeite();
