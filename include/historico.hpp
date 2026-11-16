@@ -30,6 +30,9 @@ class HistoricoSanitario{
 
         double get_CustoTotal() const;
 
+        int get_QuantidadeAtual() const;
+
+        void exibir() const;
 
 };
 
