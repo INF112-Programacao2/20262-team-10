@@ -1,5 +1,5 @@
-#ifndef PARSERPLANILHA_H
-#define PARSERPLANILHA_H
+#ifndef PARSERPLANILHA_HPP
+#define PARSERPLANILHA_HPP
 
 #include <string>
 
@@ -36,4 +36,4 @@ public:
     static std::string splitManual(std::string linha, char delim, int tamOut);
 };
 
-#endif // PARSERPLANILHA_H
+#endif // PARSERPLANILHA_HPP
