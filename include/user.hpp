@@ -19,7 +19,6 @@ class User {
 
     public:
         User(std::string login, std::string senha, std::string nome, std::string perfil);
-        //~User();
         bool autenticar(std::string login, std::string senha);
         void atualizarCotacaoDolar();
         void atualizarCotacaoArroba();

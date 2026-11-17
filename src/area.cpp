@@ -124,3 +124,21 @@ double Area::calcularLotacaoArea() {
 int Area::getCapacidadeMaxima() {
     return capacidadeMaxima;
 }
+
+Animal* Area::buscarAnimal(string id) {
+    bool achou = false;
+    Animal* temporario = nullptr;
+    for (int i = 0; i < qtdAtualDeAnimais; i++) {
+        if (rebanho[i]->getId() == id) {
+            achou = true;
+            temporario = rebanho[i];
+
+        }
+    }
+    if (achou) {
+        std::cout << "animal encontrado com sucesso" << std::endl;
+        return temporario;
+    } else {
+        throw std::out_of_range("Animal nao encontrado nessa area");
+    }
+}

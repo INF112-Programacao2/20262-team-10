@@ -26,6 +26,7 @@ class Area {
         void adicionarAnimal(Animal* a);
         void removerAnimal(string idAnimal);
         void promoverAnimal();
+        Animal* buscarAnimal(string id);
 
         //gets
         int getCapacidadeMaxima();
