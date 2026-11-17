@@ -5,6 +5,7 @@
 #include "farm.hpp"
 #include "animal.hpp"
 #include "bezerro.hpp"
+#include "parserplanilha.hpp"
 
 int main () {
 
@@ -16,6 +17,7 @@ int main () {
     //area1.promoverAnimal(); nao usar ainda
     area1.removerAnimal(b1->getId());
     std :: cout << area1.getQtdAnimais() << std :: endl;
+    ParserPlanilha::importarCSV("/docs/fazenda.csv", fazendinha);
     usuarioTeste->atualizarCotacoes();
     delete usuarioTeste;
     return 0;

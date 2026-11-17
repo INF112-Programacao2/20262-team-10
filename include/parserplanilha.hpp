@@ -17,14 +17,14 @@ public:
      *  @param arquivo Caminho do arquivo CSV de entrada.
      *  @param f Ponteiro para a instancia de Farm que recebera os dados.
      */
-    static int importarCSV(std::string arquivo, Farm* f);
+    static int importarCSV(std::string arquivo, Farm& f);
 
     /*
      * @param arquivo Caminho do arquivo CSV de saida.
      * @param f Ponteiro para a instancia de Farm com os dados atuais.
      * @return true se a exportacao foi concluida, false caso contrario.
      */
-    static bool exportarCSV(std::string arquivo, Farm* f);
+    static bool exportarCSV(std::string arquivo, Farm& f);
 
     /**
      * @brief Extrai uma coluna especifica de uma linha delimitada sem uso de STL avancada.
