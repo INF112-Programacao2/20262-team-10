@@ -32,7 +32,7 @@ std::string ParserPlanilha::splitManual(std::string linha, char delim, int tamOu
 int ParserPlanilha::importarCSV(std::string arquivo, Farm* f) 
 {
     if (f == nullptr) {
-        throw std::invalid_argument("Ptr nulo de farm ao importar");
+        throw std::invalid_argument("Ptr null de farm ao importar");
     }
     std::ifstream in(arquivo);
     if(!in.is_open()){
