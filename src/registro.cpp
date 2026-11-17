@@ -23,6 +23,10 @@ int RegistroSanitario::get_DiasCarenciaRestantes() const{
     return diasCarenciaRestantes_;
 }
 
+std::string RegistroSanitario::get_Tipo() const{
+    return vacina_.get_Tipo();
+}
+
 void RegistroSanitario::avancarDia(){
     if(diasCarenciaRestantes_ >0){
         diasCarenciaRestantes_--;
@@ -32,3 +36,4 @@ void RegistroSanitario::avancarDia(){
 bool RegistroSanitario::emCarencia() const{
     return diasCarenciaRestantes_ > 0;
 }
+

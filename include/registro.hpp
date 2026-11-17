@@ -20,11 +20,14 @@ class RegistroSanitario{
         std::string get_nomeVacina() const;
         int get_DiaAplic() const;
         int get_NumeroDose() const;
-
         double get_Custo() const;
         int get_DiasCarenciaRestantes() const;
+        std::string get_Tipo() const;
+
         void avancarDia();
         bool emCarencia() const;
+
+        
 
 };
 #endif
