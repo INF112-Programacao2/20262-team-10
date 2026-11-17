@@ -134,9 +134,9 @@ int ParserPlanilha::importarCSV(std::string arquivo, Farm& f) {
         }
     }
 
-    in.close();
-    return registrosImportados;
-}
+//     in.close();
+//     return registrosImportados;
+// }
 
 bool ParserPlanilha::exportarCSV(std::string arquivo, Farm& f) {
     std::ofstream out(arquivo);
@@ -150,6 +150,6 @@ bool ParserPlanilha::exportarCSV(std::string arquivo, Farm& f) {
     out << "GASTO_DIARIO;" << f.calcularGastoTotalDiarioFazenda() << "\n"; 
     out << "LUCRO_DIARIO;" << f.calcularLucroGeralDiario() << "\n"; 
 
-    out.close();
-    return true;
-}
+//     out.close();
+//     return true;
+// }

@@ -49,7 +49,7 @@ double Bezerro::calcularGastoDiario(double precoLeite, double precoRacao) {
     if(!desmamado){ //por hora 1.5 é um custo fixo operacional puramente especulativo
         return (consumoLeiteLitros * precoLeite) + 1.5;
     }
-    else if(desmamado){ //bezerros consomem em média 2.8% de seu peso corporal
+    else { //bezerros consomem em média 2.8% de seu peso corporal
         return peso * precoRacao * 0.028;
     }
 }

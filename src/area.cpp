@@ -116,3 +116,11 @@ void Area::promoverAnimal() { //incluir conexão com a função recomendar desti
         }
     }
 }
+
+double Area::calcularLotacaoArea() {
+   return qtdAtualDeAnimais*100/capacidadeMaxima;
+}
+
+int Area::getCapacidadeMaxima() {
+    return capacidadeMaxima;
+}

@@ -1,14 +1,14 @@
-#ifndef PARSERPLANILHA_HPP
-#define PARSERPLANILHA_HPP
+// #ifndef PARSERPLANILHA_HPP
+// #define PARSERPLANILHA_HPP
 
-#include <string>
+// #include <string>
 
-/*vitar depend. circular eventualmente (trem grande dmais vai que ne) O seguro morreu de velho*/
+// /*vitar depend. circular eventualmente (trem grande dmais vai que ne) O seguro morreu de velho*/
 
-class Farm;
+// class Farm;
 
 
- // leitura, escrita e tokenizacao manual de arquivos CSV.
+//  // leitura, escrita e tokenizacao manual de arquivos CSV.
  
 class ParserPlanilha {
 public:
@@ -26,14 +26,14 @@ public:
      */
     static bool exportarCSV(std::string arquivo, Farm& f);
 
-    /**
-     * @brief Extrai uma coluna especifica de uma linha delimitada sem uso de STL avancada.
-     * @param linha Texto completo da linha lida.
-     * @param delim Caractere separador (ex: ';').
-     * @param tamOut Indice (base 0) da coluna desejada.
-     * @return Conteudo textual da coluna extraida.
-     */
-    static std::string splitManual(std::string linha, char delim, int tamOut);
-};
+//     /**
+//      * @brief Extrai uma coluna especifica de uma linha delimitada sem uso de STL avancada.
+//      * @param linha Texto completo da linha lida.
+//      * @param delim Caractere separador (ex: ';').
+//      * @param tamOut Indice (base 0) da coluna desejada.
+//      * @return Conteudo textual da coluna extraida.
+//      */
+//     static std::string splitManual(std::string linha, char delim, int tamOut);
+// };
 
-#endif // PARSERPLANILHA_HPP
+// #endif // PARSERPLANILHA_HPP
