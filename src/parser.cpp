@@ -43,14 +43,14 @@ int ParserPlanilha::importarCSV(std::string arquivo, Farm& f) {
         std::string tipo = splitManual(linha, ';', 0);
 
         if (tipo == "AREA") {
-            // Formato: AREA;nome;estadoPasto;area
+            // Formato: AREA;nome;estadoPasto;area[cite: 8]
             std::string nome = splitManual(linha, ';', 1);
             std::string estadoPasto = splitManual(linha, ';', 2);
             double areaHectares = std::stod(splitManual(linha, ';', 3));
 
-            Area* novaArea = new Area(nome, estadoPasto, areaHectares); 
+            Area* novaArea = new Area(nome, estadoPasto, areaHectares); //[cite: 8]
             try {
-                f.adicionarArea(novaArea); 
+                f.adicionarArea(novaArea); //[cite: 11]
                 areaAtual = novaArea;
                 registrosImportados++;
             } catch (...) {
@@ -74,15 +74,15 @@ int ParserPlanilha::importarCSV(std::string arquivo, Farm& f) {
             Animal* novoAnimal = nullptr;
 
             if (tipo == "VACA") {
-                // Formato: VACA;id;sexo;peso;idadeMeses;qtdFilhos;qtdVacinas
+                // Formato: VACA;id;sexo;peso;idadeMeses;qtdFilhos;qtdVacinas[cite: 13]
                 int idadeMeses = std::stoi(splitManual(linha, ';', 4));
                 int qtdFilhos = std::stoi(splitManual(linha, ';', 5));
                 int qtdVacinas = std::stoi(splitManual(linha, ';', 6));
 
-                novoAnimal = new Vaca(id, sexo, peso, idadeMeses, qtdFilhos, qtdVacinas); 
+                novoAnimal = new Vaca(id, sexo, peso, idadeMeses, qtdFilhos, qtdVacinas); //[cite: 13]
             } 
             else if (tipo == "TOURO") {
-                // Formato: TOURO;id;sexo;peso;idadeMeses;qtdFilhos;qtdVacinas;valorDoseSemen
+                // Formato: TOURO;id;sexo;peso;idadeMeses;qtdFilhos;qtdVacinas;valorDoseSemen[cite: 12]
                 int idadeMeses = std::stoi(splitManual(linha, ';', 4));
                 int qtdFilhos = std::stoi(splitManual(linha, ';', 5));
                 int qtdVacinas = std::stoi(splitManual(linha, ';', 6));
@@ -96,14 +96,14 @@ int ParserPlanilha::importarCSV(std::string arquivo, Farm& f) {
                 int qtdFilhos = std::stoi(splitManual(linha, ';', 5));
                 int qtdVacinas = std::stoi(splitManual(linha, ';', 6));
 
-                novoAnimal = new Boicorte(id, sexo, peso, idadeMeses, qtdFilhos, qtdVacinas); 
+                novoAnimal = new Boicorte(id, sexo, peso, idadeMeses, qtdFilhos, qtdVacinas); //[cite: 10]
             } 
             else if (tipo == "BEZERRO") {
-                //  nascido: BEZERRO;id;sexo;peso
-                // adquirido: BEZERRO;id;sexo;peso;idadeMeses;qtdFilhos;qtdVacinas;consumoLeite;ganhoPeso;idadeDesmame;desmamado[cite: 9]
+                // Construtor nascido: BEZERRO;id;sexo;peso[cite: 9]
+                // Construtor adquirido: BEZERRO;id;sexo;peso;idadeMeses;qtdFilhos;qtdVacinas;consumoLeite;ganhoPeso;idadeDesmame;desmamado[cite: 9]
                 std::string colIdade = splitManual(linha, ';', 4);
                 if (colIdade.empty()) {
-                    novoAnimal = new Bezerro(id, sexo, peso);
+                    novoAnimal = new Bezerro(id, sexo, peso); //[cite: 9]
                 } else {
                     int idadeMeses = std::stoi(colIdade);
                     int qtdFilhos = std::stoi(splitManual(linha, ';', 5));
@@ -117,7 +117,7 @@ int ParserPlanilha::importarCSV(std::string arquivo, Farm& f) {
                     novoAnimal = new Bezerro(
                         id, sexo, peso, idadeMeses, qtdFilhos, qtdVacinas,
                         consumoLeite, ganhoPeso, idadeDesmame, desmamado
-                    ); 
+                    ); //[cite: 9]
                 }
             } 
             else {
@@ -125,7 +125,7 @@ int ParserPlanilha::importarCSV(std::string arquivo, Farm& f) {
             }
 
             try {
-                areaAtual->adicionarAnimal(novoAnimal); 
+                areaAtual->adicionarAnimal(novoAnimal); //[cite: 8]
                 registrosImportados++;
             } catch (...) {
                 delete novoAnimal;
@@ -134,9 +134,9 @@ int ParserPlanilha::importarCSV(std::string arquivo, Farm& f) {
         }
     }
 
-//     in.close();
-//     return registrosImportados;
-// }
+    in.close();
+    return registrosImportados;
+}
 
 bool ParserPlanilha::exportarCSV(std::string arquivo, Farm& f) {
     std::ofstream out(arquivo);
@@ -145,11 +145,11 @@ bool ParserPlanilha::exportarCSV(std::string arquivo, Farm& f) {
     }
 
     out << "# RELATORIO EXPORTADO FARMMANAGER\n";
-    out << "TOTAL_ANIMAIS;" << f.getQuantidadeTotalAnimais() << "\n"; 
-    out << "RECEITA_DIARIA;" << f.calcularReceitaTotalDiariaFazenda() << "\n"; 
-    out << "GASTO_DIARIO;" << f.calcularGastoTotalDiarioFazenda() << "\n"; 
-    out << "LUCRO_DIARIO;" << f.calcularLucroGeralDiario() << "\n"; 
+    out << "TOTAL_ANIMAIS;" << f.getQuantidadeTotalAnimais() << "\n"; //[cite: 11]
+    out << "RECEITA_DIARIA;" << f.calcularReceitaTotalDiariaFazenda() << "\n"; //[cite: 11]
+    out << "GASTO_DIARIO;" << f.calcularGastoTotalDiarioFazenda() << "\n"; //[cite: 11]
+    out << "LUCRO_DIARIO;" << f.calcularLucroGeralDiario() << "\n"; //[cite: 11]
 
-//     out.close();
-//     return true;
-// }
+    out.close();
+    return true;
+}
