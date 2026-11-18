@@ -117,6 +117,38 @@ void Area::promoverAnimal() { //incluir conexão com a função recomendar desti
     }
 }
 
+Animal* Area::extrairAnimal(string idAnimal) {
+    int indexAnimalRemovido = -1;
+    Animal* animalExtraido = nullptr;
+
+    for (int i = 0; i < qtdAtualDeAnimais; i++) {
+        if (rebanho[i]->getId() == idAnimal) {
+            indexAnimalRemovido = i;
+            animalExtraido = rebanho[i];
+            break;
+        }
+    }
+
+    if (indexAnimalRemovido == -1) {
+        return nullptr;
+    }
+
+    Animal** rebanhoNovaAlocacao = new Animal*[qtdAtualDeAnimais - 1];
+
+    for (int i = 0; i < indexAnimalRemovido; i++) {
+        rebanhoNovaAlocacao[i] = rebanho[i];
+    }
+    for (int i = indexAnimalRemovido + 1; i < qtdAtualDeAnimais; i++) {
+        rebanhoNovaAlocacao[i - 1] = rebanho[i];
+    }
+
+    delete[] rebanho;
+    rebanho = rebanhoNovaAlocacao;
+    qtdAtualDeAnimais--;
+    
+    return animalExtraido; 
+}
+
 double Area::calcularLotacaoArea() {
    return qtdAtualDeAnimais*100/capacidadeMaxima;
 }
@@ -132,13 +164,13 @@ Animal* Area::buscarAnimal(string id) {
         if (rebanho[i]->getId() == id) {
             achou = true;
             temporario = rebanho[i];
-
+            break;
         }
     }
     if (achou) {
         std::cout << "animal encontrado com sucesso" << std::endl;
         return temporario;
     } else {
-        throw std::out_of_range("Animal nao encontrado nessa area");
+        return nullptr;
     }
 }

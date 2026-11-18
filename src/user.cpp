@@ -21,9 +21,9 @@ User::User(std::string log, std::string senha,
     precoArrobaBoi = 384.55;
     precoLeite = 2.88;
     //todos os valores sao sacas de 40kg
-    precoSacaRacaoEngorda = 140,00;
-    precoSacaRacaoAvulsa = 60,00;
-    precoSacaRacaoRecria = 80,00;
+    precoSacaRacaoEngorda = 140.00;
+    precoSacaRacaoAvulsa = 60.00;
+    precoSacaRacaoRecria = 80.00;
 
     kgRacaoAvulsa = 40;
     kgRacaoEngorda = 40;
