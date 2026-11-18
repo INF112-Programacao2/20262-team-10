@@ -16,12 +16,16 @@ double Bezerro:: getGanhoPesoMedioDiario()const {return ganhoPesoMedioDiario;}
 int Bezerro:: getIdadeDesmameMeses()const {return idadeDesmameMeses;}
 bool Bezerro:: getDesmamado()const {return desmamado;}
 std::string Bezerro:: getTipo() const {return "bezerro";}
+std :: string Bezerro:: getIdPai()const{return idPai;}
+std :: string Bezerro:: getIdMae()const{return idMae;}
 bool Bezerro:: podeSerPromovido() const {if(atingiuIdadeAdulta()){return true;}return false;}
 //sets
 void Bezerro:: setConsumoLeiteLitros(double c) {consumoLeiteLitros=c;}
 void Bezerro:: setGanhoPesoMedioDiario(double g) {ganhoPesoMedioDiario=g;}
 void Bezerro:: setIdadeDesmameMeses(int i) {idadeDesmameMeses=i;}
 void Bezerro:: setDesmamado(bool d) {desmamado=d;}
+void Bezerro:: setIdPai(std::string id) {idPai = id;}
+void Bezerro:: setIdMae(std::string id) {idMae = id;}
 
 void Bezerro::realizarDesmame() {
     if(idadeMeses >= 7){

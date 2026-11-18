@@ -31,7 +31,8 @@ public:
     double calcularConsumoSacaDia();
     double calcularValorVendaMercado();
     void imprimirFichaCompleta() const;
-    bool cobrirFemea(Vaca *v);
+    bool cobrirFemea(Vaca* femea);
+    void adicionarFilho(std::string idFilho);
 };
 
 #endif

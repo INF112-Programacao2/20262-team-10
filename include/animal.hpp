@@ -10,9 +10,9 @@ protected:
     double peso;
     int idadeMeses, qtdFilhos, qtdVacinas;
     bool EmQuarentena;
-    Animal* pai;
-    Animal* mae;
-    Animal** filhos;
+    std::string idPai;
+    std::string idMae;
+    std::string* idFilhos;
 public:
     Animal(std::string id, char s, double p);
     //inicializador sobrecarga ex: animal comprado
@@ -31,9 +31,9 @@ public:
     int getQtdFilhos() const;
     int getQtdvacinas() const;
     bool getQuarentena() const;
-    Animal* getPai() const;
-    Animal* getMae() const;
-    Animal** getFilhos() const;
+    std::string getPai() const;
+    std::string getMae() const;
+    std::string* getFilhos() const;
     //metodos usados para verificar promoção
     virtual std::string getTipo() const = 0;
     virtual bool podeSerPromovido() const = 0;
