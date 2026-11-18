@@ -161,3 +161,12 @@ double Area::getGastoIndividual (string id, double precoLeite, SacaRacao** relat
     Animal* animalAchado = buscarAnimal(id);
     return (animalAchado->calcularGastoDiario(precoLeite, relatorioRacoes))*(calcularLotacaoArea()/100);
 }
+
+double Area::getGastoDaArea(double precoLeite, SacaRacao** relatorioRacoes) {
+    double total = 0;
+    for (int i = 0; i < qtdAtualDeAnimais; i++) {
+        string idAnimal = rebanho[i]->getId();
+       total += getGastoIndividual(idAnimal, precoLeite, relatorioRacoes);
+    }
+    return total;
+}
