@@ -73,8 +73,7 @@ void User::atualizarCotacaoDolar() {
 
     std::ifstream arquivo("./data/cotacao.txt");
     if (!arquivo.is_open()) {
-        std::cerr << "Erro ao abrir o arquivo de cotacao." << '\n';
-        return;
+        throw std::runtime_error("Falha ao abrir ou criar o arquivo");
     }
     
     std::string linha;
@@ -118,8 +117,7 @@ void User::atualizarCotacaoArroba() {
 
     std::ifstream arquivo("./data/cotacao_boi.txt"); 
     if (!arquivo.is_open()) {
-        std::cerr << "Erro ao abrir o arquivo de cotacao do boi.\n";
-        return;
+        throw std::runtime_error("Falha ao abrir ou criar o arquivo");
     }
 
     std::string linha;
