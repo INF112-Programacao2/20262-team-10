@@ -21,13 +21,18 @@ User::User(std::string log, std::string senha,
     precoArrobaBoi = 384.55;
     precoLeite = 2.88;
     //todos os valores sao sacas de 40kg
-    precoSacaRacaoEngorda = 140.00;
-    precoSacaRacaoAvulsa = 60.00;
-    precoSacaRacaoRecria = 80.00;
+    TiposRacoes[0]->name = "Racao Engorda";
+    TiposRacoes[0]->peso = 40.0;
+    TiposRacoes[0]->preco = 140;
 
-    kgRacaoAvulsa = 40;
-    kgRacaoEngorda = 40;
-    kgRacaoRecria = 40;
+    TiposRacoes[1]->name = "Racao Avulsa";
+    TiposRacoes[1]->peso = 40.0;
+    TiposRacoes[1]->preco = 60;
+
+    TiposRacoes[2]->name = "Racao Recria";
+    TiposRacoes[2]->peso = 40;
+    TiposRacoes[2]->preco = 80;
+
 };
 
 void User::salvarEmArquivo() {
@@ -185,9 +190,9 @@ void User::atualizarCotacoes() {
     std::cin >> precoLeite;
     std::cout << "Litro do leite atualizado com sucesso para: " << precoLeite << std::endl;
     std::cout << "Voce comprou sacos de racao de quantos kg? Preencha na ordem -> Engorda - Avulsa - Recriacao ";
-    std::cin >> kgRacaoEngorda >> kgRacaoAvulsa >> kgRacaoRecria;
+    std::cin >> TiposRacoes[0]->peso >> TiposRacoes[1]->peso >> TiposRacoes[2]->peso;
     std::cout << "Qual o preco de cada saca de racao? Preencha na ordem -> Engorda - Avulsa - Recriacao: ";
-    std::cin >> precoSacaRacaoEngorda >> precoSacaRacaoAvulsa >> precoSacaRacaoRecria;
+    std::cin >> TiposRacoes[0]->preco >> TiposRacoes[1]->preco >> TiposRacoes[2]->preco;
 }
 
 double User::getCotacaoDolar() {
@@ -203,27 +208,27 @@ double User::getPrecoLeite() {
 }
 
 double User::getKgRacaoAvulsa() {
-    return kgRacaoAvulsa;
+    return TiposRacoes[1]->peso;
 }
 
 double User::getKgRacaoEngorda() {
-    return kgRacaoEngorda;
+    return TiposRacoes[0]->peso;
 }
 
 double User::getKgRacaoRecria() {
-    return kgRacaoRecria;
+    return TiposRacoes[2]->peso;
 }
 
 double User::getSacaRacaoAvulsa() {
-    return precoSacaRacaoAvulsa;
+    return TiposRacoes[1]->preco;
 }
 
 double User::getSacaRacaoEngorda() {
-    return precoSacaRacaoEngorda;
+    return TiposRacoes[0]->preco;
 }
 
 double User::getSacaRacaoRecria() {
-    return precoSacaRacaoRecria;
+    return TiposRacoes[2]->preco;
 }
 
 double User::getCotacaoArrobaVaca() {
@@ -247,25 +252,29 @@ void User::setCotacaoDolar(double p) {
 };
 
 void User::setPrecoSacaRacaoAvulsa(double p) {
-    precoSacaRacaoAvulsa = p;
+    TiposRacoes[1]->preco = p;
 };
 
 void User::setPrecoSacaRacaoEngorda(double p) {
-    precoSacaRacaoEngorda = p;
+    TiposRacoes[0]->preco = p;
 };
 
 void User::setPrecoSacaRacaoRecria(double p) {
-    precoSacaRacaoRecria = p;
+    TiposRacoes[2]->preco = p;
 };
 
 void User::setKgRacaoAvulsa(double p) {
-    kgRacaoAvulsa= p;
+    TiposRacoes[1]->peso = p;
 };
 
 void User::setKgRacaoEngorda(double p) {
-    kgRacaoEngorda = p;
+    TiposRacoes[0]->peso = p;
 };
 
 void User::setKgRacaoRecria(double p) {
-    kgRacaoRecria = p;
+    TiposRacoes[2]->peso = p;
 };
+
+SacaRacao** User::getRelatorioRacao() {
+    return TiposRacoes;
+}

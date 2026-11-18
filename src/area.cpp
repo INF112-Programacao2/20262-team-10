@@ -3,6 +3,7 @@
 #include "farm.hpp"
 #include "animal.hpp"
 #include "touro.hpp"
+#include "user.hpp"
 
 Area::Area(std::string n, std::string estado, double a) {
     nome = n;
@@ -151,4 +152,8 @@ Animal* Area::buscarAnimal(string id) {
     } else {
         return nullptr;
     }
+}
+
+double Area::getGastoIndividual(string id) {
+    Animal* animal = buscarAnimal(id);
 }

@@ -11,13 +11,12 @@ class Area {
         string nome; //nome da area, ex-pasto1,pasto2,curral
         string estadoPasto; //seco, ruim, intermediario, bom, muito bom
         double area; //em hectares
-        int capacidadeMaxima; //calculado com base na qualidade do pasto, usado para recomendar compra de racao
+        int capacidadeMaxima;
         Animal** rebanho;
         int qtdAtualDeAnimais; //quantidade atual de animais de determinada area
 
     public:
         Area(string nome, string estadoPasto, double area);
-
         //manejo de animais
         
         //funcoes de calculo
@@ -28,6 +27,8 @@ class Area {
         Animal* extrairAnimal(string idAnimal);
         void promoverAnimal();
         Animal* buscarAnimal(string id);
+        double getGastoIndividual(string id);
+        double getGastoDaArea();
 
         //gets
         int getCapacidadeMaxima();

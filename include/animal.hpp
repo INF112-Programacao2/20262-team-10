@@ -35,7 +35,7 @@ public:
     Animal* getMae() const;
     Animal** getFilhos() const;
     //metodos usados para verificar promoção
-    virtual std::string getTipo() const =0;
+    virtual std::string getTipo() const = 0;
     virtual bool podeSerPromovido() const = 0;
 };
 

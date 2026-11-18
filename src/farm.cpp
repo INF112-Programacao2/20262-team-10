@@ -150,4 +150,3 @@ bool Farm::transferirLoteDeAnimaisEntreAreas(string* ids, int qtdAnimais, string
 }
 
 std::string Farm::getAreaAtual() const {return areaAtual;}
-

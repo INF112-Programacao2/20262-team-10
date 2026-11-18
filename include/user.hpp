@@ -2,6 +2,7 @@
 #define USER_HPP
 
 #include <iostream>
+#include "sacaRacao.hpp"
 
 class User {
     private:
@@ -11,17 +12,11 @@ class User {
         std::string nomeProprietario;
         std::string perfilAcesso;
         
+        SacaRacao** TiposRacoes;
         double cotacaoDolar;
         double precoLeite;
-        double precoSacaRacaoEngorda;
-        double precoSacaRacaoRecria;
-        double precoSacaRacaoAvulsa;
         double precoArrobaBoi;
         double precoArrobaVaca;
-
-        double kgRacaoEngorda;
-        double kgRacaoRecria;
-        double kgRacaoAvulsa;
 
     public:
         User(std::string login, std::string senha, std::string nome, std::string perfil);
@@ -56,6 +51,8 @@ class User {
         void setKgRacaoRecria(double p);
         void setKgRacaoAvulsa(double p);
         void setKgRacaoEngorda(double p);
+
+        SacaRacao** getRelatorioRacao();
 };
 
 #endif 
