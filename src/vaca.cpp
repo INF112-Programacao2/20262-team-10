@@ -34,7 +34,7 @@ double Vaca::calcularGastoDiario([[maybe_unused]] double precoLeite, SacaRacao**
 }
 
 double Vaca::calcularReceitaDiaria(double valorMercado) {
-    if(emLactacao){
+    if(emLactacao && !EmQuarentena){
         return producaoLeiteDia * valorMercado;
     }
     return 0.0;

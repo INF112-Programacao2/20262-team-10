@@ -153,6 +153,7 @@ bool Farm::transferirLoteDeAnimaisEntreAreas(string* ids, int qtdAnimais, string
     for (int i = 0; i < qtdAnimais; i++) {
         transferirAnimalEntreAreas(ids[i], areaDestino);
     }
+    return true;
 }
 
 void Farm::realizarCobertura(const std::string& idMacho, const std::string& idFemea) {

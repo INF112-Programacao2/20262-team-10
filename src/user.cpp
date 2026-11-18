@@ -41,6 +41,13 @@ User::User(std::string log, std::string senha,
 
 };
 
+User::~User() {
+    for (int i = 0; i < 3; i++) {
+        delete TiposRacoes[i];
+    }
+    delete[] TiposRacoes;
+}
+
 void User::salvarEmArquivo() {
     std::ofstream arquivo("./data/usuarios.txt", std::ios::app);
     if (!arquivo.is_open()) {
