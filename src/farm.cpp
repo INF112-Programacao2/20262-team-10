@@ -119,26 +119,27 @@ Animal* Farm::buscarAnimalGlobal(string identificador) {
 }
 
 bool Farm::transferirAnimalEntreAreas(string idAnimal, string nomeArea) {
-    Animal* temporario = nullptr;
-    bool achouAnimal = false;
-    bool achouAreaDestino = false;
+Animal* temporario = nullptr;
+    int indexOrigem = -1;
+    int indexDestino = -1;
 
     for (int i = 0; i < qtdAreas; i++) {
-        if(area[i]->buscarAnimal(idAnimal) != nullptr) {
-            temporario = area[i]->buscarAnimal(idAnimal);
-            area[i]->removerAnimal(idAnimal);
-            achouAnimal = true;
-            for (int j = 0; j < qtdAreas; j++) {
-                if (area[i]->getNomeArea() == nomeArea) {
-                    achouAreaDestino = true;
-                    area[j]->adicionarAnimal(temporario);
-                }
-            }
-        };
+        if (area[i]->getNomeArea() == nomeArea) {
+            indexDestino = i;
+        }
+        if (area[i]->buscarAnimal(idAnimal) != nullptr) {
+            indexOrigem = i;
+        }
     }
-    if (!achouAnimal) throw std::runtime_error("Nao foi encontrado um animal com esse id em nenhuma area");
-    if (!achouAreaDestino) throw std::runtime_error("Nao foi encontrada a area de destino");
-    if (achouAnimal && achouAreaDestino) std::cout << "Animal enviado com sucesso para area de destino" << std::endl;
+
+    if (indexOrigem == -1) throw std::invalid_argument("Erro: Animal não encontrado em nenhuma área para transferência.");
+    if (indexDestino == -1) throw std::invalid_argument("Erro: Área de destino não encontrada na fazenda.");
+
+    temporario = area[indexOrigem]->extrairAnimal(idAnimal);
+    area[indexDestino]->adicionarAnimal(temporario);
+    
+    std::cout << "Animal transferido com sucesso para a área " << nomeArea << std::endl;
+    return true;
 
 }
 

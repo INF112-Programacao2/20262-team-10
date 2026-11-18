@@ -25,6 +25,7 @@ class Area {
 
         void adicionarAnimal(Animal* a);
         void removerAnimal(string idAnimal);
+        Animal* extrairAnimal(string idAnimal);
         void promoverAnimal();
         Animal* buscarAnimal(string id);
 
