@@ -189,8 +189,11 @@ void Farm::registrarNascimento(const std::string& idFemea, const std::string& no
     destino->adicionarAnimal(filhote);
     filhote->setIdMae(idFemea);
     filhote->setIdPai(idPai);
+    mae->adicionarFilho(id);
     if(!idPai.empty()){
-        
+        Animal* macho = buscarAnimalGlobal(idPai);
+        Touro* pai = dynamic_cast<Touro*>(macho);
+        if(pai!= nullptr) pai->adicionarFilho(id);
     }
 }
 
