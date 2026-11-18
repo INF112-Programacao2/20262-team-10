@@ -14,7 +14,7 @@
 User::User(std::string log, std::string senha, 
     std::string nom, std::string perfil) {
     login = log;
-    senhaHash = senha;
+    senhaHash = gerarHash(senha);
     idUsuario = nom;
     perfilAcesso = perfil;
     cotacaoDolar = -2; //valor para nao quebrar
@@ -22,8 +22,40 @@ User::User(std::string log, std::string senha,
     precoLeite = 2.88;
 };
 
-void User::atualizarCotacaoDolar() {
+void User::salvarEmArquivo() {
+    std::ofstream arquivo("./data/usuarios.txt", std::ios::app);
+    if (!arquivo.is_open()) {
+        throw std::runtime_error("Falha ao abrir ou criar o arquivo");
+    }
+    arquivo << login << " " << senhaHash << " " << idUsuario << " " << perfilAcesso << "\n";
+    arquivo.close();
+}
 
+std::string User::gerarHash(const std::string& senha) {
+    std::hash<std::string> hasher;
+    return std::to_string(hasher(senha));
+}
+
+bool User::autenticar(std::string login, std::string senha) {
+    std::ifstream arquivo("./data/usuarios.txt");
+    bool achouUsuario = false;
+    std::string hash_digitado;
+    if(!arquivo.is_open()) {
+        throw std::runtime_error("Nao foi possivel encontrar um arquivo com dados usuario");
+    }
+    std::string login_arquivo, hash_arquivo, id_arquivo, perfil_arquivo;
+    while (arquivo >> login_arquivo >> hash_arquivo >> id_arquivo >> perfil_arquivo) {
+        if (login_arquivo == login) {
+            hash_digitado = gerarHash(senha);
+            achouUsuario = true;
+            break;
+        }
+    }
+    arquivo.close();
+    if (!achouUsuario) throw std::runtime_error("Usuario ou senha invalidos"); else return hash_arquivo == hash_digitado;
+}
+
+void User::atualizarCotacaoDolar() {
 //garante que vai funcionar no windows tambem
 #ifdef _WIN32
     system("curl -s https://economia.awesomeapi.com.br/last/USD-BRL > ./data/cotacao.txt");

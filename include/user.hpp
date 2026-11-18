@@ -19,10 +19,12 @@ class User {
 
     public:
         User(std::string login, std::string senha, std::string nome, std::string perfil);
-        bool autenticar(std::string login, std::string senha);
+        static std::string gerarHash(const std::string& senha); //gera o hash da senha>
+        static bool autenticar(std::string login, std::string senha);
         void atualizarCotacaoDolar();
         void atualizarCotacaoArroba();
         void atualizarCotacoes();
+        void salvarEmArquivo();
         
 
         double getPrecoLeite();
