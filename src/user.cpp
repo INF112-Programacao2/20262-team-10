@@ -21,6 +21,12 @@ User::User(std::string log, std::string senha,
     precoArrobaBoi = 384.55;
     precoLeite = 2.88;
     //todos os valores sao sacas de 40kg
+
+    TiposRacoes = new SacaRacao*[3];
+    for (int i = 0; i < 3; i++) {
+        TiposRacoes[i] = new SacaRacao();
+    }
+
     TiposRacoes[0]->name = "Racao Engorda";
     TiposRacoes[0]->peso = 40.0;
     TiposRacoes[0]->preco = 140;

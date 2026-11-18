@@ -18,7 +18,7 @@ void Touro:: setMerito(double m) {meritoGeneticoPTA=m;}
 void Touro:: setDosesEstoque(int d) {dosesEstoque=d;}
 void Touro:: setQtdCoberturas(int q) {qtdCoberturas=q;}
 
-double Touro::calcularGastoDiario(double precoLeite, SacaRacao** relatorioRacao) {
+double Touro::calcularGastoDiario([[maybe_unused]] double precoLeite, SacaRacao** relatorioRacao) {
     double precoRacao = 0;
     double pesoSaco = 0;
     for (int i = 0; i < 3; i++) {

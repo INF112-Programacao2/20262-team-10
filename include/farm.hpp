@@ -40,7 +40,8 @@ class Farm {
         double calcularLucroGeralDiario();
         void emitirRelatorioBreakEvenEVendas();
         //vai passar o valor de venda? Precisa calcular quanto vai vende?
-        bool venderAnimal(std::string id); //precisa funcoes de valor do animal -> genetico + valor investido (Rhuan vai implementar)
+        double venderAnimal(std::string id); //precisa funcoes de valor do animal -> genetico + valor investido (Rhuan vai implementar)
+        double comprarAnimal(Animal* animalComprado);
 
         //area-gado
         void adicionarArea(Area* a);

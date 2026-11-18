@@ -132,7 +132,7 @@ Animal* Area::extrairAnimal(string idAnimal) {
 }
 
 double Area::calcularLotacaoArea() {
-   return qtdAtualDeAnimais*100/capacidadeMaxima;
+   return qtdAtualDeAnimais*100.0/capacidadeMaxima;
 }
 
 int Area::getCapacidadeMaxima() {

@@ -36,6 +36,9 @@ void Farm::adicionarArea(Area* a) {
         << std::endl;
 };
 
+// double Farm::venderAnimal(string id) {
+//     precoVenda = buscarAnimalGlobal(id).;
+// }
 
 void Farm::removerArea(Area* a) {
     int indexAreaRemovido = -1;
@@ -84,6 +87,7 @@ void Farm::removerArea(Area* a) {
 
 
 int Farm::getQuantidadeTotalAnimais() {
+    qtdTotalDeAnimais = 0;
     for (int i = 0; i < qtdAreas; i++) {
         qtdTotalDeAnimais+= area[i]->getQtdAnimais();
     }
