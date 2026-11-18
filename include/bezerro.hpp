@@ -26,7 +26,7 @@ public:
     void setDesmamado(bool d);
     //metodos herança
     double calcularGastoDiario(double precoLeite, double precoRacao) override;
-    //double calcularReceitaDiaria() override;
+    double calcularReceitaDiaria(double precoLeite) override;
     std::string getTipo() const override;
     bool podeSerPromovido() const override;
     //metodos exclusivos

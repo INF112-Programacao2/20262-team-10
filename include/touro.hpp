@@ -24,7 +24,7 @@ public:
     void setQtdCoberturas(int q);
     //metodos herança
     double calcularGastoDiario(double precoLeite, double precoRacao) override;
-    //double calcularReceitaDiaria() override;
+    double calcularReceitaDiaria(double valorMercado) override;
     std::string getTipo() const override;
     bool podeSerPromovido() const override;
     //metodos exclusivos

@@ -22,3 +22,10 @@ double Vaca::calcularGastoDiario(double /*precoLeite*/, double precoRacao) {
     }
     return peso * 0.022 * precoRacao;
 }
+
+double Vaca::calcularReceitaDiaria(double valorMercado) {
+    if(emLactacao){
+        return producaoLeiteDia * valorMercado;
+    }
+    return 0.0;
+}
