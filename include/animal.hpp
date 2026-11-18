@@ -2,6 +2,7 @@
 #define ANIMAL_HPP
 
 #include <string>
+#include "sacaRacao.hpp"
 
 class Animal{
 protected:
@@ -17,7 +18,7 @@ public:
     Animal(std::string id, char s, double p);
     //inicializador sobrecarga ex: animal comprado
     Animal(std::string id, char s, double p, int iM, int qtdF, int qtdV);
-    virtual double calcularGastoDiario(double precoLeite, double precoRacao) = 0;
+    virtual double calcularGastoDiario(double precoLeite, SacaRacao** relatorioRacao) = 0;
     virtual double calcularReceitaDiaria(double valorMercado) = 0;
     virtual ~Animal();
 

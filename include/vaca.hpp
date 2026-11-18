@@ -19,7 +19,7 @@ public:
     void setProducaoLeiteDia(double p);
     void setEmLactacao(bool l);
     //metodos herança
-    double calcularGastoDiario(double precoLeite, double precoRacao) override;
+    double calcularGastoDiario(double precoLeite,  SacaRacao** relatorioRacao) override;
     double calcularReceitaDiaria(double valorMercado) override;
     std::string getTipo() const override;
     bool podeSerPromovido() const override;

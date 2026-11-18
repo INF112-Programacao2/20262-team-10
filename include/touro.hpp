@@ -23,7 +23,7 @@ public:
     void setDosesEstoque(int d);
     void setQtdCoberturas(int q);
     //metodos herança
-    double calcularGastoDiario(double precoLeite, double precoRacao) override;
+    double calcularGastoDiario(double precoLeite,  SacaRacao** relatorioRacao) override;
     double calcularReceitaDiaria(double valorMercado) override;
     std::string getTipo() const override;
     bool podeSerPromovido() const override;

@@ -16,11 +16,26 @@ void Boicorte:: setrendimentoCarcaca(double r) {rendimentoCarcaca=r;}
 void Boicorte:: setmetaAbatePeso(double m) {metaAbatePeso=m;}
 void Boicorte:: setFaseEngorda(bool f) {faseEngorda=f;}
 
-double Boicorte::calcularGastoDiario(double /*precoLeite*/, double precoRacao) {
-    if(faseEngorda){
-        return peso * 0.026 * precoRacao;
+double Boicorte::calcularGastoDiario(double /*precoLeite*/, SacaRacao** relatorioRacao) {
+    double precoRacaoEngorda;
+    double pesoSacoEngorda;
+    double precoRacaoAvulsa;
+    double pesoSacoAvulsa;
+    for (int i = 0; i < 3; i++) {
+    if (relatorioRacao[i]->name == "Racao Engorda") {
+            precoRacaoEngorda = relatorioRacao[i]->preco;
+            pesoSacoEngorda = relatorioRacao[i]->peso;
+        }
+    if (relatorioRacao[i]->name == "Racao Avulsa") {
+            precoRacaoEngorda = relatorioRacao[i]->preco;
+            pesoSacoEngorda = relatorioRacao[i]->peso;
+        }
     }
-    return peso * 0.021 * precoRacao;
+    
+    if(faseEngorda){
+        return (peso * 0.026) * precoRacaoEngorda/pesoSacoEngorda;
+    }
+    return (peso * 0.021)*precoRacaoAvulsa/pesoSacoAvulsa;
 }
 
 double Boicorte::calcularReceitaDiaria(double valorMercado) { //precoLeite alias precoArroba

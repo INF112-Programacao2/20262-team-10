@@ -16,11 +16,19 @@ bool Vaca::podeSerPromovido() const {return false;}
 void Vaca:: setProducaoLeiteDia(double p) {producaoLeiteDia=p;}
 void Vaca:: setEmLactacao(bool l) {emLactacao=l;}
 
-double Vaca::calcularGastoDiario(double /*precoLeite*/, double precoRacao) {
-    if(emLactacao){ //vacas em lactacao tem consumo por kilo corporal mais elevado
-        return peso * 0.028 * precoRacao;
+double Vaca::calcularGastoDiario(double /*precoLeite*/, SacaRacao** relatorioRacao) {
+    double precoRacao = 0;
+    double pesoSaco = 0;
+    for (int i = 0; i < 3; i++) {
+        if (relatorioRacao[i]->name == "Racao Avulsa") {
+            precoRacao = relatorioRacao[i]->preco;
+            pesoSaco = relatorioRacao[i]->peso;
+        }
     }
-    return peso * 0.022 * precoRacao;
+    if(emLactacao){ //vacas em lactacao tem consumo por kilo corporal mais elevado
+        return (peso * 0.028)*precoRacao/pesoSaco;
+    }
+    return (peso*0.022)*precoRacao/pesoSaco;
 }
 
 double Vaca::calcularReceitaDiaria(double valorMercado) {

@@ -42,7 +42,15 @@ bool Bezerro::atingiuIdadeAdulta() const {
     }
 }
 
-double Bezerro::calcularGastoDiario(double precoLeite, double precoRacao) {
+double Bezerro::calcularGastoDiario(double precoLeite, SacaRacao** relatorioRacao) {
+    double precoRacao = 0;
+    double pesoSaco = 0;
+    for (int i = 0; i < 3; i++) {
+        if (relatorioRacao[i]->name == "Racao Recria") {
+            precoRacao = relatorioRacao[i]->preco;
+            pesoSaco = relatorioRacao[i]->peso;
+        }
+    }
     if(precoLeite <=0 || precoRacao <=0) {
         return 1.5;
     }
@@ -50,7 +58,7 @@ double Bezerro::calcularGastoDiario(double precoLeite, double precoRacao) {
         return (consumoLeiteLitros * precoLeite) + 1.5;
     }
     else { //bezerros consomem em média 2.8% de seu peso corporal
-        return peso * precoRacao * 0.028;
+        return (peso * 0.028)*precoRacao/pesoSaco;
     }
 }
 

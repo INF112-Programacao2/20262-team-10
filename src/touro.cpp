@@ -18,8 +18,16 @@ void Touro:: setMerito(double m) {meritoGeneticoPTA=m;}
 void Touro:: setDosesEstoque(int d) {dosesEstoque=d;}
 void Touro:: setQtdCoberturas(int q) {qtdCoberturas=q;}
 
-double Touro::calcularGastoDiario(double /*precoLeite*/, double precoRacao) {
-    return peso * 0.020 * precoRacao;
+double Touro::calcularGastoDiario(double /*precoLeite*/, SacaRacao** relatorioRacao) {
+    double precoRacao = 0;
+    double pesoSaco = 0;
+    for (int i = 0; i < 3; i++) {
+        if (relatorioRacao[i]->name == "Racao Avulsa") {
+            precoRacao = relatorioRacao[i]->preco;
+            pesoSaco = relatorioRacao[i]->peso;
+        }
+    }
+    return (peso * 0.020)*precoRacao/pesoSaco;
 }
 
 double Touro::calcularReceitaDiaria(double valorMercado) {return 0.0;}
