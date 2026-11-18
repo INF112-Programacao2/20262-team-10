@@ -41,8 +41,7 @@ int ParserPlanilha::importarCSV(std::string arquivo, Farm& f) {
         if (linha.empty() || linha[0] == '#') continue;
 
         std::string tipo = splitManual(linha, ';', 0);
-
-/*        if (tipo == "AREA") {
+        if (tipo == "AREA") {
             // Formato: AREA;nome;estadoPasto;area[cite: 8]
             std::string nome = splitManual(linha, ';', 1);
             std::string estadoPasto = splitManual(linha, ';', 2);
@@ -152,6 +151,5 @@ bool ParserPlanilha::exportarCSV(std::string arquivo, Farm& f) {
 
     out.close();
     return true;
-    */
-}
+    
 }
