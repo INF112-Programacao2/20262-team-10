@@ -3,7 +3,10 @@
 #include "farm.hpp"
 #include "animal.hpp"
 #include "touro.hpp"
+#include "bezerro.hpp"
+#include "vaca.hpp"
 #include "user.hpp"
+#include "sacaRacao.hpp"
 
 Area::Area(std::string n, std::string estado, double a) {
     nome = n;
@@ -154,6 +157,7 @@ Animal* Area::buscarAnimal(string id) {
     }
 }
 
-double Area::getGastoIndividual(string id) {
-    Animal* animal = buscarAnimal(id);
+double Area::getGastoIndividual (string id, double precoLeite, SacaRacao** relatorioRacoes) {
+    Animal* animalAchado = buscarAnimal(id);
+    return (animalAchado->calcularGastoDiario(precoLeite, relatorioRacoes))*(calcularLotacaoArea()/100);
 }

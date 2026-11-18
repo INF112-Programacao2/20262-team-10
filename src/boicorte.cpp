@@ -16,7 +16,7 @@ void Boicorte:: setrendimentoCarcaca(double r) {rendimentoCarcaca=r;}
 void Boicorte:: setmetaAbatePeso(double m) {metaAbatePeso=m;}
 void Boicorte:: setFaseEngorda(bool f) {faseEngorda=f;}
 
-double Boicorte::calcularGastoDiario(double /*precoLeite*/, SacaRacao** relatorioRacao) {
+double Boicorte::calcularGastoDiario(double precoLeite, SacaRacao** relatorioRacao) {
     double precoRacaoEngorda;
     double pesoSacoEngorda;
     double precoRacaoAvulsa;

@@ -7,5 +7,4 @@ struct SacaRacao {
     double preco;
 };
 
-
 #endif

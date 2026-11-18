@@ -16,7 +16,7 @@ bool Vaca::podeSerPromovido() const {return false;}
 void Vaca:: setProducaoLeiteDia(double p) {producaoLeiteDia=p;}
 void Vaca:: setEmLactacao(bool l) {emLactacao=l;}
 
-double Vaca::calcularGastoDiario(double /*precoLeite*/, SacaRacao** relatorioRacao) {
+double Vaca::calcularGastoDiario(double precoLeite, SacaRacao** relatorioRacao) {
     double precoRacao = 0;
     double pesoSaco = 0;
     for (int i = 0; i < 3; i++) {
