@@ -16,4 +16,4 @@ public:
     static std::string splitManual(std::string linha, char delim, int tamOut);
  };
 
-#endif // PARSERPLANILHA_HPP
+#endif 

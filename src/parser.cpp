@@ -42,15 +42,15 @@ int ParserPlanilha::importarCSV(std::string arquivo, Farm& f) {
 
         std::string tipo = splitManual(linha, ';', 0);
 
-/*        if (tipo == "AREA") {
-            // Formato: AREA;nome;estadoPasto;area[cite: 8]
+        if (tipo == "AREA") {
+            // Formato: AREA;nome;estadoPasto;area
             std::string nome = splitManual(linha, ';', 1);
             std::string estadoPasto = splitManual(linha, ';', 2);
             double areaHectares = std::stod(splitManual(linha, ';', 3));
 
-            Area* novaArea = new Area(nome, estadoPasto, areaHectares); //[cite: 8]
+            Area* novaArea = new Area(nome, estadoPasto, areaHectares); 
             try {
-                f.adicionarArea(novaArea); //[cite: 11]
+                f.adicionarArea(novaArea); 
                 areaAtual = novaArea;
                 registrosImportados++;
             } catch (...) {
@@ -79,16 +79,16 @@ int ParserPlanilha::importarCSV(std::string arquivo, Farm& f) {
                 int qtdFilhos = std::stoi(splitManual(linha, ';', 5));
                 int qtdVacinas = std::stoi(splitManual(linha, ';', 6));
 
-                novoAnimal = new Vaca(id, sexo, peso, idadeMeses, qtdFilhos, qtdVacinas); //[cite: 13]
+                novoAnimal = new Vaca(id, sexo, peso, idadeMeses, qtdFilhos, qtdVacinas); 
             } 
             else if (tipo == "TOURO") {
-                // Formato: TOURO;id;sexo;peso;idadeMeses;qtdFilhos;qtdVacinas;valorDoseSemen[cite: 12]
+                // Formato: TOURO;id;sexo;peso;idadeMeses;qtdFilhos;qtdVacinas;valorDoseSemen
                 int idadeMeses = std::stoi(splitManual(linha, ';', 4));
                 int qtdFilhos = std::stoi(splitManual(linha, ';', 5));
                 int qtdVacinas = std::stoi(splitManual(linha, ';', 6));
                 double valorDoseSemen = std::stod(splitManual(linha, ';', 7));
 
-                novoAnimal = new Touro(id, sexo, peso, idadeMeses, qtdFilhos, qtdVacinas, valorDoseSemen); //[cite: 12]
+                novoAnimal = new Touro(id, sexo, peso, idadeMeses, qtdFilhos, qtdVacinas, valorDoseSemen); 
             } 
             else if (tipo == "BOI" || tipo == "BOICORTE") {
                 // Formato: BOICORTE;id;sexo;peso;idadeMeses;qtdFilhos;qtdVacinas[cite: 10]
@@ -100,7 +100,7 @@ int ParserPlanilha::importarCSV(std::string arquivo, Farm& f) {
             } 
             else if (tipo == "BEZERRO") {
                 // Construtor nascido: BEZERRO;id;sexo;peso[cite: 9]
-                // Construtor adquirido: BEZERRO;id;sexo;peso;idadeMeses;qtdFilhos;qtdVacinas;consumoLeite;ganhoPeso;idadeDesmame;desmamado[cite: 9]
+                // Construtor adquirido: BEZERRO;id;sexo;peso;idadeMeses;qtdFilhos;qtdVacinas;consumoLeite;ganhoPeso;idadeDesmame;desmamado
                 std::string colIdade = splitManual(linha, ';', 4);
                 if (colIdade.empty()) {
                     novoAnimal = new Bezerro(id, sexo, peso); //[cite: 9]
@@ -152,6 +152,5 @@ bool ParserPlanilha::exportarCSV(std::string arquivo, Farm& f) {
 
     out.close();
     return true;
-    */
 }
     
