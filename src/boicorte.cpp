@@ -40,7 +40,7 @@ double Boicorte::calcularGastoDiario([[maybe_unused]] double precoLeite, SacaRac
 
 double Boicorte::calcularReceitaDiaria(double valorMercado) { //precoLeite alias precoArroba
     if(faseEngorda){
-        return ((rendimentoCarcaca*0.7)/15) * valorMercado;
+        return ((rendimentoCarcaca*1.4)/15) * valorMercado;
     }
-    return ((rendimentoCarcaca*1.4)/15) * valorMercado;
+    return ((rendimentoCarcaca*0.7)/15) * valorMercado;
 }
