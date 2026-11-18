@@ -20,6 +20,14 @@ User::User(std::string log, std::string senha,
     cotacaoDolar = -2; //valor para nao quebrar
     precoArrobaBoi = 384.55;
     precoLeite = 2.88;
+    //todos os valores sao sacas de 40kg
+    precoSacaRacaoEngorda = 140,00;
+    precoSacaRacaoAvulsa = 60,00;
+    precoSacaRacaoRecria = 80,00;
+
+    kgRacaoAvulsa = 40;
+    kgRacaoEngorda = 40;
+    kgRacaoRecria = 40;
 };
 
 void User::salvarEmArquivo() {
@@ -172,6 +180,17 @@ void User::atualizarCotacaoArroba() {
     }
 }
 
+void User::atualizarCotacoes() {
+    atualizarCotacaoArroba();
+    atualizarCotacaoDolar();
+    std::cout << "Qual o preco que voce vende o litro do leite: ";
+    std::cin >> precoLeite;
+    std::cout << "Litro do leite atualizado com sucesso para: " << precoLeite << std::endl;
+    std::cout << "Voce comprou sacos de racao de quantos kg? Preencha na ordem -> Engorda - Avulsa - Recriacao ";
+    std::cin >> kgRacaoEngorda >> kgRacaoAvulsa >> kgRacaoRecria;
+    std::cout << "Qual o preco de cada saca de racao? Preencha na ordem -> Engorda - Avulsa - Recriacao: ";
+    std::cin >> precoSacaRacaoEngorda >> precoSacaRacaoAvulsa >> precoSacaRacaoRecria;
+}
 
 double User::getCotacaoDolar() {
     return cotacaoDolar;
@@ -179,6 +198,34 @@ double User::getCotacaoDolar() {
 
 double User::getCotacaoArrobaBoi() {
     return precoArrobaBoi;
+}
+
+double User::getPrecoLeite() {
+    return precoLeite;
+}
+
+double User::getKgRacaoAvulsa() {
+    return kgRacaoAvulsa;
+}
+
+double User::getKgRacaoEngorda() {
+    return kgRacaoEngorda;
+}
+
+double User::getKgRacaoRecria() {
+    return kgRacaoRecria;
+}
+
+double User::getSacaRacaoAvulsa() {
+    return precoSacaRacaoAvulsa;
+}
+
+double User::getSacaRacaoEngorda() {
+    return precoSacaRacaoEngorda;
+}
+
+double User::getSacaRacaoRecria() {
+    return precoSacaRacaoRecria;
 }
 
 double User::getCotacaoArrobaVaca() {
@@ -197,16 +244,34 @@ void User::setPrecoArrobaVaca(double p) {
     precoArrobaVaca = p;
 };
 
-void User::atualizarCotacoes() {
-    atualizarCotacaoArroba();
-    atualizarCotacaoDolar();
-    std::cout << "Qual o preco que voce vende o litro do leite: ";
-    std::cin >> precoLeite;
-    std::cout << "Litro do leite atualizado com sucesso para: " << precoLeite << std::endl;
-}
-
 void User::setCotacaoDolar(double p) {
     cotacaoDolar = p;
 };
+
+void User::setPrecoSacaRacaoAvulsa(double p) {
+    precoSacaRacaoAvulsa = p;
+};
+
+void User::setPrecoSacaRacaoEngorda(double p) {
+    precoSacaRacaoEngorda = p;
+};
+
+void User::setPrecoSacaRacaoRecria(double p) {
+    precoSacaRacaoRecria = p;
+};
+
+void User::setKgRacaoAvulsa(double p) {
+    kgRacaoAvulsa= p;
+};
+
+void User::setKgRacaoEngorda(double p) {
+    kgRacaoEngorda = p;
+};
+
+void User::setKgRacaoRecria(double p) {
+    kgRacaoRecria = p;
+};
+
+
 
 

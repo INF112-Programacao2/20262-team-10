@@ -13,9 +13,15 @@ class User {
         
         double cotacaoDolar;
         double precoLeite;
-        double precoSacaRacao;
+        double precoSacaRacaoEngorda;
+        double precoSacaRacaoRecria;
+        double precoSacaRacaoAvulsa;
         double precoArrobaBoi;
         double precoArrobaVaca;
+
+        double kgRacaoEngorda;
+        double kgRacaoRecria;
+        double kgRacaoAvulsa;
 
     public:
         User(std::string login, std::string senha, std::string nome, std::string perfil);
@@ -30,7 +36,12 @@ class User {
         double getPrecoLeite();
         double getCotacaoDolar();
         double getCotacaoArrobaBoi();
-        double getSacaRacao();
+        double getSacaRacaoEngorda();
+        double getSacaRacaoRecria();
+        double getSacaRacaoAvulsa();
+        double getKgRacaoEngorda();
+        double getKgRacaoAvulsa();
+        double getKgRacaoRecria();
         double getCotacaoArrobaVaca();
 
         //sets
@@ -38,6 +49,13 @@ class User {
         void setPrecoArrobaVaca(double p);
         void setCotacaoDolar(double p);
         void setPrecoLeite(double p);
+        void setPrecoSacaRacaoRecria(double p);
+        void setPrecoSacaRacaoEngorda(double p);
+        void setPrecoSacaRacaoAvulsa(double p);
+
+        void setKgRacaoRecria(double p);
+        void setKgRacaoAvulsa(double p);
+        void setKgRacaoEngorda(double p);
 };
 
 #endif 
