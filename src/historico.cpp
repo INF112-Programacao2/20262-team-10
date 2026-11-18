@@ -40,7 +40,7 @@
 //     }
 
 //     int dosesAnteriores = 0;
-//     for(int i = 0; i < quantidadeAtual_; i++){
+//     for(int i=0; i<quantidadeAtual_; i++){
 //         if(registros_[i]->get_nomeVacina() == vacina.get_Nome()){
 //             dosesAnteriores++;
 //         }
@@ -51,47 +51,47 @@
 //     return true;
 // }
 
-// void HistoricoSanitario::avancarDia() {
-//    for (int i = 0; i < quantidadeAtual_; i++) {
+// void HistoricoSanitario::avancarDia(){
+//    for (int i=0; i<quantidadeAtual_; i++){
 //        registros_[i]->avancarDia();
 //    }
 //}
 
-//bool HistoricoSanitario::emCarencia() const {
-//   for (int i = 0; i < quantidadeAtual_; i++) {
+//bool HistoricoSanitario::emCarencia() const{
+//   for (int i=0; i<quantidadeAtual_; i++) {
 //        if (registros_[i]->emCarencia()) return true;
 //    }
 //    return false;
 //}
 
-//int HistoricoSanitario::get_DiasCarenciaRestantes() const {
+//int HistoricoSanitario::get_DiasCarenciaRestantes() const{
 //   int maior = 0;
-//    for (int i = 0; i < quantidadeAtual_; i++) {
-//        if (registros_[i]->get_DiasCarenciaRestantes() > maior) {
+//    for (int i=0; i<quantidadeAtual_; i++) {
+//        if (registros_[i]->get_DiasCarenciaRestantes() > maior){
 //            maior = registros_[i]->get_DiasCarenciaRestantes();
 //        }
 //    }
 //    return maior;
 //}
 
-//double HistoricoSanitario::get_CustoTotal() const {
+//double HistoricoSanitario::get_CustoTotal() const{
 //    double total = 0;
-//    for (int i = 0; i < quantidadeAtual_; i++) {
+//    for (int i=0;i<quantidadeAtual_; i++) {
 //        total += registros_[i]->get_Custo();
 //    }
 //    return total;
 //}
 
-//int HistoricoSanitario::get_QuantidadeAtual() const {
+//int HistoricoSanitario::get_QuantidadeAtual() const{
 //    return quantidadeAtual_;
 //}
 
-//void HistoricoSanitario::exibir() const {
+//void HistoricoSanitario::exibir() const{
 //    if (quantidadeAtual_ == 0) {
 //        std::cout << "Nenhuma vacina registrada." << std::endl;
 //        return;
 //    }
-//    for (int i = 0; i < quantidadeAtual_; i++) {
+//    for (int i=0; i<quantidadeAtual_; i++){
 //        std::cout << registros_[i]->get_nomeVacina()
 //                  << " (" << registros_[i]->get_Tipo() << ")"
 //                  << " | dose " << registros_[i]->get_NumeroDose()
