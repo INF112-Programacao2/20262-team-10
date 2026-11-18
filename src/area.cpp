@@ -17,7 +17,6 @@ Area::Area(std::string n, std::string estado, double a) {
 }
 
 void Area::adicionarAnimal(Animal* a) {
-    if (qtdAtualDeAnimais < capacidadeMaxima) {
         //alocacao dinamica do novo rebanho
         Animal** rebanhoNovaAlocacao = new Animal*[qtdAtualDeAnimais+1];
 
@@ -39,9 +38,10 @@ void Area::adicionarAnimal(Animal* a) {
         std::cout << "animal de indice: --" << a->getId()  << "-- foi aidicionado com sucesso!"
         << std::endl;
         std::cout << "A quantidade atual de animais e de: " << qtdAtualDeAnimais << std::endl;
-    } else {
-        std::cout << "Na sua fazenda nao cabem mais animais para o atual padrao mantido" << std::endl;
-    }
+
+        if (qtdAtualDeAnimais >= capacidadeMaxima) {
+            std::cout << "Atencao, verifique a lotacao atual do pasto, ela e atualmente de: " << calcularLotacaoArea() << "%" << std::endl;
+        }
 };
 
 void Area::removerAnimal(string idAnimal) {

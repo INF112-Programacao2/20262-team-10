@@ -269,7 +269,3 @@ void User::setKgRacaoEngorda(double p) {
 void User::setKgRacaoRecria(double p) {
     kgRacaoRecria = p;
 };
-
-
-
-

@@ -1,40 +1,40 @@
-/* #ifndef HISTORICO_HPP
-#define HISTORICO_HPP
+// #ifndef HISTORICO_HPP
+// #define HISTORICO_HPP
 
-#include <string>
-#include "registro.hpp"
-#include "vacina.hpp"
+// #include <string>
+// #include "registro.hpp"
+// #include "vacina.hpp"
 
-class HistoricoSanitario{
-    private:
+// class HistoricoSanitario{
+//     private:
 
-        RegistroSanitario** registros_;
-        int capacidadeTotal_;
-        int quantidadeAtual_;
+//         RegistroSanitario** registros_;
+//         int capacidadeTotal_;
+//         int quantidadeAtual_;
 
-        void aumentarCapacidade();
+//         void aumentarCapacidade();
 
-    public: 
+//     public: 
 
-        HistoricoSanitario();
+//         HistoricoSanitario();
 
-        ~HistoricoSanitario();
+//         ~HistoricoSanitario();
 
-        bool registrarVacina(const Vacina& vacina, int dia);
+//         bool registrarVacina(const Vacina& vacina, int dia);
 
-        void avancarDia();
+//         void avancarDia();
 
-        bool emCarencia() const;
+//         bool emCarencia() const;
 
-        int get_DiasCarenciaRestantes() const;
+//         int get_DiasCarenciaRestantes() const;
 
-        double get_CustoTotal() const;
+//         double get_CustoTotal() const;
 
-        int get_QuantidadeAtual() const;
+//         int get_QuantidadeAtual() const;
 
-        void exibir() const;
+//         void exibir() const;
 
-};
+// };
 
-#endif
+// #endif
 

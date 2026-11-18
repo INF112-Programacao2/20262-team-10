@@ -132,7 +132,7 @@ Animal* temporario = nullptr;
         }
     }
 
-    if (indexOrigem == -1) throw std::invalid_argument("Erro: Animal não encontrado em nenhuma área para transferência.");
+    if (indexOrigem == -1) throw std::invalid_argument("Erro: Animal de id" + idAnimal + " não encontrado em nenhuma área para transferência.");
     if (indexDestino == -1) throw std::invalid_argument("Erro: Área de destino não encontrada na fazenda.");
 
     temporario = area[indexOrigem]->extrairAnimal(idAnimal);
@@ -141,6 +141,12 @@ Animal* temporario = nullptr;
     std::cout << "Animal transferido com sucesso para a área " << nomeArea << std::endl;
     return true;
 
+}
+
+bool Farm::transferirLoteDeAnimaisEntreAreas(string* ids, int qtdAnimais, string areaDestino) {
+    for (int i = 0; i < qtdAnimais; i++) {
+        transferirAnimalEntreAreas(ids[i], areaDestino);
+    }
 }
 
 std::string Farm::getAreaAtual() const {return areaAtual;}

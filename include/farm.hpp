@@ -48,7 +48,7 @@ class Farm {
         void selecionarArea(std::string n); //passa o nome da area que deseja selecionar
         Animal* buscarAnimalGlobal(string id);
         bool transferirAnimalEntreAreas(string idAnimal, string nomeArea);
-        bool transferirLoteDeAnimaisEntreAreas();
+        bool transferirLoteDeAnimaisEntreAreas(string* ids, int qtdAnimais, string areaDestino);
         bool enviarParaQuarentena(std::string motivo, std::string idAnimal, int dias);
         bool liberarDaQuarentena(std::string idAnimal);
         void promoverAnimalGlobal();
