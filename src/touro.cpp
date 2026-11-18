@@ -34,7 +34,7 @@ double Touro::calcularGastoDiario([[maybe_unused]] double precoLeite, SacaRacao*
 bool Touro::cobrirFemea(Vaca* femea) {
     if(femea==nullptr) throw std::invalid_argument("Vaca invalida para cobertura!");
     if(femea->getPrenha()) throw std::runtime_error("Esta vaca ja esta prenha!");
-    if(this->getId() == femea->getPai() || this->getMae() == femea->getId()){
+    if(this->getId() == femea->getPai() || this->getMae() == femea->getId() || this->getId() == femea->getPai()|| this->getMae() == femea->getId()){
         throw std::runtime_error("Cobertura bloqueada: parentesco proximo detectado!");
     } 
     qtdCoberturas++;

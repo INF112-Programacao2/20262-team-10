@@ -162,9 +162,6 @@ void Farm::realizarCobertura(const std::string& idMacho, const std::string& idFe
     Vaca* vaca = dynamic_cast<Vaca*>(Femea);
     if(touro==nullptr) throw std::invalid_argument("O id do touro nao foi encontrado!");
     if(vaca==nullptr) throw std::invalid_argument("O id da vaca nao foi encontrado!");
-    if(touro->cobrirFemea(vaca)){
-        vaca->emprenhar(touro);
-    }
 }
 
 void Farm::registrarNascimento(const std::string& idFemea, const std::string& nomeArea, std::string id, char sexo, double peso) {
@@ -172,8 +169,8 @@ void Farm::registrarNascimento(const std::string& idFemea, const std::string& no
     if(peso<=0) throw std::invalid_argument("Peso invalido!");
     Animal* femea = buscarAnimalGlobal(idFemea);
     Vaca* mae = dynamic_cast<Vaca*>(femea);
+    if(mae==nullptr) throw std::invalid_argument("Mae do bezerro nao encontrada!");
     Area* destino = nullptr;     
-    std::string idPai = mae->parir();
     for(int i=0; i<qtdAreas; i++){
         if(area[i]!=nullptr && area[i]->getNomeArea() == nomeArea){
             destino = area[i];
@@ -185,6 +182,7 @@ void Farm::registrarNascimento(const std::string& idFemea, const std::string& no
     }
     Bezerro* filhote = new Bezerro(id, sexo, peso);
     if(filhote==nullptr) throw std::invalid_argument("Bezerro nao registrado!");
+    std::string idPai = mae->parir();
     destino->adicionarAnimal(filhote);
     filhote->setIdMae(idFemea);
     filhote->setIdPai(idPai);

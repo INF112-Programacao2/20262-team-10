@@ -4,7 +4,7 @@
 Vaca::Vaca(std::string id, char s, double p, int iM, int qtdF, int qtdV) : Animal(id, s, p, iM, qtdF, qtdV) {}
 
 Vaca::~Vaca(){
-
+    delete[] idFilhos;
 }
 
 //gets
@@ -45,6 +45,8 @@ bool Vaca::emprenhar(Touro* macho) {
     if(prenha) throw std::runtime_error("Esta vaca ja esta prenha!");
     if(idadeMeses < 15) throw std::runtime_error("A vaca ainda nao atingiu a idade minima para reproducao (15 meses).");
     prenha = true;
+    idTouroPai = macho->getId();
+    return true;
 }
 
 std::string Vaca::parir() {

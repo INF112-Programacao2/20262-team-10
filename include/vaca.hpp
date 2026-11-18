@@ -3,6 +3,8 @@
 #include "animal.hpp"
 #include "touro.hpp"
 
+class Touro;
+
 class Vaca : public Animal{
 private:
     double producaoLeiteDia;
