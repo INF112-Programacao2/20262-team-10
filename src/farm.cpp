@@ -110,12 +110,12 @@ void Farm::promoverAnimalGlobal() {
 
 Animal* Farm::buscarAnimalGlobal(string identificador) {
     for (int i = 0; i < qtdAreas; i++) {
-        if (area[i]->buscarAnimal(identificador)) {
-            return area[i]->buscarAnimal(identificador);
-        } else {
-            throw std::out_of_range("Animal nao encontrado em nenhuma area!");
+        Animal* encontrado = area[i]->buscarAnimal(identificador);
+        if (encontrado != nullptr) {
+            return encontrado;
         }
     }
+    throw std::out_of_range("Animal nao encontrado em nenhuma area!");
 }
 
 bool Farm::transferirAnimalEntreAreas(string idAnimal, string nomeArea) {

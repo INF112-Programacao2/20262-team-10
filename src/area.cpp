@@ -45,37 +45,15 @@ void Area::adicionarAnimal(Animal* a) {
 };
 
 void Area::removerAnimal(string idAnimal) {
-    int indexAnimalRemovido = -1;
+    Animal* animalParaAbate = extrairAnimal(idAnimal);
 
-    for (int i = 0; i < qtdAtualDeAnimais; i++) {
-        if (rebanho[i]->getId() == idAnimal) {
-            indexAnimalRemovido = i;
-            break;
-        }
-    }
-
-    if (indexAnimalRemovido == -1) {
+    if (animalParaAbate == nullptr) {
         std::cout << "Erro: Animal nao encontrado no rebanho." << std::endl;
         return;
     }
 
-    Animal** rebanhoNovaAlocacao = new Animal*[qtdAtualDeAnimais-1];
-
-    for (int i = 0; i < indexAnimalRemovido; i++) {
-        rebanhoNovaAlocacao[i] = rebanho[i];
-    }
-
-    for (int i = indexAnimalRemovido + 1; i < qtdAtualDeAnimais; i++) {
-        rebanhoNovaAlocacao[i - 1] = rebanho[i];
-    }
-
-    delete rebanho[indexAnimalRemovido];
-    delete[] rebanho;
-
-    rebanho = rebanhoNovaAlocacao;
-
-    qtdAtualDeAnimais--;
-    std::cout << "Animal removido com sucesso!" << std::endl;
+    delete animalParaAbate; 
+    std::cout << "Animal removido e deletado com sucesso!" << std::endl;
 }
 
 std::string Area::getNomeArea() {
