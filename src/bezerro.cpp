@@ -53,4 +53,13 @@ double Bezerro::calcularGastoDiario(double precoLeite, double precoRacao) {
         return peso * precoRacao * 0.028;
     }
 }
+
+//Agio : é o percentual de valorização extra pago por arroba (ou quilo) de um animal jovem de reposição 
+//— como o bezerro — em relação ao preço base da arroba do boi gordo.
+double Bezerro::calcularReceitaDiaria(double valorMercado) {
+    double agio = 0.05; // calculo com base na idade do animal ganho de peso diario
+    if(idadeMeses<=8) (sexo=='M') ? agio=0.22 : agio=0.15;
+    else if(idadeMeses<=14) (sexo=='M') ? agio=0.12 : agio=0.08;
+    return (ganhoPesoMedioDiario/30.0) * valorMercado * (1+agio);
+}
     

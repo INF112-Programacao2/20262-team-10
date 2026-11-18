@@ -22,3 +22,10 @@ double Boicorte::calcularGastoDiario(double /*precoLeite*/, double precoRacao) {
     }
     return peso * 0.021 * precoRacao;
 }
+
+double Boicorte::calcularReceitaDiaria(double valorMercado) { //precoLeite alias precoArroba
+    if(faseEngorda){
+        return ((rendimentoCarcaca*0.7)/15) * valorMercado;
+    }
+    return ((rendimentoCarcaca*1.4)/15) * valorMercado;
+}

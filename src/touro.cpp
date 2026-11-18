@@ -21,3 +21,5 @@ void Touro:: setQtdCoberturas(int q) {qtdCoberturas=q;}
 double Touro::calcularGastoDiario(double /*precoLeite*/, double precoRacao) {
     return peso * 0.020 * precoRacao;
 }
+
+double Touro::calcularReceitaDiaria(double valorMercado) {return 0.0;}
