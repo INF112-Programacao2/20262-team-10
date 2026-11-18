@@ -30,8 +30,8 @@ public:
     void setIdPai(std::string id);
     void setIdMae(std::string id);
     //metodos herança
-    double calcularGastoDiario(double precoLeite, double precoRacao) override;
-    double calcularReceitaDiaria(double valorMercado) override;
+    double calcularGastoDiario(double precoLeite, SacaRacao** relatorioRacao) override;
+    double calcularReceitaDiaria(double precoLeite) override;
     std::string getTipo() const override;
     bool podeSerPromovido() const override;
     //metodos exclusivos

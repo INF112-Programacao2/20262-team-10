@@ -2,7 +2,7 @@
 #define AREA_QUARENTENA_HPP
 #include "area.hpp"
 
-class AreaQuarentena: public Area {
+class AreaQuarentena : public Area {
     private:
         int nivelBioseguranca;
         std::string crmvResponsavel;

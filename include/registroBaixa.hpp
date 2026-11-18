@@ -28,7 +28,6 @@ class RegistroBaixa {
         bool foiVenda() const;
         bool foiMorte() const;
 
-        
         double get_Resultado() const;
 
         void exibir() const;

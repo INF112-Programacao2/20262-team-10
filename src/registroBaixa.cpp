@@ -1,5 +1,5 @@
 #include <iostream>
-#include "registrobaixa.hpp"
+#include "registroBaixa.hpp"
 
 RegistroBaixa::RegistroBaixa(std::string idAnimal, std::string tipoAnimal, TipoBaixa tipoBaixa,
     double valorRecebido, double custoInvestido, int diaBaixa)
