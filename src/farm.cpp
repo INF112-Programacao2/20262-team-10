@@ -1,6 +1,8 @@
 #include "farm.hpp"
 #include "animal.hpp"
-
+#include "touro.hpp"
+#include "vaca.hpp"
+#include "bezerro.hpp"
 #include <iostream>
 
 Farm::Farm(std::string s, std::string l, User* propr) {
@@ -150,6 +152,44 @@ Animal* temporario = nullptr;
 bool Farm::transferirLoteDeAnimaisEntreAreas(string* ids, int qtdAnimais, string areaDestino) {
     for (int i = 0; i < qtdAnimais; i++) {
         transferirAnimalEntreAreas(ids[i], areaDestino);
+    }
+}
+
+void Farm::realizarCobertura(const std::string& idMacho, const std::string& idFemea) {
+    Animal* Macho = buscarAnimalGlobal(idMacho);
+    Animal* Femea = buscarAnimalGlobal(idFemea);
+    Touro* touro = dynamic_cast<Touro*>(Macho);
+    Vaca* vaca = dynamic_cast<Vaca*>(Femea);
+    if(touro==nullptr) throw std::invalid_argument("O id do touro nao foi encontrado!");
+    if(vaca==nullptr) throw std::invalid_argument("O id da vaca nao foi encontrado!");
+    if(touro->cobrirFemea(vaca)){
+        vaca->emprenhar(touro);
+    }
+}
+
+void Farm::registrarNascimento(const std::string& idFemea, const std::string& nomeArea, std::string id, char sexo, double peso) {
+    if(sexo!= 'M' && sexo!='F') throw std::invalid_argument("Sexo invalido!");
+    if(peso<=0) throw std::invalid_argument("Peso invalido!");
+    Animal* femea = buscarAnimalGlobal(idFemea);
+    Vaca* mae = dynamic_cast<Vaca*>(femea);
+    Area* destino = nullptr;     
+    std::string idPai = mae->parir();
+    for(int i=0; i<qtdAreas; i++){
+        if(area[i]!=nullptr && area[i]->getNomeArea() == nomeArea){
+            destino = area[i];
+            break;
+        }
+    }
+    if (destino == nullptr) {
+        throw std::invalid_argument("Area de destino nao encontrada!");
+    }
+    Bezerro* filhote = new Bezerro(id, sexo, peso);
+    if(filhote==nullptr) throw std::invalid_argument("Bezerro nao registrado!");
+    destino->adicionarAnimal(filhote);
+    filhote->setIdMae(idFemea);
+    filhote->setIdPai(idPai);
+    if(!idPai.empty()){
+        
     }
 }
 

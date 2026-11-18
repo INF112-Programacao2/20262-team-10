@@ -53,7 +53,8 @@ class Farm {
         bool enviarParaQuarentena(std::string motivo, std::string idAnimal, int dias);
         bool liberarDaQuarentena(std::string idAnimal);
         void promoverAnimalGlobal();
-
+        void realizarCobertura(const std::string& idMacho, const std::string& idFemea);
+        void registrarNascimento(const std::string& idFemea, const std::string& nomeArea, std::string id, char sexo, double peso);
         //gets
         int getQuantidadeTotalAnimais();
         std::string getAreaAtual() const;

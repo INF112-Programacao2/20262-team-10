@@ -3,6 +3,7 @@
 Animal::Animal(std::string id, char s, double p) : _id(id), sexo(s), peso(p) {
     idadeMeses = qtdFilhos = qtdVacinas = 0;
     EmQuarentena = false;
+    idFilhos = nullptr;
 }
 
 //inicializador overload 
@@ -18,9 +19,9 @@ int Animal::getIdadeMeses() const {return idadeMeses;}
 int Animal::getQtdFilhos() const {return qtdFilhos;}
 int Animal::getQtdvacinas() const {return qtdVacinas;}
 bool Animal::getQuarentena() const{return EmQuarentena;}
-Animal* Animal::getPai() const{return pai;} 
-Animal* Animal::getMae() const{return mae;}
-Animal** Animal::getFilhos() const{return filhos;}
+std::string Animal::getPai() const{return idPai;} 
+std::string Animal::getMae() const{return idMae;}
+std::string* Animal::getFilhos() const{return idFilhos;}
 
 Animal::~Animal() {
     
