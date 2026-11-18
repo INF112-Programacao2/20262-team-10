@@ -7,6 +7,7 @@
 #include "vaca.hpp"
 #include "user.hpp"
 #include "sacaRacao.hpp"
+#include "snapshotancestral.hpp"
 
 Area::Area(std::string n, std::string estado, double a) {
     nome = n;
@@ -55,6 +56,8 @@ void Area::removerAnimal(string idAnimal) {
         std::cout << "Erro: Animal nao encontrado no rebanho." << std::endl;
         return;
     }
+
+    //IMPREMENTAR SNAPSHOT AQUI
 
     delete animalParaAbate; 
     std::cout << "Animal removido e deletado com sucesso!" << std::endl;

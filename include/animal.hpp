@@ -3,6 +3,7 @@
 
 #include <string>
 #include "sacaRacao.hpp"
+#include "snapshotancestral.hpp"
 
 class Animal{
 protected:
@@ -14,6 +15,11 @@ protected:
     std::string idPai;
     std::string idMae;
     std::string* idFilhos;
+
+    //snapshot 
+    SnapshotAncestral snapshotPai;
+    SnapshotAncestral snapshotMae;
+
 public:
     Animal(std::string id, char s, double p);
     //inicializador sobrecarga ex: animal comprado
@@ -35,6 +41,16 @@ public:
     std::string getPai() const;
     std::string getMae() const;
     std::string* getFilhos() const;
+
+    //get do snapshot
+    SnapshotAncestral getSnapshotPai() const { return snapshotPai; }
+    SnapshotAncestral getSnapshotMae() const { return snapshotMae; }
+
+    //set do snapshot
+    void setSnapshotPai(const SnapshotAncestral& salva) { snapshotPai = salva; }
+    void setSnapshotMae(const SnapshotAncestral& salva) { snapshotMae = salva; }
+
+
     //metodos usados para verificar promoção
     virtual std::string getTipo() const = 0;
     virtual bool podeSerPromovido() const = 0;
