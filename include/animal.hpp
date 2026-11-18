@@ -3,14 +3,6 @@
 
 #include <string>
 
-struct SnapshotAncestral {
-    bool registrado = false;
-    std::string id;
-    char sexo = ' ';
-    double ultimoPesoKg = 0.0;
-    std::string statusAtual; 
-};
-
 class Animal{
 protected:
     std::string _id, estadoSaude, temperamento;
