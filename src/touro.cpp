@@ -2,9 +2,10 @@
 #include "farm.hpp"
 #include "touro.hpp"
 
-Touro::Touro(std::string id, char s, double p, int iM, int qtdF, int qtdV, double vDS) : Animal(id, s, p, iM, qtdF, qtdV) , valorDoseSemen(vDS) {}
+Touro::Touro(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais, double vDS) 
+: Animal(id, s, p, iM, qtdF, qtdV, filhosIniciais) , valorDoseSemen(vDS) {}
 
-Touro::~Touro(){delete[] idFilhos;}
+Touro::~Touro(){}
 
 //gets
 double Touro:: getValorDoseSemen()const {return valorDoseSemen;}
@@ -34,7 +35,7 @@ double Touro::calcularGastoDiario([[maybe_unused]] double precoLeite, SacaRacao*
 bool Touro::cobrirFemea(Vaca* femea) {
     if(femea==nullptr) throw std::invalid_argument("Vaca invalida para cobertura!");
     if(femea->getPrenha()) throw std::runtime_error("Esta vaca ja esta prenha!");
-    if(this->getId() == femea->getPai() || this->getMae() == femea->getId() || this->getId() == femea->getPai()|| this->getMae() == femea->getId()){
+    if((!this->getPai().empty() && this->getPai() == femea->getPai()) || (!this->getMae().empty() && this->getMae() == femea->getMae())){
         throw std::runtime_error("Cobertura bloqueada: parentesco proximo detectado!");
     } 
     qtdCoberturas++;

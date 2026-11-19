@@ -1,11 +1,10 @@
 #include <iostream>
 #include "vaca.hpp"
 
-Vaca::Vaca(std::string id, char s, double p, int iM, int qtdF, int qtdV) : Animal(id, s, p, iM, qtdF, qtdV) {}
+Vaca::Vaca(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais) 
+: Animal(id, s, p, iM, qtdF, qtdV, filhosIniciais) {}
 
-Vaca::~Vaca(){
-    delete[] idFilhos;
-}
+Vaca::~Vaca(){}
 
 //gets
 double Vaca:: getProducaoLeiteDia()const {return producaoLeiteDia;}
