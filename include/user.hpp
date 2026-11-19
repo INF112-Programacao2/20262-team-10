@@ -43,6 +43,7 @@ class User {
         double getKgRacaoAvulsa();
         double getKgRacaoRecria();
         SacaRacao** getRelatorioRacao();
+        std::string getId();
 
         // Setters
         void setPrecoLeite(double p);

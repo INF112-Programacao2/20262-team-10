@@ -37,7 +37,7 @@ public:
     std::string getIdTouroPai() const;
     std::string parir();
     void adicionarFilho(std::string idFilho);
-    void salvarEmArquivo();
+    void salvarEmArquivo() override;
     static Vaca* carregarVaca(std::string id);
 };
 

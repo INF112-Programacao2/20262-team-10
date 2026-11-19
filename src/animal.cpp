@@ -9,17 +9,17 @@ Animal::Animal(std::string id, char s, double p) : _id(id), sexo(s), peso(p) {
 }
 
 //inicializador overload 
-Animal::Animal(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais) : _id(id), sexo(s), peso(p), idadeMeses(iM), qtdFilhos(qtdF), qtdVacinas(qtdV) {
-   if(qtdFilhos >0 && filhosIniciais!=nullptr){
+Animal::Animal(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais)
+: _id(id), sexo(s), peso(p), idadeMeses(iM), qtdFilhos(qtdF), qtdVacinas(qtdV), EmQuarentena(false) {
+    if (qtdFilhos > 0 && filhosIniciais != nullptr) {
         idFilhos = new std::string[qtdFilhos];
-        for(int i=0; i<qtdFilhos; i++){
+        for (int i = 0; i < qtdFilhos; i++) {
             idFilhos[i] = filhosIniciais[i];
-        } 
-   }
-   else{
-        qtdFilhos=0;
-        idFilhos=nullptr;
-   }
+        }
+    } else {
+        qtdFilhos = 0;
+        idFilhos = nullptr;
+    }
 }
 
 //gets

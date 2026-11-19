@@ -34,6 +34,7 @@ public:
     virtual double calcularReceitaDiaria(double valorMercado) = 0;
     virtual std::string getTipoRacao() const = 0;
     virtual double calcularSacosDiarios(SacaRacao** relatorioRacao) const = 0;
+    virtual void salvarEmArquivo() = 0;
     virtual ~Animal();
 
     //gets

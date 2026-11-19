@@ -1,7 +1,12 @@
 #include "farm.hpp"
 #include "animal.hpp"
 #include "touro.hpp"
+#include "boicorte.hpp"
 #include "vaca.hpp"
+#include <fstream>
+#include <ostream>
+#include <cstdio>
+#include <filesystem>
 #include "bezerro.hpp"
 #include <iostream>
 #include <stdexcept>
@@ -34,6 +39,22 @@ Farm::~Farm() {
     }
 }
 
+static std::string formatarTextoFarmSalvar(std::string texto) {
+    std::string formatado = texto.empty() ? "_" : texto;
+    for (size_t i = 0; i < formatado.length(); i++) {
+        if (formatado[i] == ' ') formatado[i] = '_';
+    }
+    return formatado;
+}
+
+static std::string formatarTextoFarmCarregar(std::string texto) {
+    if (texto == "_") return "";
+    for (size_t i = 0; i < texto.length(); i++) {
+        if (texto[i] == '_') texto[i] = ' ';
+    }
+    return texto;
+}
+
 Animal* Farm::encontrarAnimalOpcional(const std::string& identificador) const {
     if (area == nullptr) return nullptr;
     for (int i = 0; i < qtdAreas; i++) {
@@ -47,7 +68,7 @@ Animal* Farm::encontrarAnimalOpcional(const std::string& identificador) const {
     return nullptr;
 }
 
-void Farm::adicionarArea(Area* a) {
+void Farm::adicionarArea(Area* a, bool silencioso) {
     if (a == nullptr) {
         throw std::invalid_argument("Nao e possivel adicionar uma area nula!");
     }
@@ -73,7 +94,241 @@ void Farm::adicionarArea(Area* a) {
         areaAtual = a->getNomeArea();
     }
 
-    std::cout << "Nova area --" << a->getNomeArea() << "-- foi adicionada com sucesso!" << std::endl;
+    if (!silencioso) {
+        std::cout << "Nova area --" << a->getNomeArea() << "-- foi adicionada com sucesso!" << std::endl;
+    }
+
+}
+
+void Farm::salvarFazenda() {
+    if (proprietario == nullptr) throw std::runtime_error("Proprietario invalido para salvar fazenda!");
+    if (nome.empty()) throw std::invalid_argument("Nome da fazenda invalido!");
+
+    std::filesystem::create_directories("./data");
+    std::string idDono = proprietario->getId();
+
+    // 1. Salva dados da fazenda
+    std::ifstream leituraFaz("./data/fazendas.txt");
+    std::ofstream tempFaz("./data/fazendas_temp.txt");
+    if (!tempFaz.is_open()) {
+        throw std::runtime_error("Falha ao criar arquivo temporario de fazendas.");
+    }
+
+    bool fazendaAtualizada = false;
+
+    try {
+        if (leituraFaz.is_open()) {
+            std::string donoLido, nomeLido, locLida, areaAtualLida;
+            int baixasLidas, diaLido;
+            double caixaLido, lucroLido, prejuizoLido;
+
+            while (leituraFaz >> donoLido >> nomeLido >> locLida >> areaAtualLida
+                              >> baixasLidas >> caixaLido >> lucroLido >> prejuizoLido >> diaLido) {
+                std::string donoFmt = formatarTextoFarmCarregar(donoLido);
+                std::string nomeFmt = formatarTextoFarmCarregar(nomeLido);
+
+                if (donoFmt == idDono && nomeFmt == nome) {
+                    tempFaz << formatarTextoFarmSalvar(idDono) << " "
+                            << formatarTextoFarmSalvar(nome) << " "
+                            << formatarTextoFarmSalvar(localizacao) << " "
+                            << formatarTextoFarmSalvar(areaAtual) << " "
+                            << qtdBaixas << " "
+                            << saldoCaixa << " "
+                            << lucroAcumuladoVendas << " "
+                            << prejuizoAcumuladoMortes << " "
+                            << diaAtualSimulacao << "\n";
+                    fazendaAtualizada = true;
+                } else {
+                    tempFaz << donoLido << " " << nomeLido << " " << locLida << " " << areaAtualLida << " "
+                            << baixasLidas << " " << caixaLido << " " << lucroLido << " "
+                            << prejuizoLido << " " << diaLido << "\n";
+                }
+            }
+            leituraFaz.close();
+        }
+
+        if (!fazendaAtualizada) {
+            tempFaz << formatarTextoFarmSalvar(idDono) << " "
+                    << formatarTextoFarmSalvar(nome) << " "
+                    << formatarTextoFarmSalvar(localizacao) << " "
+                    << formatarTextoFarmSalvar(areaAtual) << " "
+                    << qtdBaixas << " "
+                    << saldoCaixa << " "
+                    << lucroAcumuladoVendas << " "
+                    << prejuizoAcumuladoMortes << " "
+                    << diaAtualSimulacao << "\n";
+        }
+    } catch (...) {
+        if (leituraFaz.is_open()) leituraFaz.close();
+        tempFaz.close();
+        std::remove("./data/fazendas_temp.txt");
+        throw;
+    }
+
+    tempFaz.close();
+    std::remove("./data/fazendas.txt");
+    std::rename("./data/fazendas_temp.txt", "./data/fazendas.txt");
+
+    // 2. Salva areas da fazenda
+    std::ifstream leituraAreas("./data/areas.txt");
+    std::ofstream tempAreas("./data/areas_temp.txt");
+    if (!tempAreas.is_open()) {
+        throw std::runtime_error("Falha ao criar arquivo temporario de areas.");
+    }
+
+    try {
+        if (leituraAreas.is_open()) {
+            std::string donoLido, fazendaLida, nomeAreaLida, estadoLido;
+            double hectaresLidos;
+            int qtdAnimaisLida;
+
+            while (leituraAreas >> donoLido >> fazendaLida >> nomeAreaLida >> estadoLido >> hectaresLidos >> qtdAnimaisLida) {
+                std::string donoFmt = formatarTextoFarmCarregar(donoLido);
+                std::string fazendaFmt = formatarTextoFarmCarregar(fazendaLida);
+
+                if (donoFmt == idDono && fazendaFmt == nome) {
+                    // Pula os pares tipo/id antigos desta area para reescrever atualizados
+                    for (int i = 0; i < qtdAnimaisLida; i++) {
+                        std::string tipoSkip, idSkip;
+                        leituraAreas >> tipoSkip >> idSkip;
+                    }
+                } else {
+                    tempAreas << donoLido << " " << fazendaLida << " " << nomeAreaLida << " "
+                              << estadoLido << " " << hectaresLidos << " " << qtdAnimaisLida;
+                    for (int i = 0; i < qtdAnimaisLida; i++) {
+                        std::string tipoCopia, idCopia;
+                        leituraAreas >> tipoCopia >> idCopia;
+                        tempAreas << " " << tipoCopia << " " << idCopia;
+                    }
+                    tempAreas << "\n";
+                }
+            }
+            leituraAreas.close();
+        }
+
+        for (int i = 0; i < qtdAreas; i++) {
+            if (area[i] != nullptr) {
+                area[i]->escreverNoArquivo(tempAreas, idDono, nome);
+            }
+        }
+    } catch (...) {
+        if (leituraAreas.is_open()) leituraAreas.close();
+        tempAreas.close();
+        std::remove("./data/areas_temp.txt");
+        throw;
+    }
+
+    tempAreas.close();
+    std::remove("./data/areas.txt");
+    std::rename("./data/areas_temp.txt", "./data/areas.txt");
+
+    // 3. Salva todos os animais nas respectivas tabelas
+    for (int i = 0; i < qtdAreas; i++) {
+        if (area[i] == nullptr) continue;
+        Animal** rebanho = area[i]->getRebanho();
+        int qtd = area[i]->getQtdAnimais();
+        for (int j = 0; j < qtd; j++) {
+            if (rebanho[j] != nullptr) {
+                rebanho[j]->salvarEmArquivo();
+            }
+        }
+    }
+}
+
+Farm* Farm::carregarFazenda(User* proprietario, std::string nomeFazenda) {
+    if (proprietario == nullptr) throw std::invalid_argument("Proprietario invalido!");
+
+    std::ifstream arqFaz("./data/fazendas.txt");
+    if (!arqFaz.is_open()) {
+        return nullptr;
+    }
+
+    std::string idDono = proprietario->getId();
+    Farm* fazendaCarregada = nullptr;
+    std::string areaSelecionadaSalva = "";
+
+    try {
+        std::string donoLido, nomeLido, locLida, areaAtualLida;
+        int baixasLidas, diaLido;
+        double caixaLido, lucroLido, prejuizoLido;
+
+        while (arqFaz >> donoLido >> nomeLido >> locLida >> areaAtualLida
+                      >> baixasLidas >> caixaLido >> lucroLido >> prejuizoLido >> diaLido) {
+            std::string donoFmt = formatarTextoFarmCarregar(donoLido);
+            std::string nomeFmt = formatarTextoFarmCarregar(nomeLido);
+
+            if (donoFmt == idDono && (nomeFazenda.empty() || nomeFmt == nomeFazenda)) {
+                fazendaCarregada = new Farm(nomeFmt, formatarTextoFarmCarregar(locLida), proprietario);
+                fazendaCarregada->qtdBaixas = baixasLidas;
+                fazendaCarregada->saldoCaixa = caixaLido;
+                fazendaCarregada->lucroAcumuladoVendas = lucroLido;
+                fazendaCarregada->prejuizoAcumuladoMortes = prejuizoLido;
+                fazendaCarregada->diaAtualSimulacao = diaLido;
+                areaSelecionadaSalva = formatarTextoFarmCarregar(areaAtualLida);
+                break;
+            }
+        }
+        arqFaz.close();
+
+        if (fazendaCarregada == nullptr) {
+            return nullptr;
+        }
+
+        std::ifstream arqAreas("./data/areas.txt");
+        if (arqAreas.is_open()) {
+            std::string donoArea, fazendaArea, nomeAreaLida, estadoLido;
+            double hectaresLidos;
+            int qtdAnimaisLida;
+
+            while (arqAreas >> donoArea >> fazendaArea >> nomeAreaLida >> estadoLido >> hectaresLidos >> qtdAnimaisLida) {
+                std::string donoFmt = formatarTextoFarmCarregar(donoArea);
+                std::string fazendaFmt = formatarTextoFarmCarregar(fazendaArea);
+
+                if (donoFmt == idDono && fazendaFmt == fazendaCarregada->nome) {
+                    Area* novaArea = new Area(
+                        formatarTextoFarmCarregar(nomeAreaLida),
+                        formatarTextoFarmCarregar(estadoLido),
+                        hectaresLidos
+                    );
+
+                    for (int i = 0; i < qtdAnimaisLida; i++) {
+                        std::string tipoLido, idAnimalLido;
+                        if (!(arqAreas >> tipoLido >> idAnimalLido)) break;
+
+                        std::string tipoFmt = formatarTextoFarmCarregar(tipoLido);
+                        std::string idFmt = formatarTextoFarmCarregar(idAnimalLido);
+                        Animal* animalCarregado = nullptr;
+
+                        if (tipoFmt == "vaca") animalCarregado = Vaca::carregarVaca(idFmt);
+                        else if (tipoFmt == "touro") animalCarregado = Touro::carregarTouro(idFmt);
+                        else if (tipoFmt == "boicorte") animalCarregado = Boicorte::carregarBoicorte(idFmt);
+                        else if (tipoFmt == "bezerro") animalCarregado = Bezerro::carregarBezerro(idFmt);
+
+                        if (animalCarregado != nullptr) {
+                            novaArea->adicionarAnimal(animalCarregado, true);
+                        }
+                    }
+
+                    fazendaCarregada->adicionarArea(novaArea, true);
+                } else {
+                    for (int i = 0; i < qtdAnimaisLida; i++) {
+                        std::string tipoSkip, idSkip;
+                        arqAreas >> tipoSkip >> idSkip;
+                    }
+                }
+            }
+            arqAreas.close();
+        }
+
+        if (!areaSelecionadaSalva.empty()) {
+            fazendaCarregada->areaAtual = areaSelecionadaSalva;
+        }
+
+        return fazendaCarregada;
+    } catch (...) {
+        delete fazendaCarregada;
+        throw;
+    }
 }
 
 // double Farm::venderAnimal(string id) {

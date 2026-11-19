@@ -38,7 +38,7 @@ public:
     void realizarDesmame();
     bool atingiuIdadeAdulta() const;
     std::string recomendarDestinoMaturidade();
-    void salvarEmArquivo();
+    void salvarEmArquivo() override;
     static Bezerro* carregarBezerro(std::string id);
 };
 

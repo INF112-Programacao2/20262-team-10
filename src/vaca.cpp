@@ -182,10 +182,10 @@ Vaca* Vaca::carregarVaca(std::string id) {
     return nullptr;
 }
 
-void Vaca::imprimirFichaParcial() const{
-    std :: cout << "===Animal:" << getTipo() << "\n"
+void Vaca::imprimirFichaParcial() const {
+    std::cout << "===Animal:" << getTipo() << "\n"
     << "ID:" << _id << "\nSexo:" << sexo << "\nPeso:" << peso
-    << "\nIdade:" << idadeMeses;
+    << "\nIdade:" << idadeMeses << "\nEm Lactacao:";
     (emLactacao) ? std::cout << "SIM" : std::cout << "NAO";
-    std :: cout << "\n";
+    std::cout << "\n";
 }
