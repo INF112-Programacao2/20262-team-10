@@ -35,7 +35,7 @@ public:
     void imprimirFichaParcial()const override;
     //metodos exclusivos
     double calcularConsumoSacaDia();
-    double calcularValorVendaMercado();
+    double calcularValorVendaMercado(double precoArroba);
     bool cobrirFemea(Vaca* femea);
     void adicionarFilho(std::string idFilho);
     void salvarEmArquivo() override;

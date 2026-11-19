@@ -171,3 +171,18 @@ void Touro::imprimirFichaParcial() const{
     << "\nIdade:" << idadeMeses <<"\nValor Dose Material Genetico:"
     << valorDoseSemen << "\n";
 }
+
+double Touro::calcularValorVendaMercado(double precoArroba) {
+    if(precoArroba<0) throw std::invalid_argument("O preco do arroba nao pode ser negativo!");
+    double valorCarne = (peso/15.0) * precoArroba;
+    double bonusGenetico =0.0;
+    if(meritoGeneticoPTA>0){ //valor de referencia 150
+        bonusGenetico = meritoGeneticoPTA * 150.0;
+    }
+    double valorBancoSemen = (dosesEstoque * valorDoseSemen) * 0.7;
+
+    if (idadeMeses > 84) {
+        return valorCarne + valorBancoSemen;
+    }
+    return valorCarne + bonusGenetico + valorBancoSemen;
+}
