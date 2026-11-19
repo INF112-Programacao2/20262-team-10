@@ -1,22 +1,26 @@
 #ifndef AREA_HPP
 #define AREA_HPP
 
-#include "animal.hpp"
-using std::string;
-
 #include <iostream>
+#include <string>
+#include "animal.hpp"
+#include "sacaRacao.hpp"
+
+using std::string;
 
 class Area {
     protected:
-        std::string nome; // nome da area, ex: pasto1, pasto2, curral
-        std::string estadoPasto; // seco, ruim, intermediario, bom, muito bom
+        string nome; // nome da area, ex: pasto1, pasto2, curral
+        string estadoPasto; // seco, ruim, intermediario, bom, muito bom
         double area; // em hectares
         int capacidadeMaxima;
         Animal** rebanho;
         int qtdAtualDeAnimais;
 
+        void atualizarCapacidadeMaxima();
+
     public:
-        Area(std::string nome, std::string estadoPasto, double area);
+        Area(string nome, string estadoPasto, double area);
         ~Area();
 
         // funcoes de calculo
@@ -24,18 +28,25 @@ class Area {
 
         // manejo de animais
         void adicionarAnimal(Animal* a);
-        void removerAnimal(std::string idAnimal);
-        Animal* extrairAnimal(std::string idAnimal);
+        void removerAnimal(string idAnimal);
+        Animal* extrairAnimal(string idAnimal);
         void promoverAnimal();
-        Animal* buscarAnimal(std::string id);
-        double getGastoIndividual(std::string id, double precoLeite, SacaRacao** relatorioRacoes);
+        Animal* buscarAnimal(string id);
+        double getGastoIndividual(string id, double precoLeite, SacaRacao** relatorioRacoes);
         double getGastoDaArea(double precoLeite, SacaRacao** relatorioRacoes);
 
-        // gets
+        // getters
+        string getNomeArea();
+        string getEstadoPasto();
+        double getArea();
         int getCapacidadeMaxima();
-        std::string getNomeArea();
-        std::string getEstadoPasto();
         int getQtdAnimais();
+        Animal** getRebanho();
+
+        // setters
+        void setNomeArea(string n);
+        void setEstadoPasto(string estado);
+        void setArea(double a);
 };
 
 #endif
