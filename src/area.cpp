@@ -171,24 +171,66 @@ Animal* Area::buscarAnimal(string id) {
     return nullptr;
 }
 
+double Area::getSacoGastoIndividual(string id, SacaRacao** relatorioRacoes) {
+    Animal* animalAchado = buscarAnimal(id);
+    if (animalAchado == nullptr) throw std::runtime_error("Esse animal nao foi encontrado");
+
+    double sacos = animalAchado->calcularSacosDiarios(relatorioRacoes);
+    if (calcularLotacaoArea() > 100) {
+        return sacos * (calcularLotacaoArea() / 100.0);
+    }
+    return sacos;
+}
+
+ConsumoRacao Area::getSacosGastosNaArea(SacaRacao** relatorioRacoes) {
+    ConsumoRacao total;
+
+    for (int i = 0; i < qtdAtualDeAnimais; i++) {
+        if (rebanho[i] == nullptr) continue;
+
+        string tipoRacao = rebanho[i]->getTipoRacao();
+        double sacos = rebanho[i]->calcularSacosDiarios(relatorioRacoes);
+
+        if (tipoRacao == "Racao Engorda") total.engorda += sacos;
+        else if (tipoRacao == "Racao Avulsa") total.avulsa += sacos;
+        else if (tipoRacao == "Racao Recria") total.recria += sacos;
+    }
+
+    if (calcularLotacaoArea() > 100) {
+        double fator = calcularLotacaoArea() / 100.0;
+        total.engorda *= fator;
+        total.avulsa *= fator;
+        total.recria *= fator;
+    }
+
+    return total;
+}
+
+
+
 double Area::getGastoIndividual(string id, double precoLeite, SacaRacao** relatorioRacoes) {
     Animal* animalAchado = buscarAnimal(id);
     if (animalAchado == nullptr) throw std::runtime_error("Esse animal nao foi encontrado");
-    if (calcularLotacaoArea() > 100) 
-        return (animalAchado->calcularGastoDiario(precoLeite, relatorioRacoes)) * (calcularLotacaoArea() / 100.0);
-    else 
-        return (animalAchado->calcularGastoDiario(precoLeite, relatorioRacoes));
+
+    double gastoBase = animalAchado->calcularGastoDiario(precoLeite, relatorioRacoes);
+    if (calcularLotacaoArea() > 100 && !animalAchado->getTipoRacao().empty()) {
+        return gastoBase * (calcularLotacaoArea() / 100.0);
+    }
+    return gastoBase;
 }
 
 double Area::getGastoDaArea(double precoLeite, SacaRacao** relatorioRacoes) {
     double total = 0.0;
+    double fatorLotacao = (calcularLotacaoArea() > 100) ? (calcularLotacaoArea() / 100.0) : 1.0;
+
     for (int i = 0; i < qtdAtualDeAnimais; i++) {
         if (rebanho[i] != nullptr) {
-            total += rebanho[i]->calcularGastoDiario(precoLeite, relatorioRacoes);
+            double gastoAnimal = rebanho[i]->calcularGastoDiario(precoLeite, relatorioRacoes);
+            if (!rebanho[i]->getTipoRacao().empty()) {
+                gastoAnimal *= fatorLotacao;
+            }
+            total += gastoAnimal;
         }
-    }
-    if (calcularLotacaoArea() > 100) {
-        return total * (calcularLotacaoArea() / 100.0);
     }
     return total;
 }

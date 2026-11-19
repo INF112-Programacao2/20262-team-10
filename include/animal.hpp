@@ -32,6 +32,8 @@ public:
     Animal(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais= nullptr);
     virtual double calcularGastoDiario(double precoLeite, SacaRacao** relatorioRacao) = 0;
     virtual double calcularReceitaDiaria(double valorMercado) = 0;
+    virtual std::string getTipoRacao() const = 0;
+    virtual double calcularSacosDiarios(SacaRacao** relatorioRacao) const = 0;
     virtual ~Animal();
 
     //gets

@@ -16,6 +16,27 @@ Bezerro::Bezerro(std::string id, char s, double p, int iM, int qtdF, int qtdV, s
 
 Bezerro::~Bezerro() {}
 
+std::string Bezerro::getTipoRacao() const {
+    if (desmamado) {
+        return "Racao Recria";
+    }
+    return "";
+}
+
+double Bezerro::calcularSacosDiarios(SacaRacao** relatorioRacao) const {
+    if (!desmamado || relatorioRacao == nullptr) return 0.0;
+    double pesoSaco = 0.0;
+    for (int i = 0; i < 3; i++) {
+        if (relatorioRacao[i]->name == "Racao Recria") {
+            pesoSaco = relatorioRacao[i]->peso;
+            break;
+        }
+    }
+    if (pesoSaco <= 0.0) return 0.0;
+
+    return (peso * 0.028) / pesoSaco;
+}
+
 //gets
 double Bezerro:: getConsumoLeiteLitros()const {return consumoLeiteLitros;}
 double Bezerro:: getGanhoPesoMedioDiario()const {return ganhoPesoMedioDiario;}
@@ -47,25 +68,23 @@ bool Bezerro::atingiuIdadeAdulta() const {
         return false;
     }
 }
-
 double Bezerro::calcularGastoDiario(double precoLeite, SacaRacao** relatorioRacao) {
-    double precoRacao = 0;
-    double pesoSaco = 0;
+    if (!desmamado) { // por hora 1.5 e um custo fixo operacional puramente especulativo
+        if (precoLeite <= 0.0) return 1.5;
+        return (consumoLeiteLitros * precoLeite) + 1.5;
+    }
+
+    if (relatorioRacao == nullptr) return 0.0;
+    double precoRacao = 0.0;
     for (int i = 0; i < 3; i++) {
         if (relatorioRacao[i]->name == "Racao Recria") {
             precoRacao = relatorioRacao[i]->preco;
-            pesoSaco = relatorioRacao[i]->peso;
+            break;
         }
     }
-    if(precoLeite <=0 || precoRacao <=0) {
-        return 1.5;
-    }
-    if(!desmamado){ //por hora 1.5 é um custo fixo operacional puramente especulativo
-        return (consumoLeiteLitros * precoLeite) + 1.5;
-    }
-    else { //bezerros consomem em média 2.8% de seu peso corporal
-        return (peso * 0.028)*precoRacao/pesoSaco;
-    }
+    if (precoRacao <= 0.0) return 0.0;
+
+    return calcularSacosDiarios(relatorioRacao) * precoRacao;
 }
 
 //Agio : é o percentual de valorização extra pago por arroba (ou quilo) de um animal jovem de reposição 

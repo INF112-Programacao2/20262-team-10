@@ -20,6 +20,8 @@ public:
     //gets
     double getProducaoLeiteDia()const;
     bool getEmLactacao()const;
+    std::string getTipoRacao() const override;
+    double calcularSacosDiarios(SacaRacao** relatorioRacao) const override;
     bool getPrenha()const;
     //sets
     void setProducaoLeiteDia(double p);

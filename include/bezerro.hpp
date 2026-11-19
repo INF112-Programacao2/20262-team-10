@@ -19,6 +19,8 @@ public:
     double getConsumoLeiteLitros()const;
     double getGanhoPesoMedioDiario()const;
     int getIdadeDesmameMeses()const;
+    std::string getTipoRacao() const override;
+    double calcularSacosDiarios(SacaRacao** relatorioRacao) const override;
     bool getDesmamado()const;
     //sets
     void setConsumoLeiteLitros(double c);

@@ -21,6 +21,8 @@ public:
     double getMerito()const;
     int getDosesEstoque()const;
     int getQtdCoberturas()const;
+    std::string getTipoRacao() const override;
+    double calcularSacosDiarios(SacaRacao** relatorioRacao) const override;
     //sets
     void setValorDoseSemen(double v);
     void setMerito(double m);

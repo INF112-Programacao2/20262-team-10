@@ -22,6 +22,8 @@ public:
     void setrendimentoCarcaca(double r);
     void setmetaAbatePeso(double m);
     void setFaseEngorda(bool f);
+    std::string getTipoRacao() const override;
+    double calcularSacosDiarios(SacaRacao** relatorioRacao) const override;
     //metodos herança
     double calcularGastoDiario(double precoLeite,  SacaRacao** relatorioRacao) override;
     double calcularReceitaDiaria(double valorMercado) override;
