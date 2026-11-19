@@ -38,7 +38,7 @@ public:
     double calcularValorVendaMercado();
     bool cobrirFemea(Vaca* femea);
     void adicionarFilho(std::string idFilho);
-    void salvarEmArquivo();
+    void salvarEmArquivo() override;
     static Touro* carregarTouro(std::string id);
 };
 

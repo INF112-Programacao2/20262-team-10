@@ -46,7 +46,9 @@ class Farm {
         double comprarAnimal(Animal* animalComprado);
 
         // area-gado
-        void adicionarArea(Area* a);
+        void adicionarArea(Area* a, bool silencioso = false);
+        void salvarFazenda();
+        static Farm* carregarFazenda(User* proprietario, std::string nomeFazenda = "");
         void removerArea(Area* a);
         void selecionarArea(std::string n);
         Animal* buscarAnimalGlobal(std::string id);

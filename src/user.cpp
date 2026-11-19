@@ -413,6 +413,8 @@ double User::getKgRacaoRecria()      { return TiposRacoes[2]->peso; }
 
 SacaRacao** User::getRelatorioRacao() { return TiposRacoes; }
 
+std::string User::getId() { return idUsuario; }
+
 //setters
 // Mercado e produtos
 void User::setPrecoLeite(double p)              { precoLeite = p; }

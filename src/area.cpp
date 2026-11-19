@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdexcept>
+#include <fstream>
 #include "area.hpp"
 #include "farm.hpp"
 #include "animal.hpp"
@@ -29,6 +30,14 @@ Area::~Area() {
     delete[] rebanho;
 }
 
+static std::string formatarTextoAreaSalvar(std::string texto) {
+    std::string formatado = texto.empty() ? "_" : texto;
+    for (size_t i = 0; i < formatado.length(); i++) {
+        if (formatado[i] == ' ') formatado[i] = '_';
+    }
+    return formatado;
+}
+
 void Area::atualizarCapacidadeMaxima() {
     double cabecasPorHectare = 2.0; // padrao intermediario
     if (estadoPasto == "seco") cabecasPorHectare = 0.5;
@@ -50,7 +59,7 @@ double Area::calcularLotacaoArea() {
     return (qtdAtualDeAnimais * 100.0) / capacidadeMaxima;
 }
 
-void Area::adicionarAnimal(Animal* a) {
+void Area::adicionarAnimal(Animal* a, bool silencioso) {
     if (a == nullptr) {
         throw std::runtime_error("Nao e possivel adicionar um animal nulo.");
     }
@@ -71,12 +80,31 @@ void Area::adicionarAnimal(Animal* a) {
     delete[] rebanho;
     rebanho = rebanhoNovaAlocacao;
 
-    std::cout << "Animal de indice --" << a->getId() << "-- foi adicionado com sucesso!" << std::endl;
-    std::cout << "A quantidade atual de animais e de: " << qtdAtualDeAnimais << std::endl;
+    if (!silencioso) {
+        std::cout << "Animal de indice --" << a->getId() << "-- foi adicionado com sucesso!" << std::endl;
+        std::cout << "A quantidade atual de animais e de: " << qtdAtualDeAnimais << std::endl;
 
-    if (qtdAtualDeAnimais >= capacidadeMaxima) {
-        std::cout << "Atencao, verifique a lotacao atual do pasto, ela e atualmente de: " << calcularLotacaoArea() << "%" << std::endl;
+        if (qtdAtualDeAnimais >= capacidadeMaxima) {
+            std::cout << "Atencao, verifique a lotacao atual do pasto, ela e atualmente de: " << calcularLotacaoArea() << "%" << std::endl;
+        }
     }
+}
+
+void Area::escreverNoArquivo(std::ofstream& out, std::string idDono, std::string nomeFazenda) {
+    out << formatarTextoAreaSalvar(idDono) << " "
+        << formatarTextoAreaSalvar(nomeFazenda) << " "
+        << formatarTextoAreaSalvar(nome) << " "
+        << formatarTextoAreaSalvar(estadoPasto) << " "
+        << area << " "
+        << qtdAtualDeAnimais;
+
+    for (int i = 0; i < qtdAtualDeAnimais; i++) {
+        if (rebanho[i] != nullptr) {
+            out << " " << formatarTextoAreaSalvar(rebanho[i]->getTipo())
+                << " " << formatarTextoAreaSalvar(rebanho[i]->getId());
+        }
+    }
+    out << "\n";
 }
 
 void Area::removerAnimal(string idAnimal) {

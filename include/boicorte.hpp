@@ -34,7 +34,7 @@ public:
     bool prontoAbate();
     double calcularValorVendaMercado();
     double calcularArrobaLiquidas();
-    void salvarEmArquivo();
+    void salvarEmArquivo() override;
     static Boicorte* carregarBoicorte(std::string id);
 };
 

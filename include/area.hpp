@@ -29,7 +29,8 @@ class Area {
         ConsumoRacao getSacosGastosNaArea(SacaRacao** relatorioRacoes);
 
         // manejo de animais
-        void adicionarAnimal(Animal* a);
+        void adicionarAnimal(Animal* a, bool silencioso = false);
+        void escreverNoArquivo(std::ofstream& out, std::string idDono, std::string nomeFazenda);
         void removerAnimal(string idAnimal);
         Animal* extrairAnimal(string idAnimal);
         void promoverAnimal();
