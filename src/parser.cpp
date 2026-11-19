@@ -186,9 +186,9 @@ bool ParserPlanilha::exportarCSV(std::string arquivo, Farm& f) {
 
     out << "# RELATORIO EXPORTADO FARMMANAGER\n";
     out << "TOTAL_ANIMAIS;" << f.getQuantidadeTotalAnimais() << "\n";
-//  out << "RECEITA_DIARIA;" << f.calcularReceitaTotalDiariaFazenda() << "\n";
-//  out << "GASTO_DIARIO;" << f.calcularGastoTotalDiarioFazenda() << "\n";
-//  out << "LUCRO_DIARIO;" << f.calcularLucroGeralDiario() << "\n";
+    out << "RECEITA_DIARIA;" << f.calcularReceitaTotalDiariaFazenda() << "\n";
+    out << "GASTO_DIARIO;" << f.calcularGastoTotalDiarioFazenda() << "\n";
+    out << "LUCRO_DIARIO;" << f.calcularLucroGeralDiario() << "\n";
 
     out.close();
     return true;
