@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdexcept>
 #include "area.hpp"
 #include "farm.hpp"
 #include "animal.hpp"
@@ -14,40 +15,67 @@ Area::Area(std::string n, std::string estado, double a) {
     estadoPasto = estado;
     area = a;
     qtdAtualDeAnimais = 0;
-    //aqui separa o primeiro array de 1 posicao
-    rebanho = new Animal*[qtdAtualDeAnimais+1];
-    //sistema adequado de no max ate 3 cabecas por hec
-    //tem que fazer a logica if else para cada qualidade do pasto
-    capacidadeMaxima = area*3;
+    rebanho = new Animal*[1];
+
+    double cabecasPorHectare = 2.0; // padrao intermediario
+    if (estadoPasto == "seco") cabecasPorHectare = 0.5;
+    else if (estadoPasto == "ruim") cabecasPorHectare = 1.0;
+    else if (estadoPasto == "intermediario") cabecasPorHectare = 2.0;
+    else if (estadoPasto == "bom") cabecasPorHectare = 3.0;
+    else if (estadoPasto == "muito bom") cabecasPorHectare = 4.0;
+
+    capacidadeMaxima = static_cast<int>(area * cabecasPorHectare);
+    if (capacidadeMaxima < 1) {
+        capacidadeMaxima = 1;
+    }
+}
+
+std::string Area::getEstadoPasto() {
+    return estadoPasto;
+}
+
+double Area::calcularLotacaoArea() {
+    if (capacidadeMaxima <= 0) {
+        return 0.0;
+    }
+    return (qtdAtualDeAnimais * 100.0) / capacidadeMaxima;
+}
+
+Area::~Area() {
+    for (int i = 0; i < qtdAtualDeAnimais; i++) {
+        delete rebanho[i];
+    }
+    delete[] rebanho;
 }
 
 void Area::adicionarAnimal(Animal* a) {
-        //alocacao dinamica do novo rebanho
-        Animal** rebanhoNovaAlocacao = new Animal*[qtdAtualDeAnimais+1];
+    if (a == nullptr) {
+        throw std::runtime_error("Nao e possivel adicionar um animal nulo.");
+    }
 
-        //copiando enderecos dos animais para o novo rebanho
-        for (int i = 0; i < qtdAtualDeAnimais; i++) {
-            rebanhoNovaAlocacao[i] = rebanho[i];
-        }
+    if (buscarAnimal(a->getId()) != nullptr) {
+        throw std::runtime_error("Ja existe um animal com este ID nesta area.");
+    }
 
-        //coloca o animal na ultima posicao de index
-        rebanhoNovaAlocacao[qtdAtualDeAnimais] = a;
-        qtdAtualDeAnimais++;
+    Animal** rebanhoNovaAlocacao = new Animal*[qtdAtualDeAnimais + 1];
 
-        //deleta os enderecos antigos que faltavam o ultimo que rebanho aponta
-        delete[] rebanho;
+    for (int i = 0; i < qtdAtualDeAnimais; i++) {
+        rebanhoNovaAlocacao[i] = rebanho[i];
+    }
 
-        //agora rebanho aponta exatamente para os enderecos de todos os animais, incluindo o inserido;
-        rebanho = rebanhoNovaAlocacao;
+    rebanhoNovaAlocacao[qtdAtualDeAnimais] = a;
+    qtdAtualDeAnimais++;
 
-        std::cout << "animal de indice: --" << a->getId()  << "-- foi aidicionado com sucesso!"
-        << std::endl;
-        std::cout << "A quantidade atual de animais e de: " << qtdAtualDeAnimais << std::endl;
+    delete[] rebanho;
+    rebanho = rebanhoNovaAlocacao;
 
-        if (qtdAtualDeAnimais >= capacidadeMaxima) {
-            std::cout << "Atencao, verifique a lotacao atual do pasto, ela e atualmente de: " << calcularLotacaoArea() << "%" << std::endl;
-        }
-};
+    std::cout << "Animal de indice --" << a->getId() << "-- foi adicionado com sucesso!" << std::endl;
+    std::cout << "A quantidade atual de animais e de: " << qtdAtualDeAnimais << std::endl;
+
+    if (qtdAtualDeAnimais >= capacidadeMaxima) {
+        std::cout << "Atencao, verifique a lotacao atual do pasto, ela e atualmente de: " << calcularLotacaoArea() << "%" << std::endl;
+    }
+}
 
 void Area::removerAnimal(string idAnimal) {
     Animal* animalParaAbate = extrairAnimal(idAnimal);
@@ -146,35 +174,30 @@ int Area::getCapacidadeMaxima() {
     return capacidadeMaxima;
 }
 
-Animal* Area::buscarAnimal(string id) {
-    bool achou = false;
-    Animal* temporario = nullptr;
+Animal* Area::buscarAnimal(std::string id) {
     for (int i = 0; i < qtdAtualDeAnimais; i++) {
-        if (rebanho[i]->getId() == id) {
-            achou = true;
-            temporario = rebanho[i];
-            break;
+        if (rebanho[i] != nullptr && rebanho[i]->getId() == id) {
+            return rebanho[i];
         }
     }
-    if (achou) {
-        std::cout << "animal encontrado com sucesso" << std::endl;
-        return temporario;
-    } else {
-        return nullptr;
-    }
+    return nullptr;
 }
 
 double Area::getGastoIndividual (string id, double precoLeite, SacaRacao** relatorioRacoes) {
     Animal* animalAchado = buscarAnimal(id);
     if (animalAchado == nullptr) throw std::runtime_error("Esse animal nao foi encontrado");
-    return (animalAchado->calcularGastoDiario(precoLeite, relatorioRacoes))*(calcularLotacaoArea()/100);
+    if (calcularLotacaoArea() > 100) 
+        return (animalAchado->calcularGastoDiario(precoLeite, relatorioRacoes))*(calcularLotacaoArea()/100);
+    else 
+        return (animalAchado->calcularGastoDiario(precoLeite, relatorioRacoes));
 }
 
 double Area::getGastoDaArea(double precoLeite, SacaRacao** relatorioRacoes) {
-    double total = 0;
+    double total = 0.0;
     for (int i = 0; i < qtdAtualDeAnimais; i++) {
-        string idAnimal = rebanho[i]->getId();
-       total += getGastoIndividual(idAnimal, precoLeite, relatorioRacoes);
+        if (rebanho[i] != nullptr) {
+            total += rebanho[i]->calcularGastoDiario(precoLeite, relatorioRacoes);
+        }
     }
     return total;
 }
