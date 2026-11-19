@@ -87,7 +87,7 @@ int ParserPlanilha::importarCSV(std::string arquivo, Farm& f) {
                 int qtdVacinas = std::stoi(splitManual(linha, ';', 6));
                 double valorDoseSemen = std::stod(splitManual(linha, ';', 7));
 
-                novoAnimal = new Touro(id, sexo, peso, idadeMeses, qtdFilhos, qtdVacinas, valorDoseSemen); 
+                novoAnimal = new Touro(id, sexo, peso, idadeMeses, qtdFilhos, qtdVacinas, nullptr, valorDoseSemen); 
             } 
             else if (tipo == "BOI" || tipo == "BOICORTE") {
                 // Formato: BOICORTE;id;sexo;peso;idadeMeses;qtdFilhos;qtdVacinas[cite: 10]
@@ -114,7 +114,7 @@ int ParserPlanilha::importarCSV(std::string arquivo, Farm& f) {
                     bool desmamado = (desmStr == "1" || desmStr == "true" || desmStr == "TRUE");
 
                     novoAnimal = new Bezerro(
-                        id, sexo, peso, idadeMeses, qtdFilhos, qtdVacinas,
+                        id, sexo, peso, idadeMeses, qtdFilhos, qtdVacinas, nullptr,
                         consumoLeite, ganhoPeso, idadeDesmame, desmamado
                     ); //[cite: 9]
                 }
@@ -153,3 +153,5 @@ bool ParserPlanilha::exportarCSV(std::string arquivo, Farm& f) {
     return true;
     
 }
+
+//ATENCAO CONSTRUTOR DO ANIMAL FOI ALTERADO POR PEDIDO DE PAULO VITOR DA SILVA PEREIRA SANTOS ,FIQUE ATENTO!

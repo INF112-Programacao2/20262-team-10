@@ -85,14 +85,18 @@ void Area::promoverAnimal() { //incluir conexão com a função recomendar desti
             if(resposta=='Y' || resposta=='y'){
                 if(rebanho[i]->getSexo() == 'M'){
                     Touro* t = new Touro(rebanho[i]->getId(), rebanho[i]->getSexo(),
-                    rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), rebanho[i]->getQtdFilhos(), rebanho[i]->getQtdvacinas(), 0);
+                    rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), 0, rebanho[i]->getQtdvacinas(), nullptr, 0.0);
+                    t->setIdPai(rebanho[i]->getPai());
+                    t->setIdMae(rebanho[i]->getMae());
                     delete rebanho[i];
                     rebanho[i] = t;
                     std :: cout << "Bezerro promovido a touro com sucesso!\n";
                 }
                 if(rebanho[i]->getSexo() == 'F'){
                     Vaca* v = new Vaca(rebanho[i]->getId(), rebanho[i]->getSexo(),
-                    rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), rebanho[i]->getQtdFilhos(), rebanho[i]->getQtdvacinas());
+                    rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), 0, rebanho[i]->getQtdvacinas(), nullptr);
+                    v->setIdPai(rebanho[i]->getPai());
+                    v->setIdMae(rebanho[i]->getMae());
                     delete rebanho[i];
                     rebanho[i] = v;
                     std :: cout << "Bezerro promovido a Vaca com sucesso!\n";

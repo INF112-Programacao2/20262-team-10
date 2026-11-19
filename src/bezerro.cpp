@@ -6,7 +6,8 @@ Bezerro::Bezerro(std::string id, char s, double p) : Animal(id, s, p) {
     idadeDesmameMeses = 0;
 }
 
-Bezerro::Bezerro(std::string id, char s, double p, int iM, int qtdF, int qtdV, double cLL, double gPMD, int iDM, bool d) : Animal(id, s, p, iM, qtdF, qtdV) , consumoLeiteLitros(cLL), ganhoPesoMedioDiario(gPMD), idadeDesmameMeses(iDM), desmamado(d) {}
+Bezerro::Bezerro(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais, double cLL, double gPMD, int iDM, bool d) 
+: Animal(id, s, p, iM, qtdF, qtdV, filhosIniciais) , consumoLeiteLitros(cLL), ganhoPesoMedioDiario(gPMD), idadeDesmameMeses(iDM), desmamado(d) {}
 
 Bezerro::~Bezerro() {}
 
@@ -16,16 +17,12 @@ double Bezerro:: getGanhoPesoMedioDiario()const {return ganhoPesoMedioDiario;}
 int Bezerro:: getIdadeDesmameMeses()const {return idadeDesmameMeses;}
 bool Bezerro:: getDesmamado()const {return desmamado;}
 std::string Bezerro:: getTipo() const {return "bezerro";}
-std :: string Bezerro:: getIdPai()const{return idPai;}
-std :: string Bezerro:: getIdMae()const{return idMae;}
 bool Bezerro:: podeSerPromovido() const {if(atingiuIdadeAdulta()){return true;}return false;}
 //sets
 void Bezerro:: setConsumoLeiteLitros(double c) {consumoLeiteLitros=c;}
 void Bezerro:: setGanhoPesoMedioDiario(double g) {ganhoPesoMedioDiario=g;}
 void Bezerro:: setIdadeDesmameMeses(int i) {idadeDesmameMeses=i;}
 void Bezerro:: setDesmamado(bool d) {desmamado=d;}
-void Bezerro:: setIdPai(std::string id) {idPai = id;}
-void Bezerro:: setIdMae(std::string id) {idMae = id;}
 
 void Bezerro::realizarDesmame() {
     if(idadeMeses >= 7){

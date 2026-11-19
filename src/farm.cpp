@@ -163,6 +163,7 @@ void Farm::realizarCobertura(const std::string& idMacho, const std::string& idFe
     Vaca* vaca = dynamic_cast<Vaca*>(Femea);
     if(touro==nullptr) throw std::invalid_argument("O id do touro nao foi encontrado!");
     if(vaca==nullptr) throw std::invalid_argument("O id da vaca nao foi encontrado!");
+    touro->cobrirFemea(vaca);
 }
 
 void Farm::registrarNascimento(const std::string& idFemea, const std::string& nomeArea, std::string id, char sexo, double peso) {

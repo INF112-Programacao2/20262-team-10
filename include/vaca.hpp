@@ -12,7 +12,7 @@ private:
     std::string idTouroPai;
 public:
     //construtor animal adquirido
-    Vaca(std::string id, char s, double p, int iM, int qtdF, int qtdV);
+    Vaca(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais= nullptr);
     //metodo bezerro promovido
     //static Vaca* PromoverParaVaca(Animal *a); vou reconsiderar a implementação deste metodo 
     ~Vaca();

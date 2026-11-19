@@ -7,7 +7,18 @@ Animal::Animal(std::string id, char s, double p) : _id(id), sexo(s), peso(p) {
 }
 
 //inicializador overload 
-Animal::Animal(std::string id, char s, double p, int iM, int qtdF, int qtdV) : _id(id), sexo(s), peso(p), idadeMeses(iM), qtdFilhos(qtdF), qtdVacinas(qtdV) {}
+Animal::Animal(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais) : _id(id), sexo(s), peso(p), idadeMeses(iM), qtdFilhos(qtdF), qtdVacinas(qtdV) {
+   if(qtdFilhos >0 && filhosIniciais!=nullptr){
+        idFilhos = new std::string[qtdFilhos];
+        for(int i=0; i<qtdFilhos; i++){
+            idFilhos[i] = filhosIniciais[i];
+        } 
+   }
+   else{
+        qtdFilhos=0;
+        idFilhos=nullptr;
+   }
+}
 
 //gets
 std::string Animal::getId() const{return _id;}
@@ -23,6 +34,10 @@ std::string Animal::getPai() const{return idPai;}
 std::string Animal::getMae() const{return idMae;}
 std::string* Animal::getFilhos() const{return idFilhos;}
 
+//sets
+void Animal::setIdPai(std::string idPai) {this->idPai = idPai;}
+void Animal::setIdMae(std::string idMae) {this->idMae = idMae;}
+
 Animal::~Animal() {
-    
+    delete[] idFilhos;
 }

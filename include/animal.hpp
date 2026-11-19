@@ -23,7 +23,7 @@ protected:
 public:
     Animal(std::string id, char s, double p);
     //inicializador sobrecarga ex: animal comprado
-    Animal(std::string id, char s, double p, int iM, int qtdF, int qtdV);
+    Animal(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais= nullptr);
     virtual double calcularGastoDiario(double precoLeite, SacaRacao** relatorioRacao) = 0;
     virtual double calcularReceitaDiaria(double valorMercado) = 0;
     virtual ~Animal();
@@ -41,6 +41,10 @@ public:
     std::string getPai() const;
     std::string getMae() const;
     std::string* getFilhos() const;
+
+    //sets
+    void setIdPai(std::string idPai);
+    void setIdMae(std::string idMae);
 
     //get do snapshot
     SnapshotAncestral getSnapshotPai() const { return snapshotPai; }
