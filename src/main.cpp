@@ -179,10 +179,7 @@ int main() {
                 if (carregado == nullptr) {
                     std::cout << "Animal nao encontrado." << std::endl;
                 } else {
-                    std::cout << "Animal carregado: " << carregado->getTipo()
-                              << " | ID: " << carregado->getId()
-                              << " | Sexo: " << carregado->getSexo()
-                              << " | Peso: " << carregado->getPeso() << " kg" << std::endl;
+                    carregado->imprimirFichaParcial();
                     delete carregado;
                 }
             } else if (opcao == 0) {

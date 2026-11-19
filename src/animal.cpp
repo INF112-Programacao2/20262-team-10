@@ -1,5 +1,6 @@
 #include "animal.hpp"
 #include <fstream>
+#include <iostream>
 
 Animal::Animal(std::string id, char s, double p) : _id(id), sexo(s), peso(p) {
     idadeMeses = qtdFilhos = qtdVacinas = 0;
@@ -184,3 +185,4 @@ bool Animal::carregarBase(std::ifstream& in) {
 
     return true;
 }
+

@@ -190,3 +190,11 @@ Bezerro* Bezerro::carregarBezerro(std::string id) {
     delete bezerroCarregado;
     return nullptr;
 }
+
+void Bezerro::imprimirFichaParcial() const{
+    std :: cout << "===Animal:" << getTipo() << "\n"
+    << "ID:" << _id << "\nSexo:" << sexo << "\nPeso:" << peso 
+    << "\nIdade:" << idadeMeses << "\nDesmamado:";
+    (desmamado) ? std::cout << "SIM" : std::cout << "NAO";
+    std::cout <<"\n";
+}

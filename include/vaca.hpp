@@ -31,6 +31,7 @@ public:
     double calcularReceitaDiaria(double valorMercado) override;
     std::string getTipo() const override;
     bool podeSerPromovido() const override;
+    void imprimirFichaParcial()const override;
     //demais metodos
     bool emprenhar(Touro* macho);
     std::string getIdTouroPai() const;

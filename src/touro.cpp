@@ -162,3 +162,10 @@ Touro* Touro::carregarTouro(std::string id) {
     delete touroCarregado;
     return nullptr;
 }
+
+void Touro::imprimirFichaParcial() const{
+    std :: cout << "===Animal:" << getTipo() << "\n"
+    << "ID:" << _id << "\nSexo:" << sexo << "\nPeso:" << peso
+    << "\nIdade:" << idadeMeses <<"\nValor Dose Material Genetico:"
+    << valorDoseSemen << "\n";
+}

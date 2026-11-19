@@ -32,9 +32,9 @@ public:
     double calcularReceitaDiaria(double precoLeite) override;
     std::string getTipo() const override;
     bool podeSerPromovido() const override;
+    void imprimirFichaParcial()const override;
     //metodos exclusivos
     double calcularValorVendaMercado();
-    void imprimirFichaCompleta() const;
     void realizarDesmame();
     bool atingiuIdadeAdulta() const;
     std::string recomendarDestinoMaturidade();

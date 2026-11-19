@@ -151,3 +151,11 @@ Boicorte* Boicorte::carregarBoicorte(std::string id) {
     delete boiCarregado;
     return nullptr;
 }
+
+void Boicorte::imprimirFichaParcial() const{
+    std :: cout << "===Animal:" << getTipo() << "\n"
+    << "ID:" << _id << "\nSexo:" << sexo << "\nPeso:" << peso
+    << "\nIdade:" << idadeMeses << "\nFase de engorda:";
+    (faseEngorda) ? std::cout << "SIM" : std::cout <<"NAO";
+    std::cout <<"\n";
+}

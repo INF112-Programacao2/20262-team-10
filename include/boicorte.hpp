@@ -29,11 +29,11 @@ public:
     double calcularReceitaDiaria(double valorMercado) override;
     std::string getTipo() const override;
     bool podeSerPromovido() const override;
+    void imprimirFichaParcial()const override;
     //metodos exclusivos
     bool prontoAbate();
     double calcularValorVendaMercado();
     double calcularArrobaLiquidas();
-    void imprimirFichaCompleta()const;
     void salvarEmArquivo();
     static Boicorte* carregarBoicorte(std::string id);
 };

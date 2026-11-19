@@ -62,10 +62,12 @@ public:
     void setSnapshotPai(const SnapshotAncestral& salva) { snapshotPai = salva; }
     void setSnapshotMae(const SnapshotAncestral& salva) { snapshotMae = salva; }
 
-
     //metodos usados para verificar promoção
     virtual std::string getTipo() const = 0;
     virtual bool podeSerPromovido() const = 0;
+
+    //demais metodos
+    virtual void imprimirFichaParcial()const = 0;
 };
 
 #endif
