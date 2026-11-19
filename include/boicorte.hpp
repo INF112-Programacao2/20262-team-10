@@ -7,6 +7,7 @@ private:
     double rendimentoCarcaca;
     double metaAbatePeso;
     bool faseEngorda;
+    Boicorte();
 public:
     //construtor para animal adquirido
     Boicorte(std::string id, char s, double p, int iM, int qtdF, int qtdV);
@@ -31,6 +32,8 @@ public:
     double calcularValorVendaMercado();
     double calcularArrobaLiquidas();
     void imprimirFichaCompleta()const;
+    void salvarEmArquivo();
+    static Boicorte* carregarBoicorte(std::string id);
 };
 
 #endif

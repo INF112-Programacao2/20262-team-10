@@ -1,8 +1,11 @@
 #include <iostream>
+#include <fstream>
 #include "vaca.hpp"
 
 Vaca::Vaca(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais) 
-: Animal(id, s, p, iM, qtdF, qtdV, filhosIniciais) {}
+: Animal(id, s, p, iM, qtdF, qtdV, filhosIniciais), producaoLeiteDia(0.0), emLactacao(false), prenha(false) {}
+
+Vaca::Vaca() : Animal(), producaoLeiteDia(0.0), emLactacao(false), prenha(false) {}
 
 Vaca::~Vaca(){}
 
@@ -68,4 +71,77 @@ void Vaca::adicionarFilho(std::string idFilho){
     qtdFilhos++;
 }
 
+void Vaca::salvarEmArquivo() {
+    if(_id.empty()) throw std::invalid_argument("ID da vaca invalido!");
+
+    std::ifstream leitura("./data/vacas.txt");
+    std::ofstream temp("./data/vacas_temp.txt");
+    if(!temp.is_open()) {
+        throw std::runtime_error("Falha ao criar arquivo temporario de vacas.");
+    }
+
+    bool vacaAtualizada = false;
+
+    try {
+        if(leitura.is_open()) {
+            Vaca aux;
+            while(aux.carregarBase(leitura) &&
+                  (leitura >> aux.producaoLeiteDia >> aux.emLactacao >> aux.prenha >> aux.idTouroPai)) {
+                aux.idTouroPai = formatarTextoCarregar(aux.idTouroPai);
+                if(aux._id == _id) {
+                    escreverBase(temp);
+                    temp << " " << producaoLeiteDia << " " << emLactacao << " " << prenha << " " << formatarTextoSalvar(idTouroPai) << "\n";
+                    vacaAtualizada = true;
+                } else {
+                    aux.escreverBase(temp);
+                    temp << " " << aux.producaoLeiteDia << " " << aux.emLactacao << " " << aux.prenha << " " << formatarTextoSalvar(aux.idTouroPai) << "\n";
+                }
+            }
+            leitura.close();
+        }
+
+        if(!vacaAtualizada) {
+            escreverBase(temp);
+            temp << " " << producaoLeiteDia << " " << emLactacao << " " << prenha << " " << formatarTextoSalvar(idTouroPai) << "\n";
+        }
+    } catch (...) {
+        if(leitura.is_open()) leitura.close();
+        temp.close();
+        std::remove("./data/vacas_temp.txt");
+        throw;
+    }
+
+    temp.close();
+    std::remove("./data/vacas.txt");
+    std::rename("./data/vacas_temp.txt", "./data/vacas.txt");
+}
+
+Vaca* Vaca::carregarVaca(std::string id) {
+    if(id.empty()) throw std::invalid_argument("ID invalido para carregar vaca!");
+
+    std::ifstream arquivo("./data/vacas.txt");
+    if(!arquivo.is_open()) {
+        return nullptr;
+    }
+
+    Vaca* vacaCarregada = new Vaca();
+    try {
+        while(vacaCarregada->carregarBase(arquivo) &&
+              (arquivo >> vacaCarregada->producaoLeiteDia >> vacaCarregada->emLactacao >> vacaCarregada->prenha >> vacaCarregada->idTouroPai)) {
+            vacaCarregada->idTouroPai = vacaCarregada->formatarTextoCarregar(vacaCarregada->idTouroPai);
+            if(vacaCarregada->_id == id) {
+                arquivo.close();
+                return vacaCarregada;
+            }
+        }
+    } catch (...) {
+        arquivo.close();
+        delete vacaCarregada;
+        throw;
+    }
+
+    arquivo.close();
+    delete vacaCarregada;
+    return nullptr;
+}
 

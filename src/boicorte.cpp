@@ -1,8 +1,11 @@
 #include <iostream>
+#include <fstream>
 #include "boicorte.hpp"
 
-Boicorte::Boicorte(std::string id, char s, double p, int iM, int qtdF, int qtdV) : Animal(id, s, p, iM, qtdF, qtdV) {} 
+Boicorte::Boicorte(std::string id, char s, double p, int iM, int qtdF, int qtdV) 
+: Animal(id, s, p, iM, qtdF, qtdV), rendimentoCarcaca(0.0), metaAbatePeso(0.0), faseEngorda(false) {}
 
+Boicorte::Boicorte() : Animal(), rendimentoCarcaca(0.0), metaAbatePeso(0.0), faseEngorda(false) {}
 Boicorte::~Boicorte() {}
 
 //gets
@@ -43,4 +46,76 @@ double Boicorte::calcularReceitaDiaria(double valorMercado) { //precoLeite alias
         return ((rendimentoCarcaca*1.4)/15) * valorMercado;
     }
     return ((rendimentoCarcaca*0.7)/15) * valorMercado;
+}
+
+void Boicorte::salvarEmArquivo() {
+    if(_id.empty()) throw std::invalid_argument("ID do boi de corte invalido!");
+
+    std::ifstream leitura("./data/boicortes.txt");
+    std::ofstream temp("./data/boicortes_temp.txt");
+    if(!temp.is_open()) {
+        throw std::runtime_error("Falha ao criar arquivo temporario de bois de corte.");
+    }
+
+    bool boiAtualizado = false;
+
+    try {
+        if(leitura.is_open()) {
+            Boicorte aux;
+            while(aux.carregarBase(leitura) &&
+                  (leitura >> aux.rendimentoCarcaca >> aux.metaAbatePeso >> aux.faseEngorda)) {
+                if(aux._id == _id) {
+                    escreverBase(temp);
+                    temp << " " << rendimentoCarcaca << " " << metaAbatePeso << " " << faseEngorda << "\n";
+                    boiAtualizado = true;
+                } else {
+                    aux.escreverBase(temp);
+                    temp << " " << aux.rendimentoCarcaca << " " << aux.metaAbatePeso << " " << aux.faseEngorda << "\n";
+                }
+            }
+            leitura.close();
+        }
+
+        if(!boiAtualizado) {
+            escreverBase(temp);
+            temp << " " << rendimentoCarcaca << " " << metaAbatePeso << " " << faseEngorda << "\n";
+        }
+    } catch (...) {
+        if(leitura.is_open()) leitura.close();
+        temp.close();
+        std::remove("./data/boicortes_temp.txt");
+        throw;
+    }
+
+    temp.close();
+    std::remove("./data/boicortes.txt");
+    std::rename("./data/boicortes_temp.txt", "./data/boicortes.txt");
+}
+
+Boicorte* Boicorte::carregarBoicorte(std::string id) {
+    if(id.empty()) throw std::invalid_argument("ID invalido para carregar boi de corte!");
+
+    std::ifstream arquivo("./data/boicortes.txt");
+    if(!arquivo.is_open()) {
+        return nullptr;
+    }
+
+    Boicorte* boiCarregado = new Boicorte();
+    try {
+        while(boiCarregado->carregarBase(arquivo) &&
+              (arquivo >> boiCarregado->rendimentoCarcaca >> boiCarregado->metaAbatePeso >> boiCarregado->faseEngorda)) {
+            if(boiCarregado->_id == id) {
+                arquivo.close();
+                return boiCarregado;
+            }
+        }
+    } catch (...) {
+        arquivo.close();
+        delete boiCarregado;
+        throw;
+    }
+
+    arquivo.close();
+    delete boiCarregado;
+    return nullptr;
 }

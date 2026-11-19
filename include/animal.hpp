@@ -20,6 +20,12 @@ protected:
     SnapshotAncestral snapshotPai;
     SnapshotAncestral snapshotMae;
 
+    Animal();
+    std::string formatarTextoSalvar(std::string texto) const;
+    std::string formatarTextoCarregar(std::string texto) const;
+    void escreverBase(std::ofstream& out) const;
+    bool carregarBase(std::ifstream& in);
+
 public:
     Animal(std::string id, char s, double p);
     //inicializador sobrecarga ex: animal comprado

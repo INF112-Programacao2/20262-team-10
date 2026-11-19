@@ -10,6 +10,7 @@ private:
     double producaoLeiteDia;
     bool emLactacao, prenha;
     std::string idTouroPai;
+    Vaca();
 public:
     //construtor animal adquirido
     Vaca(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais= nullptr);
@@ -33,6 +34,8 @@ public:
     std::string getIdTouroPai() const;
     std::string parir();
     void adicionarFilho(std::string idFilho);
+    void salvarEmArquivo();
+    static Vaca* carregarVaca(std::string id);
 };
 
 #endif

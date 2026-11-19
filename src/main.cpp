@@ -1,6 +1,10 @@
 #include <iostream>
 #include <string>
 #include "user.hpp"
+#include "vaca.hpp"
+#include "touro.hpp"
+#include "bezerro.hpp"
+#include "boicorte.hpp"
 
 void exibirDadosUsuario(User* u) {
     std::cout << "\nCotacao Dolar: R$ " << u->getCotacaoDolar() << std::endl;
@@ -63,6 +67,8 @@ int main() {
         std::cout << "\n1 - Ver cotacoes e racoes" << std::endl;
         std::cout << "2 - Alterar preco do leite e racao" << std::endl;
         std::cout << "3 - Atualizar cotacoes" << std::endl;
+        std::cout << "4 - Cadastrar e salvar animal (teste)" << std::endl;
+        std::cout << "5 - Carregar animal por ID" << std::endl;
         std::cout << "0 - Salvar e sair" << std::endl;
         std::cout << "Opcao: ";
         std::cin >> opcao;
@@ -83,11 +89,68 @@ int main() {
                 std::cout << "Dados atualizados!" << std::endl;
             } else if (opcao == 3) {
                 usuarioAtual->atualizarCotacoes();
+            } else if (opcao == 4) {
+                int tipo;
+                std::string id;
+                char sexo;
+                double peso;
+
+                std::cout << "Tipo (1-Bezerro, 2-Vaca, 3-Touro, 4-Boicorte): ";
+                std::cin >> tipo;
+                std::cout << "ID: ";
+                std::cin >> id;
+                std::cout << "Sexo (M/F): ";
+                std::cin >> sexo;
+                std::cout << "Peso: ";
+                std::cin >> peso;
+
+                if (tipo == 1) {
+                    Bezerro* b = new Bezerro(id, sexo, peso);
+                    b->salvarEmArquivo();
+                    delete b;
+                } else if (tipo == 2) {
+                    Vaca* v = new Vaca(id, sexo, peso, 24, 0, 0);
+                    v->salvarEmArquivo();
+                    delete v;
+                } else if (tipo == 3) {
+                    Touro* t = new Touro(id, sexo, peso, 36, 0, 0, nullptr, 50.0);
+                    t->salvarEmArquivo();
+                    delete t;
+                } else if (tipo == 4) {
+                    Boicorte* bc = new Boicorte(id, sexo, peso, 20, 0, 0);
+                    bc->salvarEmArquivo();
+                    delete bc;
+                }
+                std::cout << "Animal salvo com sucesso!" << std::endl;
+            } else if (opcao == 5) {
+                int tipo;
+                std::string id;
+
+                std::cout << "Tipo (1-Bezerro, 2-Vaca, 3-Touro, 4-Boicorte): ";
+                std::cin >> tipo;
+                std::cout << "ID do animal: ";
+                std::cin >> id;
+
+                Animal* carregado = nullptr;
+                if (tipo == 1) carregado = Bezerro::carregarBezerro(id);
+                else if (tipo == 2) carregado = Vaca::carregarVaca(id);
+                else if (tipo == 3) carregado = Touro::carregarTouro(id);
+                else if (tipo == 4) carregado = Boicorte::carregarBoicorte(id);
+
+                if (carregado == nullptr) {
+                    std::cout << "Animal nao encontrado." << std::endl;
+                } else {
+                    std::cout << "Animal carregado: " << carregado->getTipo()
+                              << " | ID: " << carregado->getId()
+                              << " | Sexo: " << carregado->getSexo()
+                              << " | Peso: " << carregado->getPeso() << " kg" << std::endl;
+                    delete carregado;
+                }
             } else if (opcao == 0) {
                 usuarioAtual->salvarEmArquivo();
                 std::cout << "Saindo..." << std::endl;
             }
-        } catch (std::runtime_error& e) {
+        } catch (const std::exception& e) {
             std::cout << "Erro: " << e.what() << std::endl;
         }
     }

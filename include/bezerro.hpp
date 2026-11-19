@@ -8,6 +8,7 @@ protected:
     double ganhoPesoMedioDiario;
     int idadeDesmameMeses;
     bool desmamado;
+    Bezerro();
 public:
     //construtor para animal nascido
     Bezerro(std::string id, char s, double p);
@@ -35,6 +36,8 @@ public:
     void realizarDesmame();
     bool atingiuIdadeAdulta() const;
     std::string recomendarDestinoMaturidade();
+    void salvarEmArquivo();
+    static Bezerro* carregarBezerro(std::string id);
 };
 
 #endif

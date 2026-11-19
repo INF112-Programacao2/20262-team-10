@@ -1,10 +1,15 @@
 #include <iostream>
+#include <fstream>
 #include "bezerro.hpp"
 
 Bezerro::Bezerro(std::string id, char s, double p) : Animal(id, s, p) {
+    consumoLeiteLitros = 0.0;
+    ganhoPesoMedioDiario = 0.0;
     desmamado = false;
     idadeDesmameMeses = 0;
 }
+
+Bezerro::Bezerro() : Animal(), consumoLeiteLitros(0.0), ganhoPesoMedioDiario(0.0), idadeDesmameMeses(0), desmamado(false) {}
 
 Bezerro::Bezerro(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais, double cLL, double gPMD, int iDM, bool d) 
 : Animal(id, s, p, iM, qtdF, qtdV, filhosIniciais) , consumoLeiteLitros(cLL), ganhoPesoMedioDiario(gPMD), idadeDesmameMeses(iDM), desmamado(d) {}
@@ -70,5 +75,77 @@ double Bezerro::calcularReceitaDiaria(double valorMercado) {
     if(idadeMeses<=8) (sexo=='M') ? agio=0.22 : agio=0.15;
     else if(idadeMeses<=14) (sexo=='M') ? agio=0.12 : agio=0.08;
     return (ganhoPesoMedioDiario/30.0) * valorMercado * (1+agio);
+}
+
+void Bezerro::salvarEmArquivo() {
+    if(_id.empty()) throw std::invalid_argument("ID do bezerro invalido!");
+
+    std::ifstream leitura("./data/bezerros.txt");
+    std::ofstream temp("./data/bezerros_temp.txt");
+    if(!temp.is_open()) {
+        throw std::runtime_error("Falha ao criar arquivo temporario de bezerros.");
+    }
+
+    bool bezerroAtualizado = false;
+
+    try {
+        if(leitura.is_open()) {
+            Bezerro aux;
+            while(aux.carregarBase(leitura) &&
+                  (leitura >> aux.consumoLeiteLitros >> aux.ganhoPesoMedioDiario >> aux.idadeDesmameMeses >> aux.desmamado)) {
+                if(aux._id == _id) {
+                    escreverBase(temp);
+                    temp << " " << consumoLeiteLitros << " " << ganhoPesoMedioDiario << " " << idadeDesmameMeses << " " << desmamado << "\n";
+                    bezerroAtualizado = true;
+                } else {
+                    aux.escreverBase(temp);
+                    temp << " " << aux.consumoLeiteLitros << " " << aux.ganhoPesoMedioDiario << " " << aux.idadeDesmameMeses << " " << aux.desmamado << "\n";
+                }
+            }
+            leitura.close();
+        }
+
+        if(!bezerroAtualizado) {
+            escreverBase(temp);
+            temp << " " << consumoLeiteLitros << " " << ganhoPesoMedioDiario << " " << idadeDesmameMeses << " " << desmamado << "\n";
+        }
+    } catch (...) {
+        if(leitura.is_open()) leitura.close();
+        temp.close();
+        std::remove("./data/bezerros_temp.txt");
+        throw;
+    }
+
+    temp.close();
+    std::remove("./data/bezerros.txt");
+    std::rename("./data/bezerros_temp.txt", "./data/bezerros.txt");
+}
+
+Bezerro* Bezerro::carregarBezerro(std::string id) {
+    if(id.empty()) throw std::invalid_argument("ID invalido para carregar bezerro!");
+
+    std::ifstream arquivo("./data/bezerros.txt");
+    if(!arquivo.is_open()) {
+        return nullptr;
+    }
+
+    Bezerro* bezerroCarregado = new Bezerro();
+    try {
+        while(bezerroCarregado->carregarBase(arquivo) &&
+              (arquivo >> bezerroCarregado->consumoLeiteLitros >> bezerroCarregado->ganhoPesoMedioDiario >> bezerroCarregado->idadeDesmameMeses >> bezerroCarregado->desmamado)) {
+            if(bezerroCarregado->_id == id) {
+                arquivo.close();
+                return bezerroCarregado;
+            }
+        }
+    } catch (...) {
+        arquivo.close();
+        delete bezerroCarregado;
+        throw;
+    }
+
+    arquivo.close();
+    delete bezerroCarregado;
+    return nullptr;
 }
     

@@ -1,9 +1,12 @@
 #include <iostream>
+#include <fstream>
 #include "farm.hpp"
 #include "touro.hpp"
 
 Touro::Touro(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais, double vDS) 
-: Animal(id, s, p, iM, qtdF, qtdV, filhosIniciais) , valorDoseSemen(vDS) {}
+: Animal(id, s, p, iM, qtdF, qtdV, filhosIniciais), valorDoseSemen(vDS), meritoGeneticoPTA(0.0), dosesEstoque(0), qtdCoberturas(0) {}
+
+Touro::Touro() : Animal(), valorDoseSemen(0.0), meritoGeneticoPTA(0.0), dosesEstoque(0), qtdCoberturas(0) {}
 
 Touro::~Touro(){}
 
@@ -55,3 +58,75 @@ void Touro::adicionarFilho(std::string idFilho) {
 }
 
 double Touro::calcularReceitaDiaria(double valorMercado) {return 0.0;}
+
+void Touro::salvarEmArquivo() {
+    if(_id.empty()) throw std::invalid_argument("ID do touro invalido!");
+
+    std::ifstream leitura("./data/touros.txt");
+    std::ofstream temp("./data/touros_temp.txt");
+    if(!temp.is_open()) {
+        throw std::runtime_error("Falha ao criar arquivo temporario de touros.");
+    }
+
+    bool touroAtualizado = false;
+
+    try {
+        if(leitura.is_open()) {
+            Touro aux;
+            while(aux.carregarBase(leitura) &&
+                  (leitura >> aux.valorDoseSemen >> aux.meritoGeneticoPTA >> aux.dosesEstoque >> aux.qtdCoberturas)) {
+                if(aux._id == _id) {
+                    escreverBase(temp);
+                    temp << " " << valorDoseSemen << " " << meritoGeneticoPTA << " " << dosesEstoque << " " << qtdCoberturas << "\n";
+                    touroAtualizado = true;
+                } else {
+                    aux.escreverBase(temp);
+                    temp << " " << aux.valorDoseSemen << " " << aux.meritoGeneticoPTA << " " << aux.dosesEstoque << " " << aux.qtdCoberturas << "\n";
+                }
+            }
+            leitura.close();
+        }
+
+        if(!touroAtualizado) {
+            escreverBase(temp);
+            temp << " " << valorDoseSemen << " " << meritoGeneticoPTA << " " << dosesEstoque << " " << qtdCoberturas << "\n";
+        }
+    } catch (...) {
+        if(leitura.is_open()) leitura.close();
+        temp.close();
+        std::remove("./data/touros_temp.txt");
+        throw;
+    }
+
+    temp.close();
+    std::remove("./data/touros.txt");
+    std::rename("./data/touros_temp.txt", "./data/touros.txt");
+}
+
+Touro* Touro::carregarTouro(std::string id) {
+    if(id.empty()) throw std::invalid_argument("ID invalido para carregar touro!");
+
+    std::ifstream arquivo("./data/touros.txt");
+    if(!arquivo.is_open()) {
+        return nullptr;
+    }
+
+    Touro* touroCarregado = new Touro();
+    try {
+        while(touroCarregado->carregarBase(arquivo) &&
+              (arquivo >> touroCarregado->valorDoseSemen >> touroCarregado->meritoGeneticoPTA >> touroCarregado->dosesEstoque >> touroCarregado->qtdCoberturas)) {
+            if(touroCarregado->_id == id) {
+                arquivo.close();
+                return touroCarregado;
+            }
+        }
+    } catch (...) {
+        arquivo.close();
+        delete touroCarregado;
+        throw;
+    }
+
+    arquivo.close();
+    delete touroCarregado;
+    return nullptr;
+}

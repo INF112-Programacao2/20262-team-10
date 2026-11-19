@@ -9,6 +9,7 @@ class Touro : public Animal{
 private:
     double valorDoseSemen, meritoGeneticoPTA;
     int dosesEstoque, qtdCoberturas;
+    Touro();
 public:
     //construtor animal adquirido
     Touro(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais, double vDS);
@@ -36,6 +37,8 @@ public:
     void imprimirFichaCompleta() const;
     bool cobrirFemea(Vaca* femea);
     void adicionarFilho(std::string idFilho);
+    void salvarEmArquivo();
+    static Touro* carregarTouro(std::string id);
 };
 
 #endif
