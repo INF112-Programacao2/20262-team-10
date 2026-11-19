@@ -9,4 +9,10 @@ struct SacaRacao {
     double preco;
 };
 
+struct ConsumoRacao {
+    double engorda = 0.0;
+    double avulsa = 0.0;
+    double recria = 0.0;
+};
+
 #endif

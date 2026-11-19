@@ -21,18 +21,15 @@ void Vaca:: setProducaoLeiteDia(double p) {producaoLeiteDia=p;}
 void Vaca:: setEmLactacao(bool l) {emLactacao=l;}
 
 double Vaca::calcularGastoDiario([[maybe_unused]] double precoLeite, SacaRacao** relatorioRacao) {
-    double precoRacao = 0;
-    double pesoSaco = 0;
+    if (relatorioRacao == nullptr) return 0.0;
+    double precoRacao = 0.0;
     for (int i = 0; i < 3; i++) {
         if (relatorioRacao[i]->name == "Racao Avulsa") {
             precoRacao = relatorioRacao[i]->preco;
-            pesoSaco = relatorioRacao[i]->peso;
+            break;
         }
     }
-    if(emLactacao){ //vacas em lactacao tem consumo por kilo corporal mais elevado
-        return (peso * 0.028)*precoRacao/pesoSaco;
-    }
-    return (peso*0.022)*precoRacao/pesoSaco;
+    return calcularSacosDiarios(relatorioRacao) * precoRacao;
 }
 
 double Vaca::calcularReceitaDiaria(double valorMercado) {
@@ -40,6 +37,27 @@ double Vaca::calcularReceitaDiaria(double valorMercado) {
         return producaoLeiteDia * valorMercado;
     }
     return 0.0;
+}
+
+std::string Vaca::getTipoRacao() const {
+    return "Racao Avulsa";
+}
+
+double Vaca::calcularSacosDiarios(SacaRacao** relatorioRacao) const {
+    if (relatorioRacao == nullptr) return 0.0;
+    double pesoSaco = 0.0;
+    for (int i = 0; i < 3; i++) {
+        if (relatorioRacao[i]->name == "Racao Avulsa") {
+            pesoSaco = relatorioRacao[i]->peso;
+            break;
+        }
+    }
+    if (pesoSaco <= 0.0) return 0.0;
+
+    if (emLactacao) { // vacas em lactacao tem consumo por kilo corporal mais elevado
+        return (peso * 0.028) / pesoSaco;
+    }
+    return (peso * 0.022) / pesoSaco;
 }
 
 bool Vaca::emprenhar(Touro* macho) {

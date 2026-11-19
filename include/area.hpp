@@ -25,6 +25,8 @@ class Area {
 
         // funcoes de calculo
         double calcularLotacaoArea();
+        double getSacoGastoIndividual(string id, SacaRacao** relatorioRacoes);
+        ConsumoRacao getSacosGastosNaArea(SacaRacao** relatorioRacoes);
 
         // manejo de animais
         void adicionarAnimal(Animal* a);

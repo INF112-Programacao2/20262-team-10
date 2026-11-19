@@ -23,16 +23,34 @@ void Touro:: setMerito(double m) {meritoGeneticoPTA=m;}
 void Touro:: setDosesEstoque(int d) {dosesEstoque=d;}
 void Touro:: setQtdCoberturas(int q) {qtdCoberturas=q;}
 
+std::string Touro::getTipoRacao() const {
+    return "Racao Avulsa";
+}
+
+double Touro::calcularSacosDiarios(SacaRacao** relatorioRacao) const {
+    if (relatorioRacao == nullptr) return 0.0;
+    double pesoSaco = 0.0;
+    for (int i = 0; i < 3; i++) {
+        if (relatorioRacao[i]->name == "Racao Avulsa") {
+            pesoSaco = relatorioRacao[i]->peso;
+            break;
+        }
+    }
+    if (pesoSaco <= 0.0) return 0.0;
+
+    return (peso * 0.020) / pesoSaco;
+}
+
 double Touro::calcularGastoDiario([[maybe_unused]] double precoLeite, SacaRacao** relatorioRacao) {
-    double precoRacao = 0;
-    double pesoSaco = 0;
+    if (relatorioRacao == nullptr) return 0.0;
+    double precoRacao = 0.0;
     for (int i = 0; i < 3; i++) {
         if (relatorioRacao[i]->name == "Racao Avulsa") {
             precoRacao = relatorioRacao[i]->preco;
-            pesoSaco = relatorioRacao[i]->peso;
+            break;
         }
     }
-    return (peso * 0.020)*precoRacao/pesoSaco;
+    return calcularSacosDiarios(relatorioRacao) * precoRacao;
 }
 
 bool Touro::cobrirFemea(Vaca* femea) {

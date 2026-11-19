@@ -19,26 +19,42 @@ void Boicorte:: setrendimentoCarcaca(double r) {rendimentoCarcaca=r;}
 void Boicorte:: setmetaAbatePeso(double m) {metaAbatePeso=m;}
 void Boicorte:: setFaseEngorda(bool f) {faseEngorda=f;}
 
-double Boicorte::calcularGastoDiario([[maybe_unused]] double precoLeite, SacaRacao** relatorioRacao) {
-    double precoRacaoEngorda = 0;
-    double pesoSacoEngorda = 0;
-    double precoRacaoAvulsa = 0;
-    double pesoSacoAvulsa = 0;
+std::string Boicorte::getTipoRacao() const {
+    if (faseEngorda) {
+        return "Racao Engorda";
+    }
+    return "Racao Avulsa";
+}
+
+double Boicorte::calcularSacosDiarios(SacaRacao** relatorioRacao) const {
+    if (relatorioRacao == nullptr) return 0.0;
+    std::string tipo = getTipoRacao();
+    double pesoSaco = 0.0;
     for (int i = 0; i < 3; i++) {
-    if (relatorioRacao[i]->name == "Racao Engorda") {
-            precoRacaoEngorda = relatorioRacao[i]->preco;
-            pesoSacoEngorda = relatorioRacao[i]->peso;
-        }
-    if (relatorioRacao[i]->name == "Racao Avulsa") {
-            precoRacaoAvulsa = relatorioRacao[i]->preco;
-            pesoSacoAvulsa = relatorioRacao[i]->peso;
+        if (relatorioRacao[i]->name == tipo) {
+            pesoSaco = relatorioRacao[i]->peso;
+            break;
         }
     }
-    
-    if(faseEngorda){
-        return (peso * 0.026) * precoRacaoEngorda/pesoSacoEngorda;
+    if (pesoSaco <= 0.0) return 0.0;
+
+    if (faseEngorda) {
+        return (peso * 0.026) / pesoSaco;
     }
-    return (peso * 0.021)*precoRacaoAvulsa/pesoSacoAvulsa;
+    return (peso * 0.021) / pesoSaco;
+}
+
+double Boicorte::calcularGastoDiario([[maybe_unused]] double precoLeite, SacaRacao** relatorioRacao) {
+    if (relatorioRacao == nullptr) return 0.0;
+    std::string tipo = getTipoRacao();
+    double precoRacao = 0.0;
+    for (int i = 0; i < 3; i++) {
+        if (relatorioRacao[i]->name == tipo) {
+            precoRacao = relatorioRacao[i]->preco;
+            break;
+        }
+    }
+    return calcularSacosDiarios(relatorioRacao) * precoRacao;
 }
 
 double Boicorte::calcularReceitaDiaria(double valorMercado) { //precoLeite alias precoArroba
