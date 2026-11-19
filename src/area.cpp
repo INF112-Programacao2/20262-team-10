@@ -157,11 +157,33 @@ void Area::promoverAnimal() {
     }
 }
 
+ContagemRebanho Area::getContagemPorTipo() const {
+    ContagemRebanho contagem;
+    for (int i = 0; i < qtdAtualDeAnimais; i++) {
+        if (rebanho[i] == nullptr) continue;
+
+        std::string tipo = rebanho[i]->getTipo();
+        if (tipo == "vaca") contagem.vacas++;
+        else if (tipo == "touro") contagem.touros++;
+        else if (tipo == "boicorte") contagem.boisCorte++;
+        else if (tipo == "bezerro") contagem.bezerros++;
+    }
+    return contagem;
+}
+
 void Area::listarAnimais() const {
     if (qtdAtualDeAnimais == 0) {
         std::cout << "Nenhum animal nesta area.\n";
         return;
     }
+
+    ContagemRebanho c = getContagemPorTipo();
+    std::cout << "Total na area: " << qtdAtualDeAnimais
+              << " (Vacas: " << c.vacas
+              << " | Touros: " << c.touros
+              << " | Bois de corte: " << c.boisCorte
+              << " | Bezerros: " << c.bezerros << ")\n\n";
+
     for (int i = 0; i < qtdAtualDeAnimais; i++) {
         if (rebanho[i] != nullptr) {
             rebanho[i]->imprimirFichaParcial();

@@ -8,6 +8,17 @@
 
 using std::string;
 
+struct ContagemRebanho {
+    int vacas = 0;
+    int touros = 0;
+    int boisCorte = 0;
+    int bezerros = 0;
+
+    int total() const {
+        return vacas + touros + boisCorte + bezerros;
+    }
+};
+
 class Area {
     protected:
         string nome; // nome da area, ex: pasto1, pasto2, curral
@@ -22,6 +33,7 @@ class Area {
     public:
         Area(string nome, string estadoPasto, double area);
         ~Area();
+        // Dentro de public na class Area:
 
         // funcoes de calculo
         double calcularLotacaoArea();
@@ -46,6 +58,7 @@ class Area {
         int getCapacidadeMaxima();
         int getQtdAnimais();
         Animal** getRebanho();
+        ContagemRebanho getContagemPorTipo() const;
 
         // setters
         void setNomeArea(string n);

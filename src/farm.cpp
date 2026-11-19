@@ -31,6 +31,93 @@ Farm::Farm(std::string s, std::string l, User* propr) {
     proximoIdAnimal = 1;
 }
 
+ContagemRebanho Farm::getContagemGlobalPorTipo() const {
+    ContagemRebanho total;
+    for (int i = 0; i < qtdAreas; i++) {
+        if (area[i] != nullptr) {
+            ContagemRebanho parcial = area[i]->getContagemPorTipo();
+            total.vacas += parcial.vacas;
+            total.touros += parcial.touros;
+            total.boisCorte += parcial.boisCorte;
+            total.bezerros += parcial.bezerros;
+        }
+    }
+    return total;
+}
+
+void Farm::listarAreas() const {
+    if (qtdAreas == 0) {
+        std::cout << "Nenhuma area cadastrada na fazenda.\n";
+        return;
+    }
+    for (int i = 0; i < qtdAreas; i++) {
+        if (area[i] == nullptr) continue;
+        ContagemRebanho c = area[i]->getContagemPorTipo();
+        std::cout << "  - " << area[i]->getNomeArea()
+                  << " | Pasto: " << area[i]->getEstadoPasto()
+                  << " | " << area[i]->getArea() << " ha"
+                  << " | Lotacao: " << area[i]->getQtdAnimais()
+                  << "/" << area[i]->getCapacidadeMaxima()
+                  << " (" << area[i]->calcularLotacaoArea() << "%)"
+                  << (area[i]->getNomeArea() == areaAtual ? " [ATUAL]" : "")
+                  << "\n    Rebanho -> Vacas: " << c.vacas
+                  << " | Touros: " << c.touros
+                  << " | Bois de corte: " << c.boisCorte
+                  << " | Bezerros: " << c.bezerros << "\n";
+    }
+}
+
+void Farm::emitirRelatorioOperacional() {
+    double gastoDia = calcularGastoTotalDiarioFazenda();
+    double receitaDia = calcularReceitaTotalDiariaFazenda();
+    double lucroDia = calcularLucroGeralDiario();
+    ConsumoRacao sacosDia = calcularConsumoRacaoDiarioFazenda();
+    ContagemRebanho rebanho = getContagemGlobalPorTipo();
+
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout << "\n--- Relatorio da Fazenda: " << nome << " (" << localizacao << ") ---" << std::endl;
+    std::cout << "Dia atual: " << diaAtualSimulacao << std::endl;
+    std::cout << "Total de animais: " << rebanho.total()
+              << " (Vacas: " << rebanho.vacas
+              << " | Touros: " << rebanho.touros
+              << " | Bois de corte: " << rebanho.boisCorte
+              << " | Bezerros: " << rebanho.bezerros << ")" << std::endl;
+
+    std::cout << "\nFinanceiro diario:" << std::endl;
+    std::cout << "  Receita: R$ " << receitaDia << std::endl;
+    std::cout << "  Gasto:   R$ " << gastoDia << std::endl;
+    std::cout << "  Lucro:   R$ " << lucroDia << std::endl;
+
+    std::cout << "\nConsumo de racao (diario / estimativa 30 dias):" << std::endl;
+    std::cout << "  Engorda: " << sacosDia.engorda << " sacos/dia (" << sacosDia.engorda * 30.0 << " sacos/mes)" << std::endl;
+    std::cout << "  Avulsa:  " << sacosDia.avulsa << " sacos/dia (" << sacosDia.avulsa * 30.0 << " sacos/mes)" << std::endl;
+    std::cout << "  Recria:  " << sacosDia.recria << " sacos/dia (" << sacosDia.recria * 30.0 << " sacos/mes)" << std::endl;
+}
+
+void Farm::emitirRelatorioBreakEvenEVendas() {
+    double lucroDia = calcularLucroGeralDiario();
+
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout << "\n--- Caixa e Break-Even ---" << std::endl;
+    std::cout << "  Saldo em caixa: R$ " << saldoCaixa << std::endl;
+    std::cout << "  Total em vendas: R$ " << lucroAcumuladoVendas << std::endl;
+    std::cout << "  Prejuizo acumulado: R$ " << prejuizoAcumuladoMortes << std::endl;
+    std::cout << "  Lucro por dia: R$ " << lucroDia << std::endl;
+
+    if (saldoCaixa >= 0.0) {
+        std::cout << "Situacao: Caixa positivo, ponto de equilibrio ja atingido." << std::endl;
+    } else if (lucroDia > 0.0) {
+        double razao = (-saldoCaixa) / lucroDia;
+        int dias = (int)razao;
+        if (razao > dias) {
+            dias++;
+        }
+        std::cout << "Situacao: Faltam " << dias << " dias no ritmo atual para empatar o caixa." << std::endl;
+    } else {
+        std::cout << "Situacao: Operacao diaria no prejuizo, nao tem como empatar o caixa assim." << std::endl;
+    }
+}
+
 Farm::~Farm() {
     if (area != nullptr) {
         for (int i = 0; i < qtdAreas; i++) {
@@ -438,24 +525,6 @@ Area* Farm::buscarArea(const std::string& nomeArea) const {
         }
     }
     return nullptr;
-}
-
-void Farm::listarAreas() const {
-    if (qtdAreas == 0) {
-        std::cout << "Nenhuma area cadastrada na fazenda.\n";
-        return;
-    }
-    for (int i = 0; i < qtdAreas; i++) {
-        if (area[i] == nullptr) continue;
-        std::cout << "  - " << area[i]->getNomeArea()
-                  << " | Pasto: " << area[i]->getEstadoPasto()
-                  << " | " << area[i]->getArea() << " ha"
-                  << " | Animais: " << area[i]->getQtdAnimais()
-                  << "/" << area[i]->getCapacidadeMaxima()
-                  << " (" << area[i]->calcularLotacaoArea() << "%)"
-                  << (area[i]->getNomeArea() == areaAtual ? " [ATUAL]" : "")
-                  << "\n";
-    }
 }
 
 std::string Farm::getAreaAtual() const {
