@@ -4,18 +4,47 @@
 #include "vaca.hpp"
 #include "bezerro.hpp"
 #include <iostream>
+#include <stdexcept>
 
 Farm::Farm(std::string s, std::string l, User* propr) {
+    if (propr == nullptr) {
+        throw std::invalid_argument("Proprietario da fazenda invalido!");
+    }
     nome = s;
     localizacao = l;
-    qtdAreas = 0;
+    areaAtual = "";
     proprietario = propr;
     area = nullptr;
-    areaAtual = "";
+    qtdAreas = 0;
+
+    qtdTotalDeAnimais = 0;
+    qtdBaixas = 0;
+    saldoCaixa = 0.0;
+    lucroAcumuladoVendas = 0.0;
+    prejuizoAcumuladoMortes = 0.0;
+    diaAtualSimulacao = 0;
 }
 
 Farm::~Farm() {
-    
+    if (area != nullptr) {
+        for (int i = 0; i < qtdAreas; i++) {
+            delete area[i];
+        }
+        delete[] area;
+    }
+}
+
+Animal* Farm::encontrarAnimalOpcional(const std::string& identificador) const {
+    if (area == nullptr) return nullptr;
+    for (int i = 0; i < qtdAreas; i++) {
+        if (area[i] != nullptr) {
+            Animal* encontrado = area[i]->buscarAnimal(identificador);
+            if (encontrado != nullptr) {
+                return encontrado;
+            }
+        }
+    }
+    return nullptr;
 }
 
 void Farm::adicionarArea(Area* a) {

@@ -1,15 +1,16 @@
 #ifndef FARM_HPP
 #define FARM_HPP
 
+#include <iostream>
+#include <string>
 #include "animal.hpp"
 #include "area.hpp"
 #include "user.hpp"
-#include <iostream>
-
+#include "sacaRacao.hpp"
 
 class Farm {
     private:
-        //identificadores
+        // identificadores
         std::string nome;
         std::string localizacao;
         std::string areaAtual;
@@ -17,45 +18,47 @@ class Farm {
         Area** area;
         int qtdAreas;
 
-        //resumo de dados
+        // resumo de dados
         int qtdTotalDeAnimais;
         int qtdBaixas;
 
-        //setor financeiro
+        // setor financeiro
         double saldoCaixa;
-
         double lucroAcumuladoVendas;
         double prejuizoAcumuladoMortes;
 
-        //simulacao futuras
+        // simulacao futura
         int diaAtualSimulacao;
-    
+
+        Animal* encontrarAnimalOpcional(const std::string& identificador) const;
+
     public:
         Farm(std::string nome, std::string localizacao, User* proprietario);
         ~Farm();
 
-        //financeiro precisa de funcoes de Rhuan
+        // financeiro e consumo
         double calcularGastoTotalDiarioFazenda();
         double calcularReceitaTotalDiariaFazenda();
         double calcularLucroGeralDiario();
+        ConsumoRacao calcularConsumoRacaoDiarioFazenda();
         void emitirRelatorioBreakEvenEVendas();
-        //vai passar o valor de venda? Precisa calcular quanto vai vende?
-        double venderAnimal(std::string id); //precisa funcoes de valor do animal -> genetico + valor investido (Rhuan vai implementar)
+        double venderAnimal(std::string id);
         double comprarAnimal(Animal* animalComprado);
 
-        //area-gado
+        // area-gado
         void adicionarArea(Area* a);
         void removerArea(Area* a);
-        void selecionarArea(std::string n); //passa o nome da area que deseja selecionar
-        Animal* buscarAnimalGlobal(string id);
-        bool transferirAnimalEntreAreas(string idAnimal, string nomeArea);
-        bool transferirLoteDeAnimaisEntreAreas(string* ids, int qtdAnimais, string areaDestino);
+        void selecionarArea(std::string n);
+        Animal* buscarAnimalGlobal(std::string id);
+        bool transferirAnimalEntreAreas(std::string idAnimal, std::string nomeArea);
+        bool transferirLoteDeAnimaisEntreAreas(std::string* ids, int qtdAnimais, std::string areaDestino);
         bool enviarParaQuarentena(std::string motivo, std::string idAnimal, int dias);
         bool liberarDaQuarentena(std::string idAnimal);
         void promoverAnimalGlobal();
         void realizarCobertura(const std::string& idMacho, const std::string& idFemea);
         void registrarNascimento(const std::string& idFemea, const std::string& nomeArea, std::string id, char sexo, double peso);
-        //gets
+
+        // gets
         int getQuantidadeTotalAnimais();
         std::string getAreaAtual() const;
 };
