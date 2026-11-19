@@ -11,6 +11,7 @@ class User {
         std::string senhaHash;
         std::string nomeProprietario;
         std::string perfilAcesso;
+        User();
         
         SacaRacao** TiposRacoes;
         double cotacaoDolar;
@@ -27,33 +28,33 @@ class User {
         void atualizarCotacaoArroba();
         void atualizarCotacoes();
         void salvarEmArquivo();
-        
+        std::string gerarProximoId();
+        static User* carregarUsuario(std::string login, std::string senha);
 
+        // Getters
         double getPrecoLeite();
         double getCotacaoDolar();
         double getCotacaoArrobaBoi();
+        double getCotacaoArrobaVaca();
         double getSacaRacaoEngorda();
-        double getSacaRacaoRecria();
         double getSacaRacaoAvulsa();
+        double getSacaRacaoRecria();
         double getKgRacaoEngorda();
         double getKgRacaoAvulsa();
         double getKgRacaoRecria();
-        double getCotacaoArrobaVaca();
+        SacaRacao** getRelatorioRacao();
 
-        //sets
+        // Setters
+        void setPrecoLeite(double p);
+        void setCotacaoDolar(double p);
         void setPrecoArrobaBoi(double p);
         void setPrecoArrobaVaca(double p);
-        void setCotacaoDolar(double p);
-        void setPrecoLeite(double p);
-        void setPrecoSacaRacaoRecria(double p);
         void setPrecoSacaRacaoEngorda(double p);
         void setPrecoSacaRacaoAvulsa(double p);
-
-        void setKgRacaoRecria(double p);
-        void setKgRacaoAvulsa(double p);
+        void setPrecoSacaRacaoRecria(double p);
         void setKgRacaoEngorda(double p);
-
-        SacaRacao** getRelatorioRacao();
+        void setKgRacaoAvulsa(double p);
+        void setKgRacaoRecria(double p);
 };
 
 #endif 

@@ -5,18 +5,51 @@
 #include <cstdlib>
 #include <nlohmann/json.hpp>
 #include <iostream>
+#include <cstdio>
+
 // https://github.com/nlohmann/json
 //precisa instalar para importar a bbt -> vamos pegar cotacao 
 //do dolar daqui
 //eu estou usando um metodo mais rustico para pegar a cotacao delegado ao proprio sistema
 //talvez precisemos alterar para funcionar em outros sistemas
 
+std::string User::gerarProximoId() {
+    std::ifstream arquivo("./data/usuarios.txt");
+    if (!arquivo.is_open()) {
+        return "1";
+    }
+
+    int maiorId = 0;
+    int idLido;
+    std::string loginLido, hashLido, nomeLido, perfilLido;
+    double dolarLido, leiteLido, boiLido, vacaLido;
+    double pesoEngorda, precoEngorda, pesoAvulsa, precoAvulsa, pesoRecria, precoRecria;
+
+    while (arquivo >> idLido >> loginLido >> hashLido >> nomeLido >> perfilLido
+                   >> dolarLido >> leiteLido >> boiLido >> vacaLido
+                   >> pesoEngorda >> precoEngorda >> pesoAvulsa >> precoAvulsa >> pesoRecria >> precoRecria) {
+        if (idLido > maiorId) {
+            maiorId = idLido;
+        }
+    }
+
+    arquivo.close();
+    return std::to_string(maiorId + 1);
+}
+
+std::string User::gerarHash(const std::string& senha) {
+    std::hash<std::string> hasher;
+    return std::to_string(hasher(senha));
+}
+
 User::User(std::string log, std::string senha, 
     std::string nom, std::string perfil) {
     login = log;
     senhaHash = gerarHash(senha);
-    idUsuario = nom;
+    nomeProprietario = nom;
+    precoArrobaVaca = 320.55;
     perfilAcesso = perfil;
+    idUsuario = gerarProximoId();
     cotacaoDolar = -2; //valor para nao quebrar
     precoArrobaBoi = 384.55;
     precoLeite = 2.88;
@@ -49,36 +82,176 @@ User::~User() {
 }
 
 void User::salvarEmArquivo() {
-    std::ofstream arquivo("./data/usuarios.txt", std::ios::app);
-    if (!arquivo.is_open()) {
-        throw std::runtime_error("Falha ao abrir ou criar o arquivo");
-    }
-    arquivo << login << " " << senhaHash << " " << idUsuario << " " << perfilAcesso << "\n";
-    arquivo.close();
-}
+    std::string loginFormatado = login.empty() ? "_" : login;
+    std::string nomeFormatado = nomeProprietario.empty() ? "_" : nomeProprietario;
+    std::string perfilFormatado = perfilAcesso.empty() ? "_" : perfilAcesso;
 
-std::string User::gerarHash(const std::string& senha) {
-    std::hash<std::string> hasher;
-    return std::to_string(hasher(senha));
+    for (size_t i = 0; i < loginFormatado.length(); i++) {
+        if (loginFormatado[i] == ' ') loginFormatado[i] = '_';
+    }
+    for (size_t i = 0; i < nomeFormatado.length(); i++) {
+        if (nomeFormatado[i] == ' ') nomeFormatado[i] = '_';
+    }
+    for (size_t i = 0; i < perfilFormatado.length(); i++) {
+        if (perfilFormatado[i] == ' ') perfilFormatado[i] = '_';
+    }
+
+    std::ifstream leitura("./data/usuarios.txt");
+    std::ofstream temp("./data/usuarios_temp.txt");
+    if (!temp.is_open()) {
+        throw std::runtime_error("Falha ao criar arquivo temporario de usuarios.");
+    }
+
+    bool usuarioAtualizado = false;
+
+    if (leitura.is_open()) {
+        std::string idLido, loginLido, hashLido, nomeLido, perfilLido;
+        double dolarLido, leiteLido, boiLido, vacaLido;
+        double pesoEngorda, precoEngorda, pesoAvulsa, precoAvulsa, pesoRecria, precoRecria;
+
+        while (leitura >> idLido >> loginLido >> hashLido >> nomeLido >> perfilLido
+                       >> dolarLido >> leiteLido >> boiLido >> vacaLido
+                       >> pesoEngorda >> precoEngorda >> pesoAvulsa >> precoAvulsa >> pesoRecria >> precoRecria) {
+            if (loginLido == loginFormatado && idLido != idUsuario) {
+                leitura.close();
+                temp.close();
+                std::remove("./data/usuarios_temp.txt");
+                throw std::runtime_error("Este login ja esta em uso.");
+            }
+
+            if (idLido == idUsuario) {
+                temp << idUsuario << " " << loginFormatado << " " << senhaHash << " " << nomeFormatado << " " << perfilFormatado << " "
+                     << cotacaoDolar << " " << precoLeite << " " << precoArrobaBoi << " " << precoArrobaVaca << " "
+                     << TiposRacoes[0]->peso << " " << TiposRacoes[0]->preco << " "
+                     << TiposRacoes[1]->peso << " " << TiposRacoes[1]->preco << " "
+                     << TiposRacoes[2]->peso << " " << TiposRacoes[2]->preco << "\n";
+                usuarioAtualizado = true;
+            } else {
+                temp << idLido << " " << loginLido << " " << hashLido << " " << nomeLido << " " << perfilLido << " "
+                     << dolarLido << " " << leiteLido << " " << boiLido << " " << vacaLido << " "
+                     << pesoEngorda << " " << precoEngorda << " "
+                     << pesoAvulsa << " " << precoAvulsa << " "
+                     << pesoRecria << " " << precoRecria << "\n";
+            }
+        }
+        leitura.close();
+    }
+
+    if (!usuarioAtualizado) {
+        temp << idUsuario << " " << loginFormatado << " " << senhaHash << " " << nomeFormatado << " " << perfilFormatado << " "
+             << cotacaoDolar << " " << precoLeite << " " << precoArrobaBoi << " " << precoArrobaVaca << " "
+             << TiposRacoes[0]->peso << " " << TiposRacoes[0]->preco << " "
+             << TiposRacoes[1]->peso << " " << TiposRacoes[1]->preco << " "
+             << TiposRacoes[2]->peso << " " << TiposRacoes[2]->preco << "\n";
+    }
+
+    temp.close();
+    std::remove("./data/usuarios.txt");
+    std::rename("./data/usuarios_temp.txt", "./data/usuarios.txt");
 }
 
 bool User::autenticar(std::string login, std::string senha) {
     std::ifstream arquivo("./data/usuarios.txt");
-    bool achouUsuario = false;
-    std::string hash_digitado;
-    if(!arquivo.is_open()) {
-        throw std::runtime_error("Nao foi possivel encontrar um arquivo com dados usuario");
+    if (!arquivo.is_open()) {
+        return false;
     }
-    std::string login_arquivo, hash_arquivo, id_arquivo, perfil_arquivo;
-    while (arquivo >> login_arquivo >> hash_arquivo >> id_arquivo >> perfil_arquivo) {
-        if (login_arquivo == login) {
-            hash_digitado = gerarHash(senha);
-            achouUsuario = true;
-            break;
+
+    std::string loginFormatado = login.empty() ? "_" : login;
+    for (size_t i = 0; i < loginFormatado.length(); i++) {
+        if (loginFormatado[i] == ' ') loginFormatado[i] = '_';
+    }
+
+    std::string hashDigitado = gerarHash(senha);
+    std::string idLido, loginLido, hashLido, nomeLido, perfilLido;
+    double dolarLido, leiteLido, boiLido, vacaLido;
+    double pesoEngorda, precoEngorda, pesoAvulsa, precoAvulsa, pesoRecria, precoRecria;
+
+    while (arquivo >> idLido >> loginLido >> hashLido >> nomeLido >> perfilLido
+                   >> dolarLido >> leiteLido >> boiLido >> vacaLido
+                   >> pesoEngorda >> precoEngorda >> pesoAvulsa >> precoAvulsa >> pesoRecria >> precoRecria) {
+        if (loginLido == loginFormatado) {
+            arquivo.close();
+            return hashLido == hashDigitado;
         }
     }
+
     arquivo.close();
-    if (!achouUsuario) throw std::runtime_error("Usuario ou senha invalidos"); else return hash_arquivo == hash_digitado;
+    return false;
+}
+
+User::User() {
+    TiposRacoes = new SacaRacao*[3];
+    for (int i = 0; i < 3; i++) {
+        TiposRacoes[i] = new SacaRacao();
+    }
+    TiposRacoes[0]->name = "Racao Engorda";
+    TiposRacoes[1]->name = "Racao Avulsa";
+    TiposRacoes[2]->name = "Racao Recria";
+}
+
+User* User::carregarUsuario(std::string login, std::string senha) {
+    std::ifstream arquivo("./data/usuarios.txt");
+    if (!arquivo.is_open()) {
+        return nullptr;
+    }
+
+    std::string loginFormatado = login.empty() ? "_" : login;
+    for (size_t i = 0; i < loginFormatado.length(); i++) {
+        if (loginFormatado[i] == ' ') loginFormatado[i] = '_';
+    }
+
+    std::string hashDigitado = gerarHash(senha);
+    std::string idLido, loginLido, hashLido, nomeLido, perfilLido;
+    double dolarLido, leiteLido, boiLido, vacaLido;
+    double pesoEngorda, precoEngorda, pesoAvulsa, precoAvulsa, pesoRecria, precoRecria;
+
+    while (arquivo >> idLido >> loginLido >> hashLido >> nomeLido >> perfilLido
+                   >> dolarLido >> leiteLido >> boiLido >> vacaLido
+                   >> pesoEngorda >> precoEngorda >> pesoAvulsa >> precoAvulsa >> pesoRecria >> precoRecria) {
+        if (loginLido == loginFormatado) {
+            arquivo.close();
+            if (hashLido != hashDigitado) {
+                return nullptr;
+            }
+
+            if (loginLido == "_") loginLido = "";
+            if (nomeLido == "_") nomeLido = "";
+            if (perfilLido == "_") perfilLido = "";
+
+            for (size_t i = 0; i < loginLido.length(); i++) {
+                if (loginLido[i] == '_') loginLido[i] = ' ';
+            }
+            for (size_t i = 0; i < nomeLido.length(); i++) {
+                if (nomeLido[i] == '_') nomeLido[i] = ' ';
+            }
+            for (size_t i = 0; i < perfilLido.length(); i++) {
+                if (perfilLido[i] == '_') perfilLido[i] = ' ';
+            }
+
+            User* usuarioCarregado = new User();
+            usuarioCarregado->idUsuario = idLido;
+            usuarioCarregado->login = loginLido;
+            usuarioCarregado->senhaHash = hashLido;
+            usuarioCarregado->nomeProprietario = nomeLido;
+            usuarioCarregado->perfilAcesso = perfilLido;
+            usuarioCarregado->cotacaoDolar = dolarLido;
+            usuarioCarregado->precoLeite = leiteLido;
+            usuarioCarregado->precoArrobaBoi = boiLido;
+            usuarioCarregado->precoArrobaVaca = vacaLido;
+
+            usuarioCarregado->TiposRacoes[0]->peso = pesoEngorda;
+            usuarioCarregado->TiposRacoes[0]->preco = precoEngorda;
+            usuarioCarregado->TiposRacoes[1]->peso = pesoAvulsa;
+            usuarioCarregado->TiposRacoes[1]->preco = precoAvulsa;
+            usuarioCarregado->TiposRacoes[2]->peso = pesoRecria;
+            usuarioCarregado->TiposRacoes[2]->preco = precoRecria;
+
+            return usuarioCarregado;
+        }
+    }
+
+    arquivo.close();
+    return nullptr;
 }
 
 void User::atualizarCotacaoDolar() {
@@ -206,88 +379,40 @@ void User::atualizarCotacoes() {
     std::cin >> TiposRacoes[0]->peso >> TiposRacoes[1]->peso >> TiposRacoes[2]->peso;
     std::cout << "Qual o preco de cada saca de racao? Preencha na ordem -> Engorda - Avulsa - Recriacao: ";
     std::cin >> TiposRacoes[0]->preco >> TiposRacoes[1]->preco >> TiposRacoes[2]->preco;
+    salvarEmArquivo();
 }
 
-double User::getCotacaoDolar() {
-    return cotacaoDolar;
-};
+//getters
+double User::getPrecoLeite()         { return precoLeite; }
+double User::getCotacaoDolar()       { return cotacaoDolar; }
+double User::getCotacaoArrobaBoi()   { return precoArrobaBoi; }
+double User::getCotacaoArrobaVaca()  { return precoArrobaVaca; }
 
-double User::getCotacaoArrobaBoi() {
-    return precoArrobaBoi;
-}
+// Preço das sacas de ração
+double User::getSacaRacaoEngorda()   { return TiposRacoes[0]->preco; }
+double User::getSacaRacaoAvulsa()    { return TiposRacoes[1]->preco; }
+double User::getSacaRacaoRecria()    { return TiposRacoes[2]->preco; }
 
-double User::getPrecoLeite() {
-    return precoLeite;
-}
+// Peso (kg) das sacas de ração
+double User::getKgRacaoEngorda()     { return TiposRacoes[0]->peso; }
+double User::getKgRacaoAvulsa()      { return TiposRacoes[1]->peso; }
+double User::getKgRacaoRecria()      { return TiposRacoes[2]->peso; }
 
-double User::getKgRacaoAvulsa() {
-    return TiposRacoes[1]->peso;
-}
+SacaRacao** User::getRelatorioRacao() { return TiposRacoes; }
 
-double User::getKgRacaoEngorda() {
-    return TiposRacoes[0]->peso;
-}
+//setters
+// Mercado e produtos
+void User::setPrecoLeite(double p)              { precoLeite = p; }
+void User::setCotacaoDolar(double p)            { cotacaoDolar = p; }
+void User::setPrecoArrobaBoi(double p)          { precoArrobaBoi = p; }
+void User::setPrecoArrobaVaca(double p)         { precoArrobaVaca = p; }
 
-double User::getKgRacaoRecria() {
-    return TiposRacoes[2]->peso;
-}
+// Preço das sacas de ração
+void User::setPrecoSacaRacaoEngorda(double p)   { TiposRacoes[0]->preco = p; }
+void User::setPrecoSacaRacaoAvulsa(double p)    { TiposRacoes[1]->preco = p; }
+void User::setPrecoSacaRacaoRecria(double p)    { TiposRacoes[2]->preco = p; }
 
-double User::getSacaRacaoAvulsa() {
-    return TiposRacoes[1]->preco;
-}
-
-double User::getSacaRacaoEngorda() {
-    return TiposRacoes[0]->preco;
-}
-
-double User::getSacaRacaoRecria() {
-    return TiposRacoes[2]->preco;
-}
-
-double User::getCotacaoArrobaVaca() {
-    return precoArrobaVaca;
-}
-
-void User::setPrecoLeite (double p) {
-    precoLeite = p;
-};
-
-void User::setPrecoArrobaBoi(double p) {
-    precoArrobaBoi = p;
-};
-
-void User::setPrecoArrobaVaca(double p) {
-    precoArrobaVaca = p;
-};
-
-void User::setCotacaoDolar(double p) {
-    cotacaoDolar = p;
-};
-
-void User::setPrecoSacaRacaoAvulsa(double p) {
-    TiposRacoes[1]->preco = p;
-};
-
-void User::setPrecoSacaRacaoEngorda(double p) {
-    TiposRacoes[0]->preco = p;
-};
-
-void User::setPrecoSacaRacaoRecria(double p) {
-    TiposRacoes[2]->preco = p;
-};
-
-void User::setKgRacaoAvulsa(double p) {
-    TiposRacoes[1]->peso = p;
-};
-
-void User::setKgRacaoEngorda(double p) {
-    TiposRacoes[0]->peso = p;
-};
-
-void User::setKgRacaoRecria(double p) {
-    TiposRacoes[2]->peso = p;
-};
-
-SacaRacao** User::getRelatorioRacao() {
-    return TiposRacoes;
-}
+// Peso (kg) das sacas de ração
+void User::setKgRacaoEngorda(double p)          { TiposRacoes[0]->peso = p; }
+void User::setKgRacaoAvulsa(double p)           { TiposRacoes[1]->peso = p; }
+void User::setKgRacaoRecria(double p)           { TiposRacoes[2]->peso = p; }
