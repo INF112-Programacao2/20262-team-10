@@ -181,4 +181,3 @@ Vaca* Vaca::carregarVaca(std::string id) {
     delete vacaCarregada;
     return nullptr;
 }
-
