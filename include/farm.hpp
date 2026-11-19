@@ -57,7 +57,7 @@ class Farm {
         void promoverAnimalGlobal();
         void realizarCobertura(const std::string& idMacho, const std::string& idFemea);
         void registrarNascimento(const std::string& idFemea, const std::string& nomeArea, std::string id, char sexo, double peso);
-
+        void calcularMeritoTouro(std::string idTouro);
         // gets
         int getQuantidadeTotalAnimais();
 };

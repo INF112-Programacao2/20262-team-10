@@ -4,7 +4,6 @@
 #include "vaca.hpp"
 
 class Vaca;
-
 class Touro : public Animal{
 private:
     double valorDoseSemen, meritoGeneticoPTA;

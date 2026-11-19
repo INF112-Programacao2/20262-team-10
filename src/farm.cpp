@@ -354,3 +354,40 @@ ConsumoRacao Farm::calcularConsumoRacaoDiarioFazenda() {
     }
     return total;
 }
+
+void Farm::calcularMeritoTouro(std::string idTouro) {
+    if(idTouro.empty()) throw std::invalid_argument("ID do touro invalido!");
+    Animal* touro = buscarAnimalGlobal(idTouro);
+    if(touro==nullptr) throw std::runtime_error("Touro nao encontrado!");
+    if(touro->getTipo()!="touro") throw std::runtime_error("Este animal nao eh um touro");
+    Touro* _touro = dynamic_cast<Touro*>(touro);
+    if(_touro == nullptr) throw std::runtime_error("Falha ao converter para touro!");
+
+    double mediaPesoFilhos=0;
+    int qtdEncontrados = 0;
+    std::string* FilhosEncontrados = touro->getFilhos();
+    if(FilhosEncontrados==nullptr || touro->getQtdFilhos()==0){
+        _touro->setMerito(0.0);
+        return;
+    }
+    for(int i=0; i< touro->getQtdFilhos(); i++){
+        try{
+           Animal* filhote = buscarAnimalGlobal(FilhosEncontrados[i]);
+                if(filhote != nullptr){
+                    mediaPesoFilhos += filhote->getPeso();
+                    qtdEncontrados++;
+           }
+        }catch(const std::out_of_range&){
+            continue;
+        }
+    }
+
+    if(qtdEncontrados == 0) {
+        _touro->setMerito(0.0);
+        return;
+    }
+    mediaPesoFilhos/=qtdEncontrados;
+    //media para bezerros: 180.0, media para adulto 450.0
+    // valor de referencia : herdabilidade 0.3 , confiabilidade 5.0
+    _touro->setMerito((mediaPesoFilhos - 180.0)*0.3*(qtdEncontrados/(qtdEncontrados+5.0)));
+}
