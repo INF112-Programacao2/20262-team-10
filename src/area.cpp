@@ -134,9 +134,9 @@ void Area::promoverAnimal() {
             string resposta;
             std::cin >> resposta;
 
-            if (resposta == "Y" || resposta == "y") {
+        if (resposta == "Y" || resposta == "y") {
                 if (rebanho[i]->getSexo() == 'M') {
-                    Touro* t = new Touro(rebanho[i]->getId(), rebanho[i]->getSexo(),
+                    Touro* t = new Touro(rebanho[i]->getId(),
                         rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), 0, rebanho[i]->getQtdvacinas(), nullptr, 0.0);
                     t->setIdPai(rebanho[i]->getPai());
                     t->setIdMae(rebanho[i]->getMae());
@@ -144,7 +144,7 @@ void Area::promoverAnimal() {
                     rebanho[i] = t;
                     std::cout << "Bezerro promovido a touro com sucesso!\n";
                 } else if (rebanho[i]->getSexo() == 'F') {
-                    Vaca* v = new Vaca(rebanho[i]->getId(), rebanho[i]->getSexo(),
+                    Vaca* v = new Vaca(rebanho[i]->getId(),
                         rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), 0, rebanho[i]->getQtdvacinas(), nullptr);
                     v->setIdPai(rebanho[i]->getPai());
                     v->setIdMae(rebanho[i]->getMae());
@@ -153,6 +153,18 @@ void Area::promoverAnimal() {
                     std::cout << "Bezerro promovido a vaca com sucesso!\n";
                 }
             }
+        }
+    }
+}
+
+void Area::listarAnimais() const {
+    if (qtdAtualDeAnimais == 0) {
+        std::cout << "Nenhum animal nesta area.\n";
+        return;
+    }
+    for (int i = 0; i < qtdAtualDeAnimais; i++) {
+        if (rebanho[i] != nullptr) {
+            rebanho[i]->imprimirFichaParcial();
         }
     }
 }

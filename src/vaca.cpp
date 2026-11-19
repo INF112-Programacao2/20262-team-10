@@ -2,8 +2,12 @@
 #include <fstream>
 #include "vaca.hpp"
 
-Vaca::Vaca(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais) 
-: Animal(id, s, p, iM, qtdF, qtdV, filhosIniciais), producaoLeiteDia(0.0), emLactacao(false), prenha(false) {}
+Vaca::Vaca(std::string id, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais)
+: Animal(id, 'F', p, iM, qtdF, qtdV, filhosIniciais), producaoLeiteDia(0.0), emLactacao(false), prenha(false) {}
+
+Vaca::Vaca() : Animal(), producaoLeiteDia(0.0), emLactacao(false), prenha(false) {
+    sexo = 'F';
+}
 
 Vaca::Vaca() : Animal(), producaoLeiteDia(0.0), emLactacao(false), prenha(false) {}
 

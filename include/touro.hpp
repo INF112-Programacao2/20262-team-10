@@ -11,7 +11,7 @@ private:
     Touro();
 public:
     //construtor animal adquirido
-    Touro(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais, double vDS);
+    Touro(std::string id, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais = nullptr, double vDS = 0.0);
     //construtor bezerro promovido
     Touro(Animal *bezerroPromovido);
     ~Touro();

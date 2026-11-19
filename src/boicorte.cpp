@@ -2,10 +2,12 @@
 #include <fstream>
 #include "boicorte.hpp"
 
-Boicorte::Boicorte(std::string id, char s, double p, int iM, int qtdF, int qtdV) 
-: Animal(id, s, p, iM, qtdF, qtdV), rendimentoCarcaca(0.50), metaAbatePeso(0.0), faseEngorda(false) {}
+Boicorte::Boicorte(std::string id, double p, int iM, int qtdF, int qtdV)
+: Animal(id, 'M', p, iM, qtdF, qtdV), rendimentoCarcaca(0.50), metaAbatePeso(0.0), faseEngorda(false) {}
 
-Boicorte::Boicorte() : Animal(), rendimentoCarcaca(0.50), metaAbatePeso(0.0), faseEngorda(false) {}
+Boicorte::Boicorte() : Animal(), rendimentoCarcaca(0.50), metaAbatePeso(0.0), faseEngorda(false) {
+    sexo = 'M';
+}
 Boicorte::~Boicorte() {}
 
 //gets

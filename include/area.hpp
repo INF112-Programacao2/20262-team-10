@@ -37,6 +37,7 @@ class Area {
         Animal* buscarAnimal(string id);
         double getGastoIndividual(string id, double precoLeite, SacaRacao** relatorioRacoes);
         double getGastoDaArea(double precoLeite, SacaRacao** relatorioRacoes);
+        void listarAnimais() const;
 
         // getters
         string getNomeArea();

@@ -3,8 +3,12 @@
 #include "farm.hpp"
 #include "touro.hpp"
 
-Touro::Touro(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais, double vDS) 
-: Animal(id, s, p, iM, qtdF, qtdV, filhosIniciais), valorDoseSemen(vDS), meritoGeneticoPTA(0.0), dosesEstoque(0), qtdCoberturas(0) {}
+Touro::Touro(std::string id, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais, double vDS)
+: Animal(id, 'M', p, iM, qtdF, qtdV, filhosIniciais), valorDoseSemen(vDS), meritoGeneticoPTA(0.0), dosesEstoque(0), qtdCoberturas(0) {}
+
+Touro::Touro() : Animal(), valorDoseSemen(0.0), meritoGeneticoPTA(0.0), dosesEstoque(0), qtdCoberturas(0) {
+    sexo = 'M';
+}
 
 Touro::Touro() : Animal(), valorDoseSemen(0.0), meritoGeneticoPTA(0.0), dosesEstoque(0), qtdCoberturas(0) {}
 

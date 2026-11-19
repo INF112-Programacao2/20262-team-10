@@ -10,7 +10,7 @@ private:
     Boicorte();
 public:
     //construtor para animal adquirido
-    Boicorte(std::string id, char s, double p, int iM, int qtdF, int qtdV);
+    Boicorte(std::string id, double p, int iM, int qtdF, int qtdV);
     //construtor para bezerro promovido
     Boicorte(Animal *bezerropromovido);
     ~Boicorte();

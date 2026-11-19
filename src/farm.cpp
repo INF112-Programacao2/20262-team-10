@@ -28,6 +28,7 @@ Farm::Farm(std::string s, std::string l, User* propr) {
     lucroAcumuladoVendas = 0.0;
     prejuizoAcumuladoMortes = 0.0;
     diaAtualSimulacao = 0;
+    proximoIdAnimal = 1;
 }
 
 Farm::~Farm() {
@@ -119,11 +120,11 @@ void Farm::salvarFazenda() {
     try {
         if (leituraFaz.is_open()) {
             std::string donoLido, nomeLido, locLida, areaAtualLida;
-            int baixasLidas, diaLido;
+            int baixasLidas, diaLido, proxIdLido;
             double caixaLido, lucroLido, prejuizoLido;
 
             while (leituraFaz >> donoLido >> nomeLido >> locLida >> areaAtualLida
-                              >> baixasLidas >> caixaLido >> lucroLido >> prejuizoLido >> diaLido) {
+                              >> baixasLidas >> caixaLido >> lucroLido >> prejuizoLido >> diaLido >> proxIdLido) {
                 std::string donoFmt = formatarTextoFarmCarregar(donoLido);
                 std::string nomeFmt = formatarTextoFarmCarregar(nomeLido);
 
@@ -136,12 +137,13 @@ void Farm::salvarFazenda() {
                             << saldoCaixa << " "
                             << lucroAcumuladoVendas << " "
                             << prejuizoAcumuladoMortes << " "
-                            << diaAtualSimulacao << "\n";
+                            << diaAtualSimulacao << " "
+                            << proximoIdAnimal << "\n";
                     fazendaAtualizada = true;
                 } else {
                     tempFaz << donoLido << " " << nomeLido << " " << locLida << " " << areaAtualLida << " "
                             << baixasLidas << " " << caixaLido << " " << lucroLido << " "
-                            << prejuizoLido << " " << diaLido << "\n";
+                            << prejuizoLido << " " << diaLido << " " << proxIdLido << "\n";
                 }
             }
             leituraFaz.close();
@@ -156,7 +158,8 @@ void Farm::salvarFazenda() {
                     << saldoCaixa << " "
                     << lucroAcumuladoVendas << " "
                     << prejuizoAcumuladoMortes << " "
-                    << diaAtualSimulacao << "\n";
+                    << diaAtualSimulacao << " "
+                    << proximoIdAnimal << "\n";
         }
     } catch (...) {
         if (leituraFaz.is_open()) leituraFaz.close();
@@ -249,11 +252,11 @@ Farm* Farm::carregarFazenda(User* proprietario, std::string nomeFazenda) {
 
     try {
         std::string donoLido, nomeLido, locLida, areaAtualLida;
-        int baixasLidas, diaLido;
+        int baixasLidas, diaLido, proxIdLido;
         double caixaLido, lucroLido, prejuizoLido;
 
         while (arqFaz >> donoLido >> nomeLido >> locLida >> areaAtualLida
-                      >> baixasLidas >> caixaLido >> lucroLido >> prejuizoLido >> diaLido) {
+                      >> baixasLidas >> caixaLido >> lucroLido >> prejuizoLido >> diaLido >> proxIdLido) {
             std::string donoFmt = formatarTextoFarmCarregar(donoLido);
             std::string nomeFmt = formatarTextoFarmCarregar(nomeLido);
 
@@ -264,6 +267,7 @@ Farm* Farm::carregarFazenda(User* proprietario, std::string nomeFazenda) {
                 fazendaCarregada->lucroAcumuladoVendas = lucroLido;
                 fazendaCarregada->prejuizoAcumuladoMortes = prejuizoLido;
                 fazendaCarregada->diaAtualSimulacao = diaLido;
+                fazendaCarregada->proximoIdAnimal = (proxIdLido > 0) ? proxIdLido : 1;
                 areaSelecionadaSalva = formatarTextoFarmCarregar(areaAtualLida);
                 break;
             }
@@ -427,6 +431,37 @@ Animal* Farm::buscarAnimalGlobal(std::string identificador) {
     throw std::out_of_range("Animal nao encontrado em nenhuma area!");
 }
 
+Area* Farm::buscarArea(const std::string& nomeArea) const {
+    for (int i = 0; i < qtdAreas; i++) {
+        if (area[i] != nullptr && area[i]->getNomeArea() == nomeArea) {
+            return area[i];
+        }
+    }
+    return nullptr;
+}
+
+void Farm::listarAreas() const {
+    if (qtdAreas == 0) {
+        std::cout << "Nenhuma area cadastrada na fazenda.\n";
+        return;
+    }
+    for (int i = 0; i < qtdAreas; i++) {
+        if (area[i] == nullptr) continue;
+        std::cout << "  - " << area[i]->getNomeArea()
+                  << " | Pasto: " << area[i]->getEstadoPasto()
+                  << " | " << area[i]->getArea() << " ha"
+                  << " | Animais: " << area[i]->getQtdAnimais()
+                  << "/" << area[i]->getCapacidadeMaxima()
+                  << " (" << area[i]->calcularLotacaoArea() << "%)"
+                  << (area[i]->getNomeArea() == areaAtual ? " [ATUAL]" : "")
+                  << "\n";
+    }
+}
+
+std::string Farm::getAreaAtual() const {
+    return areaAtual;
+}
+
 bool Farm::transferirAnimalEntreAreas(std::string idAnimal, std::string nomeArea) {
     int indexOrigem = -1;
     int indexDestino = -1;
@@ -497,11 +532,12 @@ void Farm::realizarCobertura(const std::string& idMacho, const std::string& idFe
     touro->cobrirFemea(vaca);
 }
 
-void Farm::registrarNascimento(const std::string& idFemea, const std::string& nomeArea, std::string id, char sexo, double peso) {
+std::string Farm::registrarNascimento(const std::string& idFemea, const std::string& nomeArea, char sexo, double peso, std::string id) {
     if (sexo != 'M' && sexo != 'F') throw std::invalid_argument("Sexo invalido!");
     if (peso <= 0) throw std::invalid_argument("Peso invalido!");
-    if (id.empty() || encontrarAnimalOpcional(id) != nullptr) {
-        throw std::invalid_argument("ID do filhote invalido ou ja existente na fazenda!");
+
+    if (!id.empty() && encontrarAnimalOpcional(id) != nullptr) {
+        throw std::invalid_argument("ID do filhote ja existente na fazenda!");
     }
 
     Animal* femea = buscarAnimalGlobal(idFemea);
@@ -509,34 +545,39 @@ void Farm::registrarNascimento(const std::string& idFemea, const std::string& no
     if (mae == nullptr) throw std::invalid_argument("Mae do bezerro nao encontrada!");
     if (!mae->getPrenha()) throw std::runtime_error("Esta vaca nao esta prenha!");
 
-    Area* destino = nullptr;
-    for (int i = 0; i < qtdAreas; i++) {
-        if (area[i] != nullptr && area[i]->getNomeArea() == nomeArea) {
-            destino = area[i];
-            break;
-        }
-    }
+    Area* destino = buscarArea(nomeArea);
     if (destino == nullptr) {
         throw std::invalid_argument("Area de destino nao encontrada!");
     }
 
-    std::string idPai = mae->parir();
-    Bezerro* filhote = new Bezerro(id, sexo, peso);
-    filhote->setIdMae(idFemea);
-    filhote->setIdPai(idPai);
-
-    destino->adicionarAnimal(filhote);
-    mae->adicionarFilho(id);
-
-    if (!idPai.empty()) {
-        Animal* macho = encontrarAnimalOpcional(idPai);
-        Touro* pai = dynamic_cast<Touro*>(macho);
-        if (pai != nullptr) {
-            pai->adicionarFilho(id);
-        }
+    // So gera e consome o proximo ID depois que todas as validacoes passaram
+    if (id.empty()) {
+        id = gerarProximoId("bezerro");
     }
-}
 
+    Bezerro* filhote = new Bezerro(id, sexo, peso);
+    try {
+        std::string idPai = mae->parir();
+        filhote->setIdMae(idFemea);
+        filhote->setIdPai(idPai);
+
+        destino->adicionarAnimal(filhote);
+        mae->adicionarFilho(id);
+
+        if (!idPai.empty()) {
+            Animal* macho = encontrarAnimalOpcional(idPai);
+            Touro* pai = dynamic_cast<Touro*>(macho);
+            if (pai != nullptr) {
+                pai->adicionarFilho(id);
+            }
+        }
+    } catch (...) {
+        delete filhote;
+        throw;
+    }
+
+    return id;
+}
 double Farm::calcularGastoTotalDiarioFazenda() {
     if (proprietario == nullptr) {
         throw std::runtime_error("Proprietario nao definido na fazenda!");
@@ -589,6 +630,37 @@ double Farm::calcularReceitaTotalDiariaFazenda() {
 
 double Farm::calcularLucroGeralDiario() {
     return calcularReceitaTotalDiariaFazenda() - calcularGastoTotalDiarioFazenda();
+}
+
+std::string Farm::gerarProximoId(const std::string& tipo) {
+    std::string prefixo = "AN";
+    if (tipo == "vaca") prefixo = "VC";
+    else if (tipo == "touro") prefixo = "TR";
+    else if (tipo == "boicorte") prefixo = "BC";
+    else if (tipo == "bezerro") prefixo = "BZ";
+
+    std::string novoId;
+    do {
+        novoId = prefixo + std::to_string(proximoIdAnimal++);
+    } while (encontrarAnimalOpcional(novoId) != nullptr);
+
+    return novoId;
+}
+
+void Farm::adicionarAnimalNaArea(const std::string& nomeArea, Animal* a, bool silencioso) {
+    if (a == nullptr) {
+        throw std::invalid_argument("Nao e possivel adicionar um animal nulo!");
+    }
+    if (a->getId().empty() || encontrarAnimalOpcional(a->getId()) != nullptr) {
+        throw std::runtime_error("ID invalido ou ja existente em alguma area da fazenda!");
+    }
+
+    Area* destino = buscarArea(nomeArea);
+    if (destino == nullptr) {
+        throw std::invalid_argument("Area de destino nao encontrada!");
+    }
+
+    destino->adicionarAnimal(a, silencioso);
 }
 
 ConsumoRacao Farm::calcularConsumoRacaoDiarioFazenda() {

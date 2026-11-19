@@ -16,6 +16,7 @@ class Farm {
         std::string areaAtual;
         User* proprietario;
         Area** area;
+        int proximoIdAnimal;
         int qtdAreas;
 
         // resumo de dados
@@ -46,6 +47,9 @@ class Farm {
         double comprarAnimal(Animal* animalComprado);
 
         // area-gado
+        Area* buscarArea(const std::string& nomeArea) const;
+        void listarAreas() const;
+        std::string getAreaAtual() const;
         void adicionarArea(Area* a, bool silencioso = false);
         void salvarFazenda();
         static Farm* carregarFazenda(User* proprietario, std::string nomeFazenda = "");
@@ -57,6 +61,9 @@ class Farm {
         bool enviarParaQuarentena(std::string motivo, std::string idAnimal, int dias);
         bool liberarDaQuarentena(std::string idAnimal);
         void promoverAnimalGlobal();
+        std::string registrarNascimento(const std::string& idFemea, const std::string& nomeArea, char sexo, double peso, std::string id = "");
+        void adicionarAnimalNaArea(const std::string& nomeArea, Animal* a, bool silencioso = false);
+        std::string gerarProximoId(const std::string& tipo);
         void realizarCobertura(const std::string& idMacho, const std::string& idFemea);
         void registrarNascimento(const std::string& idFemea, const std::string& nomeArea, std::string id, char sexo, double peso);
         void calcularMeritoTouro(std::string idTouro);
