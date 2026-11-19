@@ -17,8 +17,19 @@ std::string Vaca::getIdTouroPai() const {return idTouroPai;}
 bool Vaca::podeSerPromovido() const {return false;}
 bool Vaca::getPrenha()const {return prenha;}
 //sets
-void Vaca:: setProducaoLeiteDia(double p) {producaoLeiteDia=p;}
-void Vaca:: setEmLactacao(bool l) {emLactacao=l;}
+void Vaca::setProducaoLeiteDia(double p) {
+    if (p < 0.0) throw std::invalid_argument("A producao de leite nao pode ser negativa!");
+    producaoLeiteDia = p;
+}
+
+void Vaca::setEmLactacao(bool l) {
+    emLactacao = l;
+    if (emLactacao && producaoLeiteDia <= 0.0) {
+        producaoLeiteDia = 15.0; // producao media base em litros/dia
+    } else if (!emLactacao) {
+        producaoLeiteDia = 0.0;
+    }
+}
 
 double Vaca::calcularGastoDiario([[maybe_unused]] double precoLeite, SacaRacao** relatorioRacao) {
     if (relatorioRacao == nullptr) return 0.0;
@@ -33,7 +44,7 @@ double Vaca::calcularGastoDiario([[maybe_unused]] double precoLeite, SacaRacao**
 }
 
 double Vaca::calcularReceitaDiaria(double valorMercado) {
-    if(emLactacao && !EmQuarentena){
+    if (emLactacao && !EmQuarentena) {
         return producaoLeiteDia * valorMercado;
     }
     return 0.0;
@@ -61,22 +72,30 @@ double Vaca::calcularSacosDiarios(SacaRacao** relatorioRacao) const {
 }
 
 bool Vaca::emprenhar(Touro* macho) {
-    if(macho==nullptr) throw std::invalid_argument("Touro invalido!");
-    if(prenha) throw std::runtime_error("Esta vaca ja esta prenha!");
-    if(idadeMeses < 15) throw std::runtime_error("A vaca ainda nao atingiu a idade minima para reproducao (15 meses).");
+    if (macho == nullptr) throw std::invalid_argument("Touro invalido!");
+    if (EmQuarentena || macho->getQuarentena()) throw std::runtime_error("Animal em quarentena nao pode reproduzir!");
+    if (prenha) throw std::runtime_error("Esta vaca ja esta prenha!");
+    if (idadeMeses < 15) throw std::runtime_error("A vaca ainda nao atingiu a idade minima para reproducao (15 meses).");
+
+    if ((!idPai.empty() && idPai == macho->getPai()) ||
+        (!idMae.empty() && idMae == macho->getMae()) ||
+        idPai == macho->getId() || macho->getMae() == _id) {
+        throw std::runtime_error("Cobertura bloqueada: parentesco proximo detectado!");
+    }
+
     prenha = true;
     idTouroPai = macho->getId();
     return true;
 }
 
 std::string Vaca::parir() {
-    if(!prenha) throw std::runtime_error("Esta vaca nao esta prenha!");
+    if (!prenha) throw std::runtime_error("Esta vaca nao esta prenha!");
     prenha = false;
     std::string PaiRegistrado = idTouroPai;
     idTouroPai = "";
-    emLactacao = true;
+    setEmLactacao(true);
     return PaiRegistrado;
- }
+}
 
 void Vaca::adicionarFilho(std::string idFilho){
     std::string* novoArray = new std::string[qtdFilhos + 1];
