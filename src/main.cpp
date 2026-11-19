@@ -75,22 +75,12 @@ int main() {
     }
 
     while (usuarioAtual != nullptr && opcao != 0) {
-<<<<<<< HEAD
-        std::cout << "\n1 - Ver cotacoes e racoes" << std::endl;
-        std::cout << "2 - Alterar preco do leite e racao" << std::endl;
-        std::cout << "3 - Atualizar cotacoes" << std::endl;
-        std::cout << "4 - Cadastrar e salvar animal (teste)" << std::endl;
-        std::cout << "5 - Carregar animal por ID" << std::endl;
-        std::cout << "0 - Salvar e sair" << std::endl;
-        std::cout << "Opcao: ";
-=======
         std::cout << "\nMenu principal:\n";
         std::cout << "  1 - Consultar cotacoes e racoes\n";
         std::cout << "  2 - Alterar algum valor manualmente\n";
         std::cout << "  3 - Atualizar todas as cotacoes (API + manual)\n";
         std::cout << "  0 - Salvar e encerrar\n";
         std::cout << "\nOpcao: ";
->>>>>>> ac2111c4a52c054375daa61b19bcdcde2973fce8
         std::cin >> opcao;
 
         try {
@@ -201,13 +191,8 @@ int main() {
             } else {
                 std::cout << "\nOpcao invalida.\n";
             }
-<<<<<<< HEAD
-        } catch (const std::exception& e) {
-            std::cout << "Erro: " << e.what() << std::endl;
-=======
         } catch (std::runtime_error& e) {
             std::cout << "\nErro: " << e.what() << std::endl;
->>>>>>> ac2111c4a52c054375daa61b19bcdcde2973fce8
         }
     }
 

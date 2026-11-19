@@ -290,13 +290,11 @@ void User::atualizarCotacaoDolar() {
     }
 
     if (cotacaoDolar == -2) {
-        std::cout << std::endl; std::cout << "---------------------" << std::endl;
-        std::cout << "Atencao valor da cotacao apresenta erro e nao foi modificado" << std::endl;
+        std::cout << "\nNao foi possivel atualizar a cotacao do dolar. O valor anterior foi mantido.\n";
     } else {
-        std::cout << "cotacao do dolar atualizada com sucesso" << std::endl;
-        std::cout << "a nova cotacao retornou:  " << cotacaoDolar << std::endl;
+        std::cout << "\nCotacao do dolar atualizada:\n";
+        std::cout << "  Dolar atual: R$ " << cotacaoDolar << std::endl;
     }
-
 };
 
 void User::atualizarCotacaoArroba() {
@@ -361,25 +359,40 @@ void User::atualizarCotacaoArroba() {
 
     // Validações
     if (this->precoArrobaBoi <= 0 || this->precoArrobaVaca <= 0) { 
-        std::cout << std::endl << "----------------------" << std::endl;
-        std::cout << "Atencao: Um ou mais valores de cotacao apresentam erro ou nao foram encontrados." << std::endl;
+        std::cout << "\nNao foi possivel atualizar as cotacoes da arroba.\n";
     } else {
-        std::cout << "Cotacoes de boi e vaca atualizadas com sucesso!" << std::endl;
-          std::cout << "o teste da cotacao do arroba do boi retornou: " << precoArrobaBoi << " e o da vaca: "<< precoArrobaVaca << std::endl;
+        std::cout << "\nCotacoes da arroba atualizadas:\n";
+        std::cout << "  Arroba do boi:  R$ " << precoArrobaBoi << std::endl;
+        std::cout << "  Arroba da vaca: R$ " << precoArrobaVaca << std::endl;
     }
 }
 
 void User::atualizarCotacoes() {
     atualizarCotacaoArroba();
     atualizarCotacaoDolar();
-    std::cout << "Qual o preco que voce vende o litro do leite: ";
+
+    std::cout << "\nAtualizacao manual:\n";
+    std::cout << "  Preco do litro do leite (R$): ";
     std::cin >> precoLeite;
-    std::cout << "Litro do leite atualizado com sucesso para: " << precoLeite << std::endl;
-    std::cout << "Voce comprou sacos de racao de quantos kg? Preencha na ordem -> Engorda - Avulsa - Recriacao ";
-    std::cin >> TiposRacoes[0]->peso >> TiposRacoes[1]->peso >> TiposRacoes[2]->peso;
-    std::cout << "Qual o preco de cada saca de racao? Preencha na ordem -> Engorda - Avulsa - Recriacao: ";
-    std::cin >> TiposRacoes[0]->preco >> TiposRacoes[1]->preco >> TiposRacoes[2]->preco;
+
+    std::cout << "\nPeso das sacas de racao (kg):\n";
+    std::cout << "  Engorda: ";
+    std::cin >> TiposRacoes[0]->peso;
+    std::cout << "  Avulsa:  ";
+    std::cin >> TiposRacoes[1]->peso;
+    std::cout << "  Recria:  ";
+    std::cin >> TiposRacoes[2]->peso;
+
+    std::cout << "\nPreco das sacas de racao (R$):\n";
+    std::cout << "  Engorda: ";
+    std::cin >> TiposRacoes[0]->preco;
+    std::cout << "  Avulsa:  ";
+    std::cin >> TiposRacoes[1]->preco;
+    std::cout << "  Recria:  ";
+    std::cin >> TiposRacoes[2]->preco;
+
     salvarEmArquivo();
+    std::cout << "\nCotacoes atualizadas e salvas com sucesso!\n";
 }
 
 //getters
