@@ -10,8 +10,6 @@ Touro::Touro() : Animal(), valorDoseSemen(0.0), meritoGeneticoPTA(0.0), dosesEst
     sexo = 'M';
 }
 
-Touro::Touro() : Animal(), valorDoseSemen(0.0), meritoGeneticoPTA(0.0), dosesEstoque(0), qtdCoberturas(0) {}
-
 Touro::~Touro(){}
 
 //gets
