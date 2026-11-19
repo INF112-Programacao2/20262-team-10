@@ -3,21 +3,37 @@
 #include "boicorte.hpp"
 
 Boicorte::Boicorte(std::string id, char s, double p, int iM, int qtdF, int qtdV) 
-: Animal(id, s, p, iM, qtdF, qtdV), rendimentoCarcaca(0.0), metaAbatePeso(0.0), faseEngorda(false) {}
+: Animal(id, s, p, iM, qtdF, qtdV), rendimentoCarcaca(0.50), metaAbatePeso(0.0), faseEngorda(false) {}
 
-Boicorte::Boicorte() : Animal(), rendimentoCarcaca(0.0), metaAbatePeso(0.0), faseEngorda(false) {}
+Boicorte::Boicorte() : Animal(), rendimentoCarcaca(0.50), metaAbatePeso(0.0), faseEngorda(false) {}
 Boicorte::~Boicorte() {}
 
 //gets
-double Boicorte:: getrendimentoCarcaca()const {return rendimentoCarcaca;}
-double Boicorte:: getmetaAbatePeso()const {return metaAbatePeso;}
-bool Boicorte:: getFaseEngorda()const {return faseEngorda;}
-std::string Boicorte:: getTipo() const {return "boicorte";}
-bool Boicorte:: podeSerPromovido() const {return false;}
+double Boicorte::getrendimentoCarcaca() const { return rendimentoCarcaca; }
+double Boicorte::getmetaAbatePeso() const { return metaAbatePeso; }
+bool Boicorte::getFaseEngorda() const { return faseEngorda; }
+std::string Boicorte::getTipo() const { return "boicorte"; }
+bool Boicorte::podeSerPromovido() const { return false; }
 //sets
-void Boicorte:: setrendimentoCarcaca(double r) {rendimentoCarcaca=r;}
-void Boicorte:: setmetaAbatePeso(double m) {metaAbatePeso=m;}
-void Boicorte:: setFaseEngorda(bool f) {faseEngorda=f;}
+void Boicorte::setrendimentoCarcaca(double r) {
+    if (r < 0.0) throw std::invalid_argument("O rendimento de carcaca nao pode ser negativo!");
+    if (r > 1.0 && r <= 100.0) {
+        rendimentoCarcaca = r / 100.0; // converte percentagem (ex: 52) para decimal (0.52)
+    } else if (r <= 1.0) {
+        rendimentoCarcaca = r;
+    } else {
+        throw std::invalid_argument("Rendimento de carcaca invalido!");
+    }
+}
+
+void Boicorte::setmetaAbatePeso(double m) {
+    if (m < 0.0) throw std::invalid_argument("A meta de peso para abate nao pode ser negativa!");
+    metaAbatePeso = m;
+}
+
+void Boicorte::setFaseEngorda(bool f) {
+    faseEngorda = f;
+}
 
 std::string Boicorte::getTipoRacao() const {
     if (faseEngorda) {

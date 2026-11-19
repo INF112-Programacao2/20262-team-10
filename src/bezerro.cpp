@@ -3,8 +3,8 @@
 #include "bezerro.hpp"
 
 Bezerro::Bezerro(std::string id, char s, double p) : Animal(id, s, p) {
-    consumoLeiteLitros = 0.0;
-    ganhoPesoMedioDiario = 0.0;
+    consumoLeiteLitros = 4.0;
+    ganhoPesoMedioDiario = 0.7;
     desmamado = false;
     idadeDesmameMeses = 0;
 }
@@ -12,7 +12,7 @@ Bezerro::Bezerro(std::string id, char s, double p) : Animal(id, s, p) {
 Bezerro::Bezerro() : Animal(), consumoLeiteLitros(0.0), ganhoPesoMedioDiario(0.0), idadeDesmameMeses(0), desmamado(false) {}
 
 Bezerro::Bezerro(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais, double cLL, double gPMD, int iDM, bool d) 
-: Animal(id, s, p, iM, qtdF, qtdV, filhosIniciais) , consumoLeiteLitros(cLL), ganhoPesoMedioDiario(gPMD), idadeDesmameMeses(iDM), desmamado(d) {}
+: Animal(id, s, p, iM, qtdF, qtdV, filhosIniciais), consumoLeiteLitros(cLL), ganhoPesoMedioDiario(gPMD), idadeDesmameMeses(iDM), desmamado(d) {}
 
 Bezerro::~Bezerro() {}
 
@@ -38,25 +38,48 @@ double Bezerro::calcularSacosDiarios(SacaRacao** relatorioRacao) const {
 }
 
 //gets
-double Bezerro:: getConsumoLeiteLitros()const {return consumoLeiteLitros;}
-double Bezerro:: getGanhoPesoMedioDiario()const {return ganhoPesoMedioDiario;}
-int Bezerro:: getIdadeDesmameMeses()const {return idadeDesmameMeses;}
-bool Bezerro:: getDesmamado()const {return desmamado;}
-std::string Bezerro:: getTipo() const {return "bezerro";}
-bool Bezerro:: podeSerPromovido() const {if(atingiuIdadeAdulta()){return true;}return false;}
+double Bezerro::getConsumoLeiteLitros() const { return consumoLeiteLitros; }
+double Bezerro::getGanhoPesoMedioDiario() const { return ganhoPesoMedioDiario; }
+int Bezerro::getIdadeDesmameMeses() const { return idadeDesmameMeses; }
+bool Bezerro::getDesmamado() const { return desmamado; }
+std::string Bezerro::getTipo() const { return "bezerro"; }
+bool Bezerro::podeSerPromovido() const { return atingiuIdadeAdulta(); }
 //sets
-void Bezerro:: setConsumoLeiteLitros(double c) {consumoLeiteLitros=c;}
-void Bezerro:: setGanhoPesoMedioDiario(double g) {ganhoPesoMedioDiario=g;}
-void Bezerro:: setIdadeDesmameMeses(int i) {idadeDesmameMeses=i;}
-void Bezerro:: setDesmamado(bool d) {desmamado=d;}
+void Bezerro::setConsumoLeiteLitros(double c) {
+    if (c < 0.0) throw std::invalid_argument("O consumo de leite nao pode ser negativo!");
+    consumoLeiteLitros = c;
+}
+
+void Bezerro::setGanhoPesoMedioDiario(double g) {
+    if (g < 0.0) throw std::invalid_argument("O ganho de peso diario nao pode ser negativo!");
+    ganhoPesoMedioDiario = g;
+}
+
+void Bezerro::setIdadeDesmameMeses(int i) {
+    if (i < 0) throw std::invalid_argument("A idade de desmame nao pode ser negativa!");
+    idadeDesmameMeses = i;
+}
+
+void Bezerro::setDesmamado(bool d) {
+    desmamado = d;
+    if (desmamado) {
+        consumoLeiteLitros = 0.0;
+    } else if (consumoLeiteLitros <= 0.0) {
+        consumoLeiteLitros = 4.0;
+    }
+}
 
 void Bezerro::realizarDesmame() {
-    if(idadeMeses >= 7){
+    if (desmamado) {
+        std::cout << "Este bezerro ja foi desmamado aos " << idadeDesmameMeses << " meses.\n";
+        return;
+    }
+    if (idadeMeses >= 7) {
         desmamado = true;
         idadeDesmameMeses = idadeMeses;
-    }
-    else{
-        std :: cout << "O bezerro nao esta com a idade adequada para o desmame\n";
+        consumoLeiteLitros = 0.0;
+    } else {
+        std::cout << "O bezerro nao esta com a idade adequada para o desmame.\n";
     }
 }
 
@@ -167,4 +190,3 @@ Bezerro* Bezerro::carregarBezerro(std::string id) {
     delete bezerroCarregado;
     return nullptr;
 }
-    

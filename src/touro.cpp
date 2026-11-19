@@ -18,10 +18,24 @@ int Touro:: getQtdCoberturas()const {return qtdCoberturas;}
 std::string Touro::getTipo() const {return "touro";}
 bool Touro::podeSerPromovido() const {return false;} 
 //sets
-void Touro:: setValorDoseSemen(double v) {valorDoseSemen=v;}
-void Touro:: setMerito(double m) {meritoGeneticoPTA=m;}
-void Touro:: setDosesEstoque(int d) {dosesEstoque=d;}
-void Touro:: setQtdCoberturas(int q) {qtdCoberturas=q;}
+void Touro::setValorDoseSemen(double v) {
+    if (v < 0.0) throw std::invalid_argument("O valor da dose de semen nao pode ser negativo!");
+    valorDoseSemen = v;
+}
+
+void Touro::setMerito(double m) {
+    meritoGeneticoPTA = m;
+}
+
+void Touro::setDosesEstoque(int d) {
+    if (d < 0) throw std::invalid_argument("O estoque de doses nao pode ser negativo!");
+    dosesEstoque = d;
+}
+
+void Touro::setQtdCoberturas(int q) {
+    if (q < 0) throw std::invalid_argument("A quantidade de coberturas nao pode ser negativa!");
+    qtdCoberturas = q;
+}
 
 std::string Touro::getTipoRacao() const {
     return "Racao Avulsa";
@@ -54,13 +68,11 @@ double Touro::calcularGastoDiario([[maybe_unused]] double precoLeite, SacaRacao*
 }
 
 bool Touro::cobrirFemea(Vaca* femea) {
-    if(femea==nullptr) throw std::invalid_argument("Vaca invalida para cobertura!");
-    if(femea->getPrenha()) throw std::runtime_error("Esta vaca ja esta prenha!");
-    if((!this->getPai().empty() && this->getPai() == femea->getPai()) || (!this->getMae().empty() && this->getMae() == femea->getMae())){
-        throw std::runtime_error("Cobertura bloqueada: parentesco proximo detectado!");
-    } 
-    qtdCoberturas++;
+    if (femea == nullptr) throw std::invalid_argument("Vaca invalida para cobertura!");
+    if (idadeMeses < 15) throw std::runtime_error("O touro ainda nao atingiu a idade minima para reproducao (15 meses).");
+
     femea->emprenhar(this);
+    qtdCoberturas++;
     return true;
 }
 
@@ -75,7 +87,9 @@ void Touro::adicionarFilho(std::string idFilho) {
     qtdFilhos++;
 }
 
-double Touro::calcularReceitaDiaria(double valorMercado) {return 0.0;}
+double Touro::calcularReceitaDiaria([[maybe_unused]] double valorMercado) {
+    return 0.0;
+}
 
 void Touro::salvarEmArquivo() {
     if(_id.empty()) throw std::invalid_argument("ID do touro invalido!");
