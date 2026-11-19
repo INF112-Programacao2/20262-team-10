@@ -159,6 +159,7 @@ Animal* Area::buscarAnimal(string id) {
 
 double Area::getGastoIndividual (string id, double precoLeite, SacaRacao** relatorioRacoes) {
     Animal* animalAchado = buscarAnimal(id);
+    if (animalAchado == nullptr) throw std::runtime_error("Esse animal nao foi encontrado");
     return (animalAchado->calcularGastoDiario(precoLeite, relatorioRacoes))*(calcularLotacaoArea()/100);
 }
 

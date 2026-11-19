@@ -15,7 +15,7 @@ User::User(std::string log, std::string senha,
     std::string nom, std::string perfil) {
     login = log;
     senhaHash = gerarHash(senha);
-    idUsuario = nom;
+    nomeProprietario = nom;
     perfilAcesso = perfil;
     cotacaoDolar = -2; //valor para nao quebrar
     precoArrobaBoi = 384.55;
