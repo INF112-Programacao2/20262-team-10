@@ -7,13 +7,16 @@
 #include "boicorte.hpp"
 
 void exibirDadosUsuario(User* u) {
-    std::cout << "\nCotacao Dolar: R$ " << u->getCotacaoDolar() << std::endl;
-    std::cout << "Preco Leite (L): R$ " << u->getPrecoLeite() << std::endl;
-    std::cout << "Arroba Boi: R$ " << u->getCotacaoArrobaBoi() << std::endl;
-    std::cout << "Arroba Vaca: R$ " << u->getCotacaoArrobaVaca() << std::endl;
-    std::cout << "Racao Engorda: " << u->getKgRacaoEngorda() << " kg | R$ " << u->getSacaRacaoEngorda() << std::endl;
-    std::cout << "Racao Avulsa: " << u->getKgRacaoAvulsa() << " kg | R$ " << u->getSacaRacaoAvulsa() << std::endl;
-    std::cout << "Racao Recria: " << u->getKgRacaoRecria() << " kg | R$ " << u->getSacaRacaoRecria() << std::endl;
+    std::cout << "\nCotacoes atuais:\n";
+    std::cout << "  Dolar:          R$ " << u->getCotacaoDolar() << std::endl;
+    std::cout << "  Litro do leite: R$ " << u->getPrecoLeite() << std::endl;
+    std::cout << "  Arroba do boi:  R$ " << u->getCotacaoArrobaBoi() << std::endl;
+    std::cout << "  Arroba da vaca: R$ " << u->getCotacaoArrobaVaca() << std::endl;
+
+    std::cout << "\nSacas de racao:\n";
+    std::cout << "  Engorda: " << u->getKgRacaoEngorda() << " kg - R$ " << u->getSacaRacaoEngorda() << std::endl;
+    std::cout << "  Avulsa:  " << u->getKgRacaoAvulsa()  << " kg - R$ " << u->getSacaRacaoAvulsa()  << std::endl;
+    std::cout << "  Recria:  " << u->getKgRacaoRecria()  << " kg - R$ " << u->getSacaRacaoRecria()  << std::endl;
 }
 
 int main() {
@@ -21,49 +24,58 @@ int main() {
     int opcao = -1;
 
     while (opcao != 0 && usuarioAtual == nullptr) {
-        std::cout << "\n1 - Cadastrar usuario" << std::endl;
-        std::cout << "2 - Fazer login" << std::endl;
-        std::cout << "0 - Sair" << std::endl;
-        std::cout << "Opcao: ";
+        std::cout << "\nAcesso ao sistema:\n";
+        std::cout << "  1 - Cadastrar novo usuario\n";
+        std::cout << "  2 - Entrar na conta\n";
+        std::cout << "  0 - Sair\n";
+        std::cout << "\nOpcao: ";
         std::cin >> opcao;
-        std::cin.ignore();
 
         if (opcao == 1) {
+            std::cin.ignore();
             std::string login, senha, nome, perfil;
-            std::cout << "Login: ";
+
+            std::cout << "\nCadastro de usuario:\n";
+            std::cout << "  Login: ";
             std::getline(std::cin, login);
-            std::cout << "Senha: ";
+            std::cout << "  Senha: ";
             std::getline(std::cin, senha);
-            std::cout << "Nome do proprietario: ";
+            std::cout << "  Nome do proprietario: ";
             std::getline(std::cin, nome);
-            std::cout << "Perfil de acesso: ";
+            std::cout << "  Perfil de acesso: ";
             std::getline(std::cin, perfil);
 
             try {
                 User* novo = new User(login, senha, nome, perfil);
                 novo->salvarEmArquivo();
-                std::cout << "Usuario cadastrado com sucesso!" << std::endl;
+                std::cout << "\nUsuario cadastrado e salvo com sucesso!\n";
                 delete novo;
             } catch (std::runtime_error& e) {
-                std::cout << "Erro: " << e.what() << std::endl;
+                std::cout << "\nErro ao cadastrar: " << e.what() << std::endl;
             }
         } else if (opcao == 2) {
+            std::cin.ignore();
             std::string login, senha;
-            std::cout << "Login: ";
+
+            std::cout << "\nLogin:\n";
+            std::cout << "  Usuario: ";
             std::getline(std::cin, login);
-            std::cout << "Senha: ";
+            std::cout << "  Senha: ";
             std::getline(std::cin, senha);
 
             usuarioAtual = User::carregarUsuario(login, senha);
             if (usuarioAtual == nullptr) {
-                std::cout << "Login ou senha invalidos." << std::endl;
+                std::cout << "\nUsuario ou senha invalidos. Tente novamente.\n";
             } else {
-                std::cout << "Login realizado!" << std::endl;
+                std::cout << "\nAcesso liberado! Bem-vindo ao sistema.\n";
             }
+        } else if (opcao != 0) {
+            std::cout << "\nOpcao invalida.\n";
         }
     }
 
     while (usuarioAtual != nullptr && opcao != 0) {
+<<<<<<< HEAD
         std::cout << "\n1 - Ver cotacoes e racoes" << std::endl;
         std::cout << "2 - Alterar preco do leite e racao" << std::endl;
         std::cout << "3 - Atualizar cotacoes" << std::endl;
@@ -71,23 +83,60 @@ int main() {
         std::cout << "5 - Carregar animal por ID" << std::endl;
         std::cout << "0 - Salvar e sair" << std::endl;
         std::cout << "Opcao: ";
+=======
+        std::cout << "\nMenu principal:\n";
+        std::cout << "  1 - Consultar cotacoes e racoes\n";
+        std::cout << "  2 - Alterar algum valor manualmente\n";
+        std::cout << "  3 - Atualizar todas as cotacoes (API + manual)\n";
+        std::cout << "  0 - Salvar e encerrar\n";
+        std::cout << "\nOpcao: ";
+>>>>>>> ac2111c4a52c054375daa61b19bcdcde2973fce8
         std::cin >> opcao;
 
         try {
             if (opcao == 1) {
                 exibirDadosUsuario(usuarioAtual);
             } else if (opcao == 2) {
-                double novoLeite, novaRacaoEngorda;
-                std::cout << "Novo preco do leite: ";
-                std::cin >> novoLeite;
-                std::cout << "Novo preco da saca de Racao Engorda: ";
-                std::cin >> novaRacaoEngorda;
+                int subOpcao = -1;
+                double valor = 0;
 
-                usuarioAtual->setPrecoLeite(novoLeite);
-                usuarioAtual->setPrecoSacaRacaoEngorda(novaRacaoEngorda);
-                usuarioAtual->salvarEmArquivo();
-                std::cout << "Dados atualizados!" << std::endl;
+                std::cout << "\nQual valor voce deseja alterar?\n";
+                std::cout << "  1  - Cotacao do dolar\n";
+                std::cout << "  2  - Preco do litro do leite\n";
+                std::cout << "  3  - Preco da arroba do boi\n";
+                std::cout << "  4  - Preco da arroba da vaca\n";
+                std::cout << "  5  - Preco da saca (Racao Engorda)\n";
+                std::cout << "  6  - Preco da saca (Racao Avulsa)\n";
+                std::cout << "  7  - Preco da saca (Racao Recria)\n";
+                std::cout << "  8  - Peso da saca em kg (Racao Engorda)\n";
+                std::cout << "  9  - Peso da saca em kg (Racao Avulsa)\n";
+                std::cout << "  10 - Peso da saca em kg (Racao Recria)\n";
+                std::cout << "  0  - Voltar ao menu\n";
+                std::cout << "\nOpcao: ";
+                std::cin >> subOpcao;
+
+                if (subOpcao >= 1 && subOpcao <= 10) {
+                    std::cout << "  Digite o novo valor: ";
+                    std::cin >> valor;
+
+                    if (subOpcao == 1) usuarioAtual->setCotacaoDolar(valor);
+                    else if (subOpcao == 2) usuarioAtual->setPrecoLeite(valor);
+                    else if (subOpcao == 3) usuarioAtual->setPrecoArrobaBoi(valor);
+                    else if (subOpcao == 4) usuarioAtual->setPrecoArrobaVaca(valor);
+                    else if (subOpcao == 5) usuarioAtual->setPrecoSacaRacaoEngorda(valor);
+                    else if (subOpcao == 6) usuarioAtual->setPrecoSacaRacaoAvulsa(valor);
+                    else if (subOpcao == 7) usuarioAtual->setPrecoSacaRacaoRecria(valor);
+                    else if (subOpcao == 8) usuarioAtual->setKgRacaoEngorda(valor);
+                    else if (subOpcao == 9) usuarioAtual->setKgRacaoAvulsa(valor);
+                    else if (subOpcao == 10) usuarioAtual->setKgRacaoRecria(valor);
+
+                    usuarioAtual->salvarEmArquivo();
+                    std::cout << "\nAlteracao salva com sucesso!\n";
+                } else if (subOpcao != 0) {
+                    std::cout << "\nOpcao invalida.\n";
+                }
             } else if (opcao == 3) {
+                std::cout << std::endl;
                 usuarioAtual->atualizarCotacoes();
             } else if (opcao == 4) {
                 int tipo;
@@ -148,10 +197,17 @@ int main() {
                 }
             } else if (opcao == 0) {
                 usuarioAtual->salvarEmArquivo();
-                std::cout << "Saindo..." << std::endl;
+                std::cout << "\nDados salvos. Encerrando o programa...\n";
+            } else {
+                std::cout << "\nOpcao invalida.\n";
             }
+<<<<<<< HEAD
         } catch (const std::exception& e) {
             std::cout << "Erro: " << e.what() << std::endl;
+=======
+        } catch (std::runtime_error& e) {
+            std::cout << "\nErro: " << e.what() << std::endl;
+>>>>>>> ac2111c4a52c054375daa61b19bcdcde2973fce8
         }
     }
 
