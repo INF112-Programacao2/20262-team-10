@@ -9,8 +9,6 @@ Vaca::Vaca() : Animal(), producaoLeiteDia(0.0), emLactacao(false), prenha(false)
     sexo = 'F';
 }
 
-Vaca::Vaca() : Animal(), producaoLeiteDia(0.0), emLactacao(false), prenha(false) {}
-
 Vaca::~Vaca(){}
 
 //gets
