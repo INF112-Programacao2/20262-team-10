@@ -16,7 +16,7 @@ protected:
     std::string idMae;
     std::string* idFilhos;
 
-    //snapshot 
+    //snapshot ancestral
     SnapshotAncestral snapshotPai;
     SnapshotAncestral snapshotMae;
 
