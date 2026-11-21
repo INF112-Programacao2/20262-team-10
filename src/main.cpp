@@ -19,10 +19,15 @@ User* moduloLogin() {
     while(1==1){
         limparTela();
         std:: cout << "===SISTEMA DE LOGIN===\n" << 
-        "Fazer Login?[1]\n" << "Criar Nova Conta\n[2]" <<
+        "Fazer Login?[1]\n" << "Criar Nova Conta[2]\n" <<
         "Sair do Sistema[3]\n";
         int opcao;
         std :: cin >> opcao;
+        if(std::cin.fail()){
+            std::cin.clear();
+            std::cin.ignore(10000, '\n');
+            continue;
+        }
         if(opcao==3) return nullptr;
         std::string login="", senha="", nome="", cargo="";
         if(opcao==1){
@@ -32,6 +37,7 @@ User* moduloLogin() {
             std :: cout << "Senha: ";
             std :: cin >> senha;
             if(User::autenticar(login, senha)){
+                std :: cout << "Login Realizado com Sucesso.\n";
                 return User::carregarUsuario(login, senha);
             }
             else{
@@ -72,8 +78,14 @@ int main() {
             sistemaOk = false;
             break;
         }
+        limparTela();
+        std::cout << "\n=== SESSÃO INICIADA ===\n";
+        std::cout << "Bem-vindo(a), " << usuarioAtual->getNomeProprietario() << "!\n";
+        std::cout << "\nPressione ENTER para fazer logout e voltar ao menu...";
+        std::cin.ignore(10000, '\n');
+        std::cin.get();
         delete usuarioAtual;
     }
-
+    std::cout << "Sistema encerrado.\n";
     return 0;
 }

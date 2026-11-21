@@ -32,6 +32,7 @@ class User {
         static User* carregarUsuario(std::string login, std::string senha);
 
         // Getters
+        std::string getNomeProprietario() const;
         double getPrecoLeite();
         double getCotacaoDolar();
         double getCotacaoArrobaBoi();

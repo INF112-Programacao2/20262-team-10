@@ -396,6 +396,7 @@ void User::atualizarCotacoes() {
 }
 
 //getters
+std::string User::getNomeProprietario()const{return nomeProprietario;}
 double User::getPrecoLeite()         { return precoLeite; }
 double User::getCotacaoDolar()       { return cotacaoDolar; }
 double User::getCotacaoArrobaBoi()   { return precoArrobaBoi; }
