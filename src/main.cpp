@@ -131,8 +131,8 @@ int main() {
             limparTela();
             std :: cout << "=== PAINEL DE GESTAO | PROPRIETARIO: " << usuarioAtual->getNomeProprietario() << " ===\n";
             std :: cout << "Area selecionada: " << (fazendaAtual->getAreaAtual().empty() ? "Nenhuma" : fazendaAtual->getAreaAtual()) << "\n\n";
-            std :: cout << "[3] Listar Areas / Pastos\n" << "[4] Criar Nova Area / Pasto\n" << "[5] Selecionar Area Atual e Listar Rebanho\n" 
-            << "[6] Adicionar Animal na Area Atual\n" << "[11] Atualizar Cotacoes (Dolar, Arroba, Leite, Racoes)\n" << "[12] Salvar Tudo Agora\n" 
+            std :: cout <<"[1] Emitir Relatorio Operacional\n" << "[2] Emitir Relatorio Break Even & Vendas\n" <<"[3] Listar Areas / Pastos\n" << "[4] Criar Nova Area / Pasto\n" << "[5] Selecionar Area Atual e Listar Rebanho\n" 
+            << "[6] Adicionar Animal na Area Atual\n" << "[7] Transferir Animal Entre Areas\n" <<"[8] Realizar Cobertura (Touro x Vaca)\n" <<"[9] Registrar Nascimento\n" <<"[10] Promover Animais\n" <<"[11] Atualizar Cotacoes (Dolar, Arroba, Leite, Racoes)\n" << "[12] Salvar Tudo Agora\n" 
             << "[0] Salvar e Voltar ao Login (Logout)\n"
             <<"Opcao: ";
             int opcao;
@@ -144,6 +144,14 @@ int main() {
             }
             try{
                 switch(opcao){
+                    case 1:
+                        fazendaAtual->emitirRelatorioOperacional();
+                        pausarTela();
+                        break;
+                    case 2:
+                        fazendaAtual->emitirRelatorioBreakEvenEVendas();
+                        pausarTela();
+                        break;
                     case 3:
                         fazendaAtual->listarAreas();
                         pausarTela();
@@ -256,6 +264,48 @@ int main() {
                         pausarTela();
                         break;
                     }
+                    case 7:{
+                        std :: string id, nomeArea;
+                        std :: cout << "Id do Animal: ";
+                        std :: cin >> id;
+                        std :: cout <<"Area de destino: ";
+                        std :: getline(std :: cin>> std::ws, nomeArea);
+                        fazendaAtual->transferirAnimalEntreAreas(id, nomeArea);
+                        pausarTela();
+                        break;   
+                    }
+                    case 8:{
+                        std :: string idVaca, idTouro;
+                        std :: cout << "Id da Vaca: ";
+                        std :: cin >> idVaca;
+                        std :: cout << "Id do Touro: ";
+                        fazendaAtual->realizarCobertura(idTouro, idVaca);
+                        std::cout << "Cobertura registrada com sucesso!\n";
+                        pausarTela();
+                        break;
+                    }
+                    case 9:{
+                        std :: string idMae, areaNascimento;
+                        double pesoNascimento;
+                        char sexo;
+                        std :: cout << "Id Vaca(Mae): ";
+                        std :: cin >> idMae;
+                        std :: cout << "Area do Nascimento: ";
+                        std :: getline(std :: cin >> std::ws, areaNascimento);
+                        std :: cout << "Sexo do bezerro[M/F]: ";
+                        std :: cin >> sexo;
+                        std :: cout << "Peso ao Nascer(kg): ";
+                        std :: cin >> pesoNascimento;
+                        std :: string idgerado =fazendaAtual->gerarProximoId("bezerro");
+                        fazendaAtual->registrarNascimento(idMae, areaNascimento, sexo, pesoNascimento, idgerado);
+                        std :: cout << "Nascimento registrado! ID do bezerro: " << idgerado << "\n";
+                        pausarTela();
+                        break;
+                    }
+                    case 10:
+                        fazendaAtual->promoverAnimalGlobal();
+                        pausarTela();
+                        break;
                     case 11:
                         usuarioAtual->atualizarCotacoes();
                         pausarTela();
