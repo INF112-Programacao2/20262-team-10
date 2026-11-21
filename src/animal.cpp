@@ -35,10 +35,14 @@ bool Animal::getQuarentena() const{return EmQuarentena;}
 std::string Animal::getPai() const{return idPai;} 
 std::string Animal::getMae() const{return idMae;}
 std::string* Animal::getFilhos() const{return idFilhos;}
+SnapshotAncestral Animal::getSnapshotPai() const{return snapshotPai;}
+SnapshotAncestral Animal::getSnapshotMae() const{return snapshotMae;}
 
 //sets
 void Animal::setIdPai(std::string idPai) {this->idPai = idPai;}
 void Animal::setIdMae(std::string idMae) {this->idMae = idMae;}
+void Animal::setSnapshotPai(const SnapshotAncestral& salva) {snapshotPai=salva;}
+void Animal::setSnapshotMae(const SnapshotAncestral& salva) {snapshotMae=salva;}
 
 Animal::~Animal() {
     delete[] idFilhos;

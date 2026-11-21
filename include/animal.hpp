@@ -56,12 +56,12 @@ public:
     void setIdMae(std::string idMae);
 
     //get do snapshot
-    SnapshotAncestral getSnapshotPai() const { return snapshotPai; }
-    SnapshotAncestral getSnapshotMae() const { return snapshotMae; }
+    SnapshotAncestral getSnapshotPai() const;
+    SnapshotAncestral getSnapshotMae() const;
 
     //set do snapshot
-    void setSnapshotPai(const SnapshotAncestral& salva) { snapshotPai = salva; }
-    void setSnapshotMae(const SnapshotAncestral& salva) { snapshotMae = salva; }
+    void setSnapshotPai(const SnapshotAncestral& salva);
+    void setSnapshotMae(const SnapshotAncestral& salva);
 
     //metodos usados para verificar promoção
     virtual std::string getTipo() const = 0;
