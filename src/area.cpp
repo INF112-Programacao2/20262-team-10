@@ -115,8 +115,6 @@ void Area::removerAnimal(string idAnimal) {
         return;
     }
 
-    //IMPREMENTAR SNAPSHOT AQUI
-
     delete animalParaAbate; 
     std::cout << "Animal removido e deletado com sucesso!" << std::endl;
 }
@@ -140,6 +138,11 @@ void Area::promoverAnimal() {
                         rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), 0, rebanho[i]->getQtdvacinas(), nullptr, 0.0);
                     t->setIdPai(rebanho[i]->getPai());
                     t->setIdMae(rebanho[i]->getMae());
+
+                    //snapshot
+                    t->setSnapshotPai(*rebanho[i]->getSnapshotPai());
+                    t->setSnapshotMae(*rebanho[i]->getSnapshotMae());
+
                     delete rebanho[i];
                     rebanho[i] = t;
                     std::cout << "Bezerro promovido a touro com sucesso!\n";
@@ -148,6 +151,11 @@ void Area::promoverAnimal() {
                         rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), 0, rebanho[i]->getQtdvacinas(), nullptr);
                     v->setIdPai(rebanho[i]->getPai());
                     v->setIdMae(rebanho[i]->getMae());
+
+                    //snapshot
+                    v->setSnapshotPai(*rebanho[i]->getSnapshotPai());
+                    v->setSnapshotMae(*rebanho[i]->getSnapshotMae());
+                    
                     delete rebanho[i];
                     rebanho[i] = v;
                     std::cout << "Bezerro promovido a vaca com sucesso!\n";

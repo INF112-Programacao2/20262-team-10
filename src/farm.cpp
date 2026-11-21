@@ -630,6 +630,17 @@ std::string Farm::registrarNascimento(const std::string& idFemea, const std::str
         filhote->setIdMae(idFemea);
         filhote->setIdPai(idPai);
 
+        // snapshot incluindo toda a arvore ancestral
+        filhote->setSnapshotMae(mae->criarSnapshot());
+
+        // o pai pode estar em qualquer area da fazenda
+        if (!idPai.empty()) { Animal* paiSnapshot = encontrarAnimalOpcional(idPai);
+
+            if (paiSnapshot != nullptr) {
+                filhote->setSnapshotPai(paiSnapshot->criarSnapshot());
+            }
+        }
+
         destino->adicionarAnimal(filhote);
         mae->adicionarFilho(id);
 

@@ -1,3 +1,4 @@
+
 #ifndef ANIMAL_HPP
 #define ANIMAL_HPP
 
@@ -5,7 +6,7 @@
 #include "sacaRacao.hpp"
 #include "snapshotancestral.hpp"
 
-class Animal{
+class Animal {
 protected:
     std::string _id, estadoSaude, temperamento;
     char sexo;
@@ -16,7 +17,7 @@ protected:
     std::string idMae;
     std::string* idFilhos;
 
-    //snapshot ancestral
+    // Snapshot ancestral
     SnapshotAncestral snapshotPai;
     SnapshotAncestral snapshotMae;
 
@@ -28,8 +29,11 @@ protected:
 
 public:
     Animal(std::string id, char s, double p);
-    //inicializador sobrecarga ex: animal comprado
-    Animal(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais= nullptr);
+
+    // Inicializador sobrecarga ex: animal comprado
+    Animal(std::string id, char s, double p, int iM, int qtdF,
+           int qtdV, std::string* filhosIniciais = nullptr);
+
     virtual double calcularGastoDiario(double precoLeite, SacaRacao** relatorioRacao) = 0;
     virtual double calcularReceitaDiaria(double valorMercado) = 0;
     virtual std::string getTipoRacao() const = 0;
@@ -37,7 +41,7 @@ public:
     virtual void salvarEmArquivo() = 0;
     virtual ~Animal();
 
-    //gets
+    // gets
     std::string getId() const;
     std::string getEstadoSaude() const;
     std::string getTemperamento() const;
@@ -51,25 +55,38 @@ public:
     std::string getMae() const;
     std::string* getFilhos() const;
 
-    //sets
+    // sets
     void setIdPai(std::string idPai);
     void setIdMae(std::string idMae);
 
-    //get do snapshot
-    SnapshotAncestral getSnapshotPai() const;
-    SnapshotAncestral getSnapshotMae() const;
+    // get do snapshot
+    const SnapshotAncestral* getSnapshotPai() const {
+        return &snapshotPai;
+    }
 
-    //set do snapshot
-    void setSnapshotPai(const SnapshotAncestral& salva);
-    void setSnapshotMae(const SnapshotAncestral& salva);
+    const SnapshotAncestral* getSnapshotMae() const {
+        return &snapshotMae;
+    }
 
-    //metodos usados para verificar promoção
+    // set do snapshot
+    void setSnapshotPai(const SnapshotAncestral& salva) {
+        snapshotPai = salva;
+    }
+
+    void setSnapshotMae(const SnapshotAncestral& salva) {
+        snapshotMae = salva;
+    }
+
+    // cria um snapshot completo, incluindo sua árvore ancestral
+    SnapshotAncestral criarSnapshot() const { return SnapshotAncestral(_id, sexo, peso, estadoSaude, &snapshotPai, &snapshotMae );
+    }
+
+    // metodos usados para verificar promoção
     virtual std::string getTipo() const = 0;
     virtual bool podeSerPromovido() const = 0;
 
-    //demais metodos
-    virtual void imprimirFichaParcial()const = 0;
+    // demais metodos
+    virtual void imprimirFichaParcial() const = 0;
 };
 
 #endif
-
