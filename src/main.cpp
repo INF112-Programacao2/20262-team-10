@@ -126,7 +126,7 @@ int main() {
             limparTela();
             std :: cout << "=== PAINEL DE GESTAO | PROPRIETARIO: " << usuarioAtual->getNomeProprietario() << " ===\n";
             std :: cout << "Area selecionada: " << (fazendaAtual->getAreaAtual().empty() ? "Nenhuma" : fazendaAtual->getAreaAtual()) << "\n\n";
-            std :: cout << "[4] Criar Nova Area / Pasto\n" <<"[11] Atualizar Cotacoes (Dolar, Arroba, Leite, Racoes)\n"
+            std :: cout << "[3] Listar Areas / Pastos\n" << "[4] Criar Nova Area / Pasto\n" <<"[11] Atualizar Cotacoes (Dolar, Arroba, Leite, Racoes)\n"
             << "[12] Salvar Tudo Agora\n" << "[0] Salvar e Voltar ao Login (Logout)\n"
             <<"Opcao: ";
             int opcao;
@@ -138,6 +138,10 @@ int main() {
             }
             try{
                 switch(opcao){
+                    case 3:
+                        fazendaAtual->listarAreas();
+                        pausarTela();
+                        break;
                     case 4: {
                         std :: string nomeArea, estado;
                         double hectares;
