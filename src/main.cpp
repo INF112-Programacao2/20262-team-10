@@ -9,6 +9,12 @@ void limparTela() {
     std::cout << "\033[2J\033[H" << std::flush;
 }
 
+void pausarTela() {
+    std::cout << "\nPressione ENTER para continuar...";
+    std::cin.ignore(10000, '\n');
+    std::cin.get();
+}
+
 void prepararDiretorios() { //verifica se realmente existe a pasta data na raiz 
     if (!std::filesystem::exists("./data")) {
         std::filesystem::create_directories("./data");
@@ -19,8 +25,8 @@ User* moduloLogin() {
     while(1==1){
         limparTela();
         std:: cout << "===SISTEMA DE LOGIN===\n" << 
-        "Fazer Login?[1]\n" << "Criar Nova Conta[2]\n" <<
-        "Sair do Sistema[3]\n";
+        "[1] Fazer Login\n" << "[2] Criar Nova Conta\n" <<
+        "[3] Sair do Sistema\n" << "Opcao: ";
         int opcao;
         std :: cin >> opcao;
         if(std::cin.fail()){
@@ -57,13 +63,41 @@ User* moduloLogin() {
             std::getline(std::cin >> std::ws, nome); //std::ws pra limpar o enter
             std :: cout << "Cargo: ";
             std::getline(std::cin >> std::ws, cargo);
-            if(login !="" && nome!="" && senha!="" && cargo!=""){
+            if(!login.empty() && !nome.empty() && !senha.empty() && !cargo.empty()){
                 User* usuarioRegister = new User(login, senha, nome, cargo);
+                try{
                 usuarioRegister->salvarEmArquivo();
+                std::cout << "Conta criada com sucesso!\n";
                 return usuarioRegister;
+                }catch(const std::exception& e){
+                    delete usuarioRegister;
+                    std::cerr <<"Erro ao criar conta: " << e.what() << "\n";
+                }
             }
         }
     }
+}
+
+Farm* inicializarFazendaDoUsuario(User* usuarioAtual) {
+    Farm* fazenda = Farm::carregarFazenda(usuarioAtual);
+
+    if (fazenda == nullptr) {
+        limparTela();
+        std::cout << "=== CONFIGURACAO INICIAL DA FAZENDA ===\n";
+        std::cout << "Nenhuma fazenda encontrada para " << usuarioAtual->getNomeProprietario() << ".\n";
+
+        std::string nomeFazenda, localizacao;
+        std::cout << "Nome da Fazenda: ";
+        std::getline(std::cin >> std::ws, nomeFazenda);
+        std::cout << "Localizacao: ";
+        std::getline(std::cin >> std::ws, localizacao);
+
+        fazenda = new Farm(nomeFazenda, localizacao, usuarioAtual);
+        fazenda->salvarFazenda();
+        std::cout << "Fazenda criada e salva com sucesso!\n";
+        pausarTela();
+    }
+    return fazenda;
 }
 
 int main() {
@@ -78,12 +112,41 @@ int main() {
             sistemaOk = false;
             break;
         }
-        limparTela();
-        std::cout << "\n=== SESSÃO INICIADA ===\n";
-        std::cout << "Bem-vindo(a), " << usuarioAtual->getNomeProprietario() << "!\n";
-        std::cout << "\nPressione ENTER para fazer logout e voltar ao menu...";
-        std::cin.ignore(10000, '\n');
-        std::cin.get();
+        Farm* fazendaAtual = nullptr;
+        try {
+            fazendaAtual = inicializarFazendaDoUsuario(usuarioAtual);
+        } catch (const std::exception& e) {
+            std::cerr << "Erro critico ao carregar fazenda: " << e.what() << "\n";
+            delete usuarioAtual;
+            pausarTela();
+            continue;
+        }
+        bool sessaoAtiva = true;
+        while(sessaoAtiva) {
+            limparTela();
+            std :: cout << "=== PAINEL DE GESTAO | PROPRIETARIO: " << usuarioAtual->getNomeProprietario() << " ===\n";
+            std :: cout << "Area selecionada: " << (fazendaAtual->getAreaAtual().empty() ? "Nenhuma" : fazendaAtual->getAreaAtual()) << "\n\n";
+            std :: cout << "[0] Salvar e Voltar ao Login (Logout)\n" << "Opcao: ";
+            int opcao;
+            std::cin >> opcao;
+            if (std::cin.fail()) {
+                std::cin.clear();
+                std::cin.ignore(10000, '\n');
+                continue;
+            }
+            if(opcao==0){
+                fazendaAtual->salvarFazenda();
+                usuarioAtual->salvarEmArquivo();
+                sessaoAtiva = false;
+                break;
+            }
+            else{
+                std::cout << "Opcao invalida.\n";
+                pausarTela();
+                break;
+            }
+        }
+        delete fazendaAtual;
         delete usuarioAtual;
     }
     std::cout << "Sistema encerrado.\n";
