@@ -126,7 +126,8 @@ int main() {
             limparTela();
             std :: cout << "=== PAINEL DE GESTAO | PROPRIETARIO: " << usuarioAtual->getNomeProprietario() << " ===\n";
             std :: cout << "Area selecionada: " << (fazendaAtual->getAreaAtual().empty() ? "Nenhuma" : fazendaAtual->getAreaAtual()) << "\n\n";
-            std :: cout << "[0] Salvar e Voltar ao Login (Logout)\n" << "Opcao: ";
+            std :: cout << "[11] Atualizar Cotacoes (Dolar, Arroba, Leite, Racoes)\n" << "[12] Salvar Tudo Agora\n" << "[0] Salvar e Voltar ao Login (Logout)\n"
+            <<"Opcao: ";
             int opcao;
             std::cin >> opcao;
             if (std::cin.fail()) {
@@ -134,16 +135,30 @@ int main() {
                 std::cin.ignore(10000, '\n');
                 continue;
             }
-            if(opcao==0){
-                fazendaAtual->salvarFazenda();
-                usuarioAtual->salvarEmArquivo();
-                sessaoAtiva = false;
-                break;
-            }
-            else{
-                std::cout << "Opcao invalida.\n";
-                pausarTela();
-                break;
+            try{
+                switch(opcao){
+                    case 11:
+                        usuarioAtual->atualizarCotacoes();
+                        pausarTela();
+                        break;
+                    case 12:
+                        fazendaAtual->salvarFazenda();
+                        usuarioAtual->salvarEmArquivo();
+                        std::cout << "Dados da fazenda, areas, rebanho e cotacoes salvos\n";
+                        pausarTela();
+                        break;
+                    case 0:
+                        fazendaAtual->salvarFazenda();
+                        usuarioAtual->salvarEmArquivo();
+                        sessaoAtiva = false;
+                        break;
+                    default:
+                        std::cout << "Opcao invalida.\n";
+                        pausarTela();
+                        break;
+                }
+            }catch(const std::exception& e){
+                std :: cerr << "Erro: " << e.what() << "\n";
             }
         }
         delete fazendaAtual;
