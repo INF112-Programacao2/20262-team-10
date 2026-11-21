@@ -126,7 +126,8 @@ int main() {
             limparTela();
             std :: cout << "=== PAINEL DE GESTAO | PROPRIETARIO: " << usuarioAtual->getNomeProprietario() << " ===\n";
             std :: cout << "Area selecionada: " << (fazendaAtual->getAreaAtual().empty() ? "Nenhuma" : fazendaAtual->getAreaAtual()) << "\n\n";
-            std :: cout << "[11] Atualizar Cotacoes (Dolar, Arroba, Leite, Racoes)\n" << "[12] Salvar Tudo Agora\n" << "[0] Salvar e Voltar ao Login (Logout)\n"
+            std :: cout << "[4] Criar Nova Area / Pasto\n" <<"[11] Atualizar Cotacoes (Dolar, Arroba, Leite, Racoes)\n"
+            << "[12] Salvar Tudo Agora\n" << "[0] Salvar e Voltar ao Login (Logout)\n"
             <<"Opcao: ";
             int opcao;
             std::cin >> opcao;
@@ -137,6 +138,25 @@ int main() {
             }
             try{
                 switch(opcao){
+                    case 4: {
+                        std :: string nomeArea, estado;
+                        double hectares;
+                        std :: cout <<"Nome da area: ";
+                        std :: getline(std :: cin>> std::ws, nomeArea);
+                        std :: cout << "Estado do pasto (seco/ruim/intermediario/bom/muito bom): ";
+                        std :: getline(std::cin >> std::ws, estado);
+                        std :: cout << "Tamanho (hectares): ";
+                        std :: cin >> hectares;
+                        Area* novaArea = new Area(nomeArea, estado, hectares);
+                        try{
+                            fazendaAtual->adicionarArea(novaArea);
+                        }catch(...){
+                            delete novaArea;
+                            throw;
+                        }
+                        pausarTela();
+                        break;
+                    }
                     case 11:
                         usuarioAtual->atualizarCotacoes();
                         pausarTela();
