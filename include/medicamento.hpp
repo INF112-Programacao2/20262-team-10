@@ -36,9 +36,6 @@ class Medicamento {
 
         bool ehVacina() const;
 
-        //conversao de categoria pra texto
-        static std::string categoriaParaTexto(CategoriaMedicamento c);
-        static CategoriaMedicamento textoParaCategoria(const std::string& texto);
 };
 
 #endif

@@ -15,7 +15,7 @@ class RegistroSanitario{
 
     public: 
 
-        RegistroSanitario(const Medicamento& vacina, int diaAplicacao, int numeroDose);
+        RegistroSanitario(const Medicamento& medicamento, int diaAplicacao, int numeroDose);
 
         std::string get_nomeMedicamento() const;
         int get_DiaAplic() const;
@@ -27,8 +27,6 @@ class RegistroSanitario{
 
         void avancarDia();
         bool emCarencia() const;
-
-        
 
 };
 #endif
