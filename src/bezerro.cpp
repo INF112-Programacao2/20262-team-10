@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include "bezerro.hpp"
 
 Bezerro::Bezerro(std::string id, char s, double p) : Animal(id, s, p) {
@@ -121,7 +122,7 @@ double Bezerro::calcularReceitaDiaria(double valorMercado) {
 
 void Bezerro::salvarEmArquivo() {
     if(_id.empty()) throw std::invalid_argument("ID do bezerro invalido!");
-
+    std::filesystem::create_directories("./data");
     std::ifstream leitura("./data/bezerros.txt");
     std::ofstream temp("./data/bezerros_temp.txt");
     if(!temp.is_open()) {

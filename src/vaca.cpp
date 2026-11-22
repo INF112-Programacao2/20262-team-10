@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include "vaca.hpp"
 
 Vaca::Vaca(std::string id, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais)
@@ -112,7 +113,7 @@ void Vaca::adicionarFilho(std::string idFilho){
 
 void Vaca::salvarEmArquivo() {
     if(_id.empty()) throw std::invalid_argument("ID da vaca invalido!");
-
+    std::filesystem::create_directories("./data");
     std::ifstream leitura("./data/vacas.txt");
     std::ofstream temp("./data/vacas_temp.txt");
     if(!temp.is_open()) {

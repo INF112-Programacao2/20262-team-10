@@ -96,6 +96,8 @@ void User::salvarEmArquivo() {
         if (perfilFormatado[i] == ' ') perfilFormatado[i] = '_';
     }
 
+    std::filesystem::create_directories("./data");
+
     std::ifstream leitura("./data/usuarios.txt");
     std::ofstream temp("./data/usuarios_temp.txt");
     if (!temp.is_open()) {

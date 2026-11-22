@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include "farm.hpp"
 #include "touro.hpp"
 
@@ -95,7 +96,7 @@ double Touro::calcularReceitaDiaria([[maybe_unused]] double valorMercado) {
 
 void Touro::salvarEmArquivo() {
     if(_id.empty()) throw std::invalid_argument("ID do touro invalido!");
-
+    std::filesystem::create_directories("./data");
     std::ifstream leitura("./data/touros.txt");
     std::ofstream temp("./data/touros_temp.txt");
     if(!temp.is_open()) {

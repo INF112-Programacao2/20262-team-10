@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include "boicorte.hpp"
 
 Boicorte::Boicorte(std::string id, double p, int iM, int qtdF, int qtdV)
@@ -84,7 +85,7 @@ double Boicorte::calcularReceitaDiaria(double valorMercado) { //precoLeite alias
 
 void Boicorte::salvarEmArquivo() {
     if(_id.empty()) throw std::invalid_argument("ID do boi de corte invalido!");
-
+    std::filesystem::create_directories("./data");
     std::ifstream leitura("./data/boicortes.txt");
     std::ofstream temp("./data/boicortes_temp.txt");
     if(!temp.is_open()) {
