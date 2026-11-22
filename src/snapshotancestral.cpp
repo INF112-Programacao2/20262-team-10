@@ -117,26 +117,51 @@ bool SnapshotAncestral::ler(std::istream& in) {
     std::string id, status;
     char sexo;
     double peso;
+
     if (!(in >> reg >> id >> sexo >> peso >> status >> temPai)) return false;
 
-    SnapshotAncestral lido; 
-    lido.registrado_ = (reg != 0);
-    lido.id_ = decodificar(id);
-    lido.sexo_ = (sexo == '_') ? ' ' : sexo;
-    lido.ultimoPeso_ = peso;
-    lido.status_ = decodificar(status);
+    liberar();
+    registrado_ = (reg != 0);
+    id_ = decodificar(id);
+    sexo_ = (sexo == '_') ? ' ' : sexo;
+    ultimoPeso_ = peso;
+    status_ = decodificar(status);
 
     if (temPai != 0) {
-        SnapshotAncestral pai;
-        if (!pai.ler(in)) return false;
-        lido.snapshotPai_ = new SnapshotAncestral(pai);
+        snapshotPai_ = new SnapshotAncestral();
+        if (!snapshotPai_->ler(in)) {
+            liberar();
+            registrado_ = false;
+            id_.clear();
+            sexo_ = ' ';
+            ultimoPeso_ = 0.0;
+            status_.clear();
+            return false;
+        }
     }
-    if (!(in >> temMae)) return false;
+
+    if (!(in >> temMae)) {
+        liberar();
+        registrado_ = false;
+        id_.clear();
+        sexo_ = ' ';
+        ultimoPeso_ = 0.0;
+        status_.clear();
+        return false;
+    }
+
     if (temMae != 0) {
-        SnapshotAncestral mae;
-        if (!mae.ler(in)) return false;
-        lido.snapshotMae_ = new SnapshotAncestral(mae);
+        snapshotMae_ = new SnapshotAncestral();
+        if (!snapshotMae_->ler(in)) {
+            liberar();
+            registrado_ = false;
+            id_.clear();
+            sexo_ = ' ';
+            ultimoPeso_ = 0.0;
+            status_.clear();
+            return false;
+        }
     }
-    *this = lido;
+
     return true;
 }

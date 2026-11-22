@@ -193,6 +193,32 @@ void Farm::salvarFazenda() {
     if (proprietario == nullptr) throw std::runtime_error("Proprietario invalido para salvar fazenda!");
     if (nome.empty()) throw std::invalid_argument("Nome da fazenda invalido!");
 
+    // atualiza os dados dos ancestrais que ainda estao vivos na fazenda
+    // atualizacao percorre recursivamente a arvore
+    for (int i = 0; i < qtdAreas; ++i) {
+        if (area[i] == nullptr) continue;
+        Animal** rebanhoAtual = area[i]->getRebanho();
+        int quantidade = area[i]->getQtdAnimais();
+        for (int j = 0; j < quantidade; ++j) {
+            if (rebanhoAtual[j] == nullptr) continue;
+            SnapshotAncestral dadosAtuais = rebanhoAtual[j]->criarSnapshot();
+            for (int a = 0; a < qtdAreas; ++a) {
+                if (area[a] == nullptr) continue;
+                Animal** rebanhoAlvo = area[a]->getRebanho();
+                int qtdAlvos = area[a]->getQtdAnimais();
+                for (int k = 0; k < qtdAlvos; ++k) {
+                    if (rebanhoAlvo[k] == nullptr) continue;
+                    rebanhoAlvo[k]->getSnapshotPai()->atualizarAncestral(dadosAtuais);
+                    rebanhoAlvo[k]->getSnapshotMae()->atualizarAncestral(dadosAtuais);
+                    Vaca* vacaAlvo = dynamic_cast<Vaca*>(rebanhoAlvo[k]);
+                    if (vacaAlvo != nullptr) {
+                        vacaAlvo->getSnapshotTouroPai().atualizarAncestral(dadosAtuais);
+                    }
+                }
+            }
+        }
+    }
+
     std::filesystem::create_directories("./data");
     std::string idDono = proprietario->getId();
 
@@ -631,15 +657,10 @@ std::string Farm::registrarNascimento(const std::string& idFemea, const std::str
         filhote->setIdMae(idFemea);
         filhote->setIdPai(idPai);
 
-        // snapshot incluindo toda a arvore ancestral
+        // Snapshot completo da mae e do touro 
         filhote->setSnapshotMae(mae->criarSnapshot());
-
-        // o pai pode estar em qualquer area da fazenda
-        if (!idPai.empty()) { Animal* paiSnapshot = encontrarAnimalOpcional(idPai);
-
-            if (paiSnapshot != nullptr) {
-                filhote->setSnapshotPai(paiSnapshot->criarSnapshot());
-            }
+        if (mae->getSnapshotTouroPai().get_Registrado()) {
+            filhote->setSnapshotPai(mae->getSnapshotTouroPai());
         }
 
         destino->adicionarAnimal(filhote);

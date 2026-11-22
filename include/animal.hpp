@@ -60,8 +60,16 @@ public:
     void setIdMae(std::string idMae);
 
     // get do snapshot
+    SnapshotAncestral* getSnapshotPai() {
+        return &snapshotPai;
+    }
+
     const SnapshotAncestral* getSnapshotPai() const {
         return &snapshotPai;
+    }
+
+    SnapshotAncestral* getSnapshotMae() {
+        return &snapshotMae;
     }
 
     const SnapshotAncestral* getSnapshotMae() const {

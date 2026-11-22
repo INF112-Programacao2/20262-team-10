@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <sstream>
 #include "vaca.hpp"
 
 Vaca::Vaca(std::string id, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais)
@@ -17,6 +18,8 @@ double Vaca:: getProducaoLeiteDia()const {return producaoLeiteDia;}
 bool Vaca:: getEmLactacao()const {return emLactacao;}
 std::string Vaca::getTipo() const {return "vaca";}
 std::string Vaca::getIdTouroPai() const {return idTouroPai;}
+SnapshotAncestral& Vaca::getSnapshotTouroPai() { return snapshotTouroPai; }
+const SnapshotAncestral& Vaca::getSnapshotTouroPai() const { return snapshotTouroPai; }
 bool Vaca::podeSerPromovido() const {return false;}
 bool Vaca::getPrenha()const {return prenha;}
 //sets
@@ -86,6 +89,8 @@ bool Vaca::emprenhar(Touro* macho) {
         throw std::runtime_error("Cobertura bloqueada: parentesco proximo detectado!");
     }
 
+    //salva o snapshot paterno
+    snapshotTouroPai = macho->criarSnapshot();
     prenha = true;
     idTouroPai = macho->getId();
     return true;
@@ -125,16 +130,28 @@ void Vaca::salvarEmArquivo() {
     try {
         if(leitura.is_open()) {
             Vaca aux;
-            while(aux.carregarBase(leitura) &&
-                  (leitura >> aux.producaoLeiteDia >> aux.emLactacao >> aux.prenha >> aux.idTouroPai)) {
+            while(aux.carregarBase(leitura)) {
+                aux.snapshotTouroPai = SnapshotAncestral();
+                if (!(leitura >> aux.producaoLeiteDia >> aux.emLactacao >> aux.prenha >> aux.idTouroPai)) break;
                 aux.idTouroPai = formatarTextoCarregar(aux.idTouroPai);
+                std::string restante;
+                std::getline(leitura, restante);
+                std::istringstream linha(restante);
+                linha >> std::ws;
+                if (linha.peek() != std::char_traits<char>::eof() && !aux.snapshotTouroPai.ler(linha)) {
+                    throw std::runtime_error("Snapshot do touro invalido no arquivo de vacas.");
+                }
                 if(aux._id == _id) {
                     escreverBase(temp);
-                    temp << " " << producaoLeiteDia << " " << emLactacao << " " << prenha << " " << formatarTextoSalvar(idTouroPai) << "\n";
+                    temp << " " << producaoLeiteDia << " " << emLactacao << " " << prenha << " " << formatarTextoSalvar(idTouroPai) << " ";
+                    snapshotTouroPai.escrever(temp);
+                    temp << "\n";
                     vacaAtualizada = true;
                 } else {
                     aux.escreverBase(temp);
-                    temp << " " << aux.producaoLeiteDia << " " << aux.emLactacao << " " << aux.prenha << " " << formatarTextoSalvar(aux.idTouroPai) << "\n";
+                    temp << " " << aux.producaoLeiteDia << " " << aux.emLactacao << " " << aux.prenha << " " << formatarTextoSalvar(aux.idTouroPai) << " ";
+                    aux.snapshotTouroPai.escrever(temp);
+                    temp << "\n";
                 }
             }
             leitura.close();
@@ -142,7 +159,9 @@ void Vaca::salvarEmArquivo() {
 
         if(!vacaAtualizada) {
             escreverBase(temp);
-            temp << " " << producaoLeiteDia << " " << emLactacao << " " << prenha << " " << formatarTextoSalvar(idTouroPai) << "\n";
+            temp << " " << producaoLeiteDia << " " << emLactacao << " " << prenha << " " << formatarTextoSalvar(idTouroPai) << " ";
+            snapshotTouroPai.escrever(temp);
+            temp << "\n";
         }
     } catch (...) {
         if(leitura.is_open()) leitura.close();
@@ -160,15 +179,31 @@ Vaca* Vaca::carregarVaca(std::string id) {
     if(id.empty()) throw std::invalid_argument("ID invalido para carregar vaca!");
 
     std::ifstream arquivo("./data/vacas.txt");
-    if(!arquivo.is_open()) {
-        return nullptr;
-    }
+    if(!arquivo.is_open()) return nullptr;
 
     Vaca* vacaCarregada = new Vaca();
     try {
-        while(vacaCarregada->carregarBase(arquivo) &&
-              (arquivo >> vacaCarregada->producaoLeiteDia >> vacaCarregada->emLactacao >> vacaCarregada->prenha >> vacaCarregada->idTouroPai)) {
-            vacaCarregada->idTouroPai = vacaCarregada->formatarTextoCarregar(vacaCarregada->idTouroPai);
+        while(vacaCarregada->carregarBase(arquivo)) {
+            vacaCarregada->snapshotTouroPai = SnapshotAncestral();
+            std::string idTouroLido;
+            if (!(arquivo >> vacaCarregada->producaoLeiteDia
+                         >> vacaCarregada->emLactacao
+                         >> vacaCarregada->prenha
+                         >> idTouroLido)) break;
+
+            vacaCarregada->idTouroPai = vacaCarregada->formatarTextoCarregar(idTouroLido);
+
+            //snapshot paterno
+            std::string restante;
+            std::getline(arquivo, restante);
+            std::istringstream linha(restante);
+            linha >> std::ws;
+            if (linha.peek() != std::char_traits<char>::eof()) {
+                if (!vacaCarregada->snapshotTouroPai.ler(linha)) {
+                    throw std::runtime_error("Snapshot do touro invalido no arquivo de vacas.");
+                }
+            }
+
             if(vacaCarregada->_id == id) {
                 arquivo.close();
                 return vacaCarregada;

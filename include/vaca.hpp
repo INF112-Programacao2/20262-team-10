@@ -10,6 +10,7 @@ private:
     double producaoLeiteDia;
     bool emLactacao, prenha;
     std::string idTouroPai;
+    SnapshotAncestral snapshotTouroPai;
     Vaca();
 public:
     //construtor animal adquirido
@@ -35,6 +36,8 @@ public:
     //demais metodos
     bool emprenhar(Touro* macho);
     std::string getIdTouroPai() const;
+    SnapshotAncestral& getSnapshotTouroPai();
+    const SnapshotAncestral& getSnapshotTouroPai() const;
     std::string parir();
     void adicionarFilho(std::string idFilho);
     void salvarEmArquivo() override;
