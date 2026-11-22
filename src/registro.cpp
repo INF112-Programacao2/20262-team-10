@@ -1,10 +1,10 @@
 #include "registro.hpp"
 
-RegistroSanitario::RegistroSanitario(const Vacina& vacina, int diaAplicacao, int numeroDose)
-    :vacina_(vacina), diaAplicacao_(diaAplicacao), numeroDose_(numeroDose), diasCarenciaRestantes_(vacina.get_diasCarencia()) {}
+RegistroSanitario::RegistroSanitario(const Medicamento& medicamento, int diaAplicacao, int numeroDose)
+    :medicamento_(medicamento), diaAplicacao_(diaAplicacao), numeroDose_(numeroDose), diasCarenciaRestantes_(medicamento.get_diasCarencia()){}
 
-std::string RegistroSanitario::get_nomeVacina() const{
-    return vacina_.get_Nome();
+std::string RegistroSanitario::get_nomeMedicamento() const{
+    return medicamento_.get_Nome();
 }
 
 int RegistroSanitario::get_DiaAplic() const{
@@ -16,7 +16,7 @@ int RegistroSanitario::get_NumeroDose() const{
 }
 
 double RegistroSanitario::get_Custo() const{
-    return vacina_.get_custo();
+    return medicamento_.get_custo();
 }
 
 int RegistroSanitario::get_DiasCarenciaRestantes() const{
@@ -24,11 +24,15 @@ int RegistroSanitario::get_DiasCarenciaRestantes() const{
 }
 
 std::string RegistroSanitario::get_Tipo() const{
-    return vacina_.get_Tipo();
+    return medicamento_.get_Tipo();
+}
+
+CategoriaMedicamento RegistroSanitario::get_Categoria() const{
+    return medicamento_.get_Categoria();
 }
 
 void RegistroSanitario::avancarDia(){
-    if(diasCarenciaRestantes_ >0){
+    if(diasCarenciaRestantes_ > 0){
         diasCarenciaRestantes_--;
     }
 }
@@ -36,4 +40,3 @@ void RegistroSanitario::avancarDia(){
 bool RegistroSanitario::emCarencia() const{
     return diasCarenciaRestantes_ > 0;
 }
-
