@@ -71,6 +71,9 @@ class Farm {
         // gets
         int getQuantidadeTotalAnimais();
         ContagemRebanho getContagemGlobalPorTipo() const;
+
+        static int listarFazendasDoUsuario(User* proprietario);
+        static bool existeFazendaDoUsuario(User* proprietario, const std::string& nomeFazenda);
 };
 
 #endif

@@ -799,3 +799,67 @@ void Farm::calcularMeritoTouro(std::string idTouro) {
     // valor de referencia : herdabilidade 0.3 , confiabilidade 5.0
     _touro->setMerito((mediaPesoFilhos - 180.0)*0.3*(qtdEncontrados/(qtdEncontrados+5.0)));
 }
+
+int Farm::listarFazendasDoUsuario(User* proprietario) {
+    if (proprietario == nullptr) throw std::invalid_argument("Proprietario invalido!");
+
+    std::ifstream arqFaz("./data/fazendas.txt");
+    if (!arqFaz.is_open()) {
+        std::cout << "Nenhuma fazenda cadastrada para este usuario.\n";
+        return 0;
+    }
+
+    std::string idDono = proprietario->getId();
+    std::string donoLido, nomeLido, locLida, areaAtualLida;
+    int baixasLidas, diaLido, proxIdLido;
+    double caixaLido, lucroLido, prejuizoLido;
+    int contador = 0;
+
+    while (arqFaz >> donoLido >> nomeLido >> locLida >> areaAtualLida
+                  >> baixasLidas >> caixaLido >> lucroLido >> prejuizoLido >> diaLido >> proxIdLido) {
+        std::string donoFmt = formatarTextoFarmCarregar(donoLido);
+        if (donoFmt == idDono) {
+            contador++;
+            std::string nomeFmt = formatarTextoFarmCarregar(nomeLido);
+            std::string locFmt = formatarTextoFarmCarregar(locLida);
+            std::cout << "[" << contador << "] " << nomeFmt
+                      << " | Localizacao: " << locFmt
+                      << " | Dia: " << diaLido << "\n";
+        }
+    }
+
+    arqFaz.close();
+
+    if (contador == 0) {
+        std::cout << "Nenhuma fazenda cadastrada para este usuario.\n";
+    }
+
+    return contador;
+}
+
+bool Farm::existeFazendaDoUsuario(User* proprietario, const std::string& nomeFazenda) {
+    if (proprietario == nullptr) throw std::invalid_argument("Proprietario invalido!");
+
+    std::ifstream arqFaz("./data/fazendas.txt");
+    if (!arqFaz.is_open()) {
+        return false;
+    }
+
+    std::string idDono = proprietario->getId();
+    std::string donoLido, nomeLido, locLida, areaAtualLida;
+    int baixasLidas, diaLido, proxIdLido;
+    double caixaLido, lucroLido, prejuizoLido;
+
+    while (arqFaz >> donoLido >> nomeLido >> locLida >> areaAtualLida
+                  >> baixasLidas >> caixaLido >> lucroLido >> prejuizoLido >> diaLido >> proxIdLido) {
+        std::string donoFmt = formatarTextoFarmCarregar(donoLido);
+        std::string nomeFmt = formatarTextoFarmCarregar(nomeLido);
+        if (donoFmt == idDono && nomeFmt == nomeFazenda) {
+            arqFaz.close();
+            return true;
+        }
+    }
+
+    arqFaz.close();
+    return false;
+}
