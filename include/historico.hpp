@@ -2,8 +2,9 @@
 #define HISTORICO_HPP
 
 #include <string>
+
 #include "registro.hpp"
-#include "vacina.hpp"
+#include "medicamento.hpp"
 
 class HistoricoSanitario{
     private:
@@ -20,7 +21,11 @@ class HistoricoSanitario{
 
         ~HistoricoSanitario();
 
-        bool registrarVacina(const Vacina& vacina, int dia);
+        //nao causar duplo delete indevido
+        HistoricoSanitario(const HistoricoSanitario&) = delete;
+        HistoricoSanitario& operator=(const HistoricoSanitario&) = delete;
+
+        bool registrarMedicamento(const Medicamento& medicamento, int dia);
 
         void avancarDia();
 
@@ -32,9 +37,11 @@ class HistoricoSanitario{
 
         int get_QuantidadeAtual() const;
 
+        //quantos registros existem de uma categoria
+        int contarPorCategoria(CategoriaMedicamento categoria) const;
+
         void exibir() const;
 
 };
 
 #endif
-
