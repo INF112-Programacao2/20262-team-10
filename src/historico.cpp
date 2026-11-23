@@ -5,6 +5,7 @@ HistoricoSanitario::HistoricoSanitario(){
 
     capacidadeTotal_ = 5;
     quantidadeAtual_ = 0;
+    registros_ = nullptr;
 
     registros_ = new RegistroSanitario*[capacidadeTotal_];
 }
@@ -33,22 +34,42 @@ void HistoricoSanitario::aumentarCapacidade(){
     capacidadeTotal_ = novaCapacidade;
 }
 
-bool HistoricoSanitario::registrarMedicamento(const Medicamento& medicamento, int dia){
+void HistoricoSanitario::adicionarRegistro(RegistroSanitario *registro){
 
     if(quantidadeAtual_ >= capacidadeTotal_){
         aumentarCapacidade();
     }
 
-    int dosesAnteriores = 0;
-    for(int i=0; i<quantidadeAtual_; i++){
-        if(registros_[i]->get_nomeMedicamento() == medicamento.get_Nome()){
-            dosesAnteriores++;
+    registros_[quantidadeAtual_] = registro;
+    quantidadeAtual_++;
+}
+
+bool HistoricoSanitario::registrarMedicamento(const Medicamento& medicamento, int dia){
+
+    if(podeAplicar(medicamento, dia)){
+
+        int dosesAnteriores = 0;
+        for(int i=0; i<quantidadeAtual_; i++){
+            if(registros_[i]->get_nomeMedicamento() == medicamento.get_Nome()){
+                dosesAnteriores++;
+            }
         }
+
+        adicionarRegistro(new RegistroSanitario(medicamento, dia, dosesAnteriores + 1));
+        return true;
     }
 
-    registros_[quantidadeAtual_] = new RegistroSanitario(medicamento, dia, dosesAnteriores + 1);
-    quantidadeAtual_++;
-    return true;
+    return false;
+}
+
+int HistoricoSanitario::achaUltimoDia(const std::string& nomeMedicamento) const{
+    int ultimoDia = -1;
+    for(int i=0; i<quantidadeAtual_; i++){
+        if(registros_[i]->get_nomeMedicamento() == nomeMedicamento && registros_[i]->get_DiaAplic() > ultimoDia){
+            ultimoDia = registros_[i]->get_DiaAplic();
+        }
+    }
+    return ultimoDia;
 }
 
 void HistoricoSanitario::avancarDia(){
@@ -64,26 +85,26 @@ bool HistoricoSanitario::emCarencia() const{
    return false;
 }
 
-int HistoricoSanitario::get_DiasCarenciaRestantes() const{
-  int maior = 0;
-   for (int i=0; i<quantidadeAtual_; i++) {
-       if (registros_[i]->get_DiasCarenciaRestantes() > maior){
-           maior = registros_[i]->get_DiasCarenciaRestantes();
-       }
-   }
-   return maior;
-}
+bool HistoricoSanitario::podeAplicar(const Medicamento& medicamento, int dia) const{
 
-double HistoricoSanitario::get_CustoTotal() const{
-   double total = 0;
-   for (int i=0; i<quantidadeAtual_; i++) {
-       total += registros_[i]->get_Custo();
-   }
-   return total;
-}
+    if(dia < 0){
+        return false;
+    }
 
-int HistoricoSanitario::get_QuantidadeAtual() const{
-   return quantidadeAtual_;
+    int ultimoDia = achaUltimoDia(medicamento.get_Nome());
+
+    //nunca foi aplicado
+
+    if(ultimoDia == -1){
+        return true;
+    }
+
+    //dose unica ja aplicada
+    if(medicamento.get_Intervalo() == 0){
+        return false;
+    } 
+
+    return (dia - ultimoDia) >= medicamento.get_Intervalo();
 }
 
 int HistoricoSanitario::contarPorCategoria(CategoriaMedicamento categoria) const{
@@ -95,6 +116,53 @@ int HistoricoSanitario::contarPorCategoria(CategoriaMedicamento categoria) const
    }
    return total;
 }
+
+int HistoricoSanitario::contVacinas() const{
+   return contarPorCategoria(VACINA);
+}
+
+
+
+
+//implementação dos getters
+
+double HistoricoSanitario::get_CustoTotal() const{
+   double total = 0;
+   for (int i=0; i<quantidadeAtual_; i++){
+       total += registros_[i]->get_Custo();
+   }
+   return total;
+}
+
+int HistoricoSanitario::get_QuantidadeAtual() const{
+   return quantidadeAtual_;
+}
+
+double HistoricoSanitario::get_CustoNoPeriodo(int diaInicial, int diaFinal) const{
+   double total = 0;
+   for (int i=0; i<quantidadeAtual_; i++){
+       if (registros_[i]->get_DiaAplic() >= diaInicial && registros_[i]->get_DiaAplic() <= diaFinal){
+
+           total += registros_[i]->get_Custo();
+       }
+   }
+   return total;
+}
+
+
+int HistoricoSanitario::get_DiasCarenciaRestantes() const{
+  int maior = 0;
+   for (int i=0; i<quantidadeAtual_; i++){
+       if (registros_[i]->get_DiasCarenciaRestantes() >maior){
+           maior = registros_[i]->get_DiasCarenciaRestantes();
+       }
+   }
+   return maior;
+}
+
+
+
+//prototipo exibir
 
 void HistoricoSanitario::exibir() const{
    if (quantidadeAtual_ == 0) {

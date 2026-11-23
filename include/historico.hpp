@@ -14,6 +14,8 @@ class HistoricoSanitario{
         int quantidadeAtual_;
 
         void aumentarCapacidade();
+        void adicionarRegistro(RegistroSanitario *registro);
+        int achaUltimoDia(const std::string& nomeMedicamento) const;
 
     public: 
 
@@ -21,15 +23,22 @@ class HistoricoSanitario{
 
         ~HistoricoSanitario();
 
-        //nao causar duplo delete indevido
-        HistoricoSanitario(const HistoricoSanitario&) = delete;
-        HistoricoSanitario& operator=(const HistoricoSanitario&) = delete;
-
         bool registrarMedicamento(const Medicamento& medicamento, int dia);
 
         void avancarDia();
 
         bool emCarencia() const;
+
+        bool podeAplicar(const Medicamento& medicamento, int dia) const;
+
+        int contVacinas() const;
+
+        //quantos registros existem de uma categoria
+        int contarPorCategoria(CategoriaMedicamento categoria) const;
+
+        void exibir() const;
+
+        //getters
 
         int get_DiasCarenciaRestantes() const;
 
@@ -37,10 +46,7 @@ class HistoricoSanitario{
 
         int get_QuantidadeAtual() const;
 
-        //quantos registros existem de uma categoria
-        int contarPorCategoria(CategoriaMedicamento categoria) const;
-
-        void exibir() const;
+        double get_CustoNoPeriodo(int diaInicial, int diaFinal) const;
 
 };
 
