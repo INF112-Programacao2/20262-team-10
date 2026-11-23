@@ -32,7 +32,7 @@ class Area {
 
     public:
         Area(string nome, string estadoPasto, double area);
-        ~Area();
+        virtual ~Area();
         // Dentro de public na class Area:
 
         // funcoes de calculo
@@ -48,7 +48,7 @@ class Area {
         void promoverAnimal();
         Animal* buscarAnimal(string id);
         double getGastoIndividual(string id, double precoLeite, SacaRacao** relatorioRacoes);
-        double getGastoDaArea(double precoLeite, SacaRacao** relatorioRacoes);
+        virtual double getGastoDaArea(double precoLeite, SacaRacao** relatorioRacoes);
         void listarAnimais() const;
 
         // getters
