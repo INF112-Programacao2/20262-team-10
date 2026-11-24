@@ -64,6 +64,8 @@ class AreaQuarentena : public Area {
         int getQtdPacientes() const;
         int getDiasRestantes(std::string idAnimal) const;
         double getGastoDaArea(double precoLeite, SacaRacao** relatorioRacoes) override;
+
+        //setters
         
 };
 
