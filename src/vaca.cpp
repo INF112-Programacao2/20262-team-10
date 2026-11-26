@@ -22,6 +22,13 @@ SnapshotAncestral& Vaca::getSnapshotTouroPai() { return snapshotTouroPai; }
 const SnapshotAncestral& Vaca::getSnapshotTouroPai() const { return snapshotTouroPai; }
 bool Vaca::podeSerPromovido() const {return false;}
 bool Vaca::getPrenha()const {return prenha;}
+
+// producao de leite em relacao a referencia de 20 L/dia (so conta se a vaca esta produzindo)
+bool Vaca::obterRazaoProducao(double& razao) const {
+    if (!emLactacao || producaoLeiteDia <= 0.0) return false;
+    razao = producaoLeiteDia / 20.0;
+    return true;
+}
 //sets
 void Vaca::setProducaoLeiteDia(double p) {
     if (p < 0.0) throw std::invalid_argument("A producao de leite nao pode ser negativa!");
@@ -89,7 +96,8 @@ bool Vaca::emprenhar(Touro* macho) {
         throw std::runtime_error("Cobertura bloqueada: parentesco proximo detectado!");
     }
 
-    //salva o snapshot paterno
+    //salva o snapshot paterno 
+    macho->calcularScoreBase();
     snapshotTouroPai = macho->criarSnapshot();
     prenha = true;
     idTouroPai = macho->getId();
@@ -223,7 +231,7 @@ Vaca* Vaca::carregarVaca(std::string id) {
 void Vaca::imprimirFichaParcial() const {
     std::cout << "===Animal:" << getTipo() << "\n"
     << "ID:" << _id << "\nSexo:" << sexo << "\nPeso:" << peso
-    << "\nIdade:" << idadeMeses << "\nEm Lactacao:";
+    << "\nIdade:" << idadeMeses << "\nScore genetico:" << scoreGenetico << "\nEm Lactacao:";
     (emLactacao) ? std::cout << "SIM" : std::cout << "NAO";
     std::cout << "\n";
 }

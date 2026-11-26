@@ -24,6 +24,7 @@ public:
     std::string getTipoRacao() const override;
     double calcularSacosDiarios(SacaRacao** relatorioRacao) const override;
     bool getPrenha()const;
+    bool obterRazaoProducao(double& razao) const override;
     //sets
     void setProducaoLeiteDia(double p);
     void setEmLactacao(bool l);

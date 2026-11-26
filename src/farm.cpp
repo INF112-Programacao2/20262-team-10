@@ -189,9 +189,84 @@ void Farm::adicionarArea(Area* a, bool silencioso) {
 
 }
 
+double Farm::calcularMediaScoreBase() const {
+    double soma = 0.0;
+    int n = 0;
+    for (int i = 0; i < qtdAreas; ++i) {
+        if (area[i] == nullptr) continue;
+        Animal** rebanho = area[i]->getRebanho();
+        for (int j = 0; j < area[i]->getQtdAnimais(); ++j) {
+            if (rebanho[j] != nullptr && rebanho[j]->getScoreBase() > 0.0) { soma += rebanho[j]->getScoreBase(); n++; }
+        }
+    }
+    return (n > 0) ? soma / n : 50.0;
+}
+
+// Recalcula o score genetico de todos os animais da fazenda, em tres passos:
+void Farm::recalcularScoresGeneticos() {
+    const double PONTOS_POR_DESCENDENTE = 1.5;
+    const double TETO_AJUSTE_DESCENDENTES = 6.0;
+    const int IDADE_MINIMA_DESCENDENTE = 6; 
+
+    for (int i = 0; i < qtdAreas; ++i) {
+        if (area[i] == nullptr) continue;
+        Animal** rebanho = area[i]->getRebanho();
+        for (int j = 0; j < area[i]->getQtdAnimais(); ++j) {
+            if (rebanho[j] != nullptr) rebanho[j]->calcularScoreBase();
+        }
+    }
+
+    //mesma atualizacao de snapshots feita em salvarFazenda, so que agr com o score base
+    for (int i = 0; i < qtdAreas; ++i) {
+        if (area[i] == nullptr) continue;
+        Animal** rebanhoAtual = area[i]->getRebanho();
+        for (int j = 0; j < area[i]->getQtdAnimais(); ++j) {
+            if (rebanhoAtual[j] == nullptr) continue;
+            SnapshotAncestral dadosAtuais = rebanhoAtual[j]->criarSnapshot();
+            for (int a = 0; a < qtdAreas; ++a) {
+                if (area[a] == nullptr) continue;
+                Animal** rebanhoAlvo = area[a]->getRebanho();
+                for (int k = 0; k < area[a]->getQtdAnimais(); ++k) {
+                    if (rebanhoAlvo[k] == nullptr) continue;
+                    rebanhoAlvo[k]->getSnapshotPai()->atualizarAncestral(dadosAtuais);
+                    rebanhoAlvo[k]->getSnapshotMae()->atualizarAncestral(dadosAtuais);
+                    Vaca* vacaAlvo = dynamic_cast<Vaca*>(rebanhoAlvo[k]);
+                    if (vacaAlvo != nullptr) vacaAlvo->getSnapshotTouroPai().atualizarAncestral(dadosAtuais);
+                }
+            }
+        }
+    }
+
+    const double mediaRebanho = calcularMediaScoreBase();
+
+    for (int i = 0; i < qtdAreas; ++i) {
+        if (area[i] == nullptr) continue;
+        Animal** rebanho = area[i]->getRebanho();
+        for (int j = 0; j < area[i]->getQtdAnimais(); ++j) {
+            Animal* pai = rebanho[j];
+            if (pai == nullptr) continue;
+
+            double ajuste = 0.0;
+            std::string* filhos = pai->getFilhos();
+            for (int k = 0; filhos != nullptr && k < pai->getQtdFilhos(); ++k) {
+                Animal* filho = encontrarAnimalOpcional(filhos[k]);
+                if (filho == nullptr || filho->getIdadeMeses() < IDADE_MINIMA_DESCENDENTE || filho->getScoreBase() <= 0.0) continue;
+                ajuste += ((filho->getScoreBase() - mediaRebanho) / 50.0) * PONTOS_POR_DESCENDENTE;
+            }
+            if (ajuste > TETO_AJUSTE_DESCENDENTES) ajuste = TETO_AJUSTE_DESCENDENTES;
+            if (ajuste < -TETO_AJUSTE_DESCENDENTES) ajuste = -TETO_AJUSTE_DESCENDENTES;
+
+            pai->setAjusteDescendentes(ajuste);
+            pai->recalcularScoreGenetico(mediaRebanho);
+        }
+    }
+}
+
 void Farm::salvarFazenda() {
     if (proprietario == nullptr) throw std::runtime_error("Proprietario invalido para salvar fazenda!");
     if (nome.empty()) throw std::invalid_argument("Nome da fazenda invalido!");
+
+    recalcularScoresGeneticos(); // score atualizado antes de gravar
 
     // atualiza os dados dos ancestrais que ainda estao vivos na fazenda
     // atualizacao percorre recursivamente a arvore
@@ -658,10 +733,16 @@ std::string Farm::registrarNascimento(const std::string& idFemea, const std::str
         filhote->setIdPai(idPai);
 
         // Snapshot completo da mae e do touro 
+        mae->calcularScoreBase();
         filhote->setSnapshotMae(mae->criarSnapshot());
         if (mae->getSnapshotTouroPai().get_Registrado()) {
             filhote->setSnapshotPai(mae->getSnapshotTouroPai());
         }
+
+        // score genetico inicial do bezerro
+        filhote->setPesoNascimento(peso);
+        filhote->calcularScoreBase();
+        filhote->recalcularScoreGenetico(calcularMediaScoreBase());
 
         destino->adicionarAnimal(filhote);
         mae->adicionarFilho(id);

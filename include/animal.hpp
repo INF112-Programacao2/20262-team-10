@@ -1,4 +1,3 @@
-
 #ifndef ANIMAL_HPP
 #define ANIMAL_HPP
 
@@ -17,6 +16,13 @@ protected:
     std::string idMae;
     std::string* idFilhos;
 
+    // Score genetico
+    double pesoNascimento;        
+    double ganhoMedioPeso;        
+    double scoreBase;             // 0 a 100
+    double ajusteDescendentes;    
+    double scoreGenetico;        
+
     // Snapshot ancestral
     SnapshotAncestral snapshotPai;
     SnapshotAncestral snapshotMae;
@@ -26,6 +32,8 @@ protected:
     std::string formatarTextoCarregar(std::string texto) const;
     void escreverBase(std::ofstream& out) const;
     bool carregarBase(std::ifstream& in);
+
+    virtual bool obterRazaoProducao(double& razao) const;
 
 public:
     Animal(std::string id, char s, double p);
@@ -54,10 +62,26 @@ public:
     std::string getPai() const;
     std::string getMae() const;
     std::string* getFilhos() const;
+    double getPesoNascimento() const;
+    double getGanhoMedioPeso() const;
+    double getScoreBase() const;
+    double getAjusteDescendentes() const;
+    double getScoreGenetico() const;
 
     // sets
     void setIdPai(std::string idPai);
     void setIdMae(std::string idMae);
+    void setPesoNascimento(double p);
+    void setAjusteDescendentes(double pontos);
+
+    // score genetico
+    void registrarPesagem(double novoPeso, int novaIdadeMeses); 
+    int contarAncestraisSalvos() const;
+    double calcularAjusteAncestrais(double mediaRebanho = 50.0) const;
+    double calcularScoreBase();          
+    void recalcularScoreGenetico(double mediaRebanho = 50.0); 
+    double getFatorPrecoGenetico() const; 
+    void copiarDadosGeneticosDe(const Animal& outro); 
 
     // get do snapshot
     SnapshotAncestral* getSnapshotPai() {
@@ -86,7 +110,7 @@ public:
     }
 
     // cria um snapshot completo, incluindo sua árvore ancestral
-    SnapshotAncestral criarSnapshot() const { return SnapshotAncestral(_id, sexo, peso, estadoSaude, &snapshotPai, &snapshotMae );
+    SnapshotAncestral criarSnapshot() const { return SnapshotAncestral(_id, sexo, peso, estadoSaude, &snapshotPai, &snapshotMae, scoreBase );
     }
 
     // metodos usados para verificar promoção

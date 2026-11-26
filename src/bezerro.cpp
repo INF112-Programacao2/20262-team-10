@@ -111,13 +111,18 @@ double Bezerro::calcularGastoDiario(double precoLeite, SacaRacao** relatorioRaca
     return calcularSacosDiarios(relatorioRacao) * precoRacao;
 }
 
-//Agio : é o percentual de valorização extra pago por arroba (ou quilo) de um animal jovem de reposição 
-//— como o bezerro — em relação ao preço base da arroba do boi gordo.
 double Bezerro::calcularReceitaDiaria(double valorMercado) {
     double agio = 0.05; // calculo com base na idade do animal ganho de peso diario
     if(idadeMeses<=8) (sexo=='M') ? agio=0.22 : agio=0.15;
     else if(idadeMeses<=14) (sexo=='M') ? agio=0.12 : agio=0.08;
     return (ganhoPesoMedioDiario/30.0) * valorMercado * (1+agio);
+}
+
+// macho vira touro se o score for >=60, senao vira boi de corte
+std::string Bezerro::recomendarDestinoMaturidade() {
+    const double SCORE_MINIMO_TOURO = 60.0;
+    if(sexo=='F') return "vaca";
+    return (scoreGenetico >= SCORE_MINIMO_TOURO) ? "touro" : "boicorte";
 }
 
 void Bezerro::salvarEmArquivo() {
@@ -195,7 +200,7 @@ Bezerro* Bezerro::carregarBezerro(std::string id) {
 void Bezerro::imprimirFichaParcial() const{
     std :: cout << "===Animal:" << getTipo() << "\n"
     << "ID:" << _id << "\nSexo:" << sexo << "\nPeso:" << peso 
-    << "\nIdade:" << idadeMeses << "\nDesmamado:";
+    << "\nIdade:" << idadeMeses << "\nScore genetico:" << scoreGenetico << "\nDesmamado:";
     (desmamado) ? std::cout << "SIM" : std::cout << "NAO";
     std::cout <<"\n";
 }

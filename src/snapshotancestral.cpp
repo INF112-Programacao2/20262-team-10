@@ -17,19 +17,19 @@ namespace {
     }
 }
 
-SnapshotAncestral::SnapshotAncestral() : registrado_(false), id_(""), sexo_(' '), ultimoPeso_(0.0), status_(""), snapshotPai_(nullptr), snapshotMae_(nullptr) {}
+SnapshotAncestral::SnapshotAncestral() : registrado_(false), id_(""), sexo_(' '), ultimoPeso_(0.0), status_(""), scoreBase_(0.0), snapshotPai_(nullptr), snapshotMae_(nullptr) {}
 
 SnapshotAncestral::SnapshotAncestral(std::string id, char sexo, double ultimoPeso, std::string status): registrado_(true), id_(id), sexo_(sexo),
-    ultimoPeso_(ultimoPeso),status_(status), snapshotPai_(nullptr),snapshotMae_(nullptr) {}
+    ultimoPeso_(ultimoPeso),status_(status), scoreBase_(0.0), snapshotPai_(nullptr),snapshotMae_(nullptr) {}
 
-SnapshotAncestral::SnapshotAncestral(std::string id, char sexo, double ultimoPeso, std::string status, const SnapshotAncestral* snapPai, const SnapshotAncestral* snapMae)
-    : registrado_(true), id_(id),sexo_(sexo), ultimoPeso_(ultimoPeso), status_(status), snapshotPai_(nullptr), snapshotMae_(nullptr) {
+SnapshotAncestral::SnapshotAncestral(std::string id, char sexo, double ultimoPeso, std::string status, const SnapshotAncestral* snapPai, const SnapshotAncestral* snapMae, double scoreBase)
+    : registrado_(true), id_(id),sexo_(sexo), ultimoPeso_(ultimoPeso), status_(status), scoreBase_(scoreBase), snapshotPai_(nullptr), snapshotMae_(nullptr) {
     if (snapPai != nullptr && snapPai->registrado_) snapshotPai_ = new SnapshotAncestral(*snapPai);
     if (snapMae != nullptr && snapMae->registrado_) snapshotMae_ = new SnapshotAncestral(*snapMae);
 }
 
 SnapshotAncestral::SnapshotAncestral(const SnapshotAncestral& outro)
-    : registrado_(false), id_(""), sexo_(' '), ultimoPeso_(0.0), status_(""), snapshotPai_(nullptr), snapshotMae_(nullptr) {
+    : registrado_(false), id_(""), sexo_(' '), ultimoPeso_(0.0), status_(""), scoreBase_(0.0), snapshotPai_(nullptr), snapshotMae_(nullptr) {
     copiarDe(outro);
 }
 
@@ -42,6 +42,7 @@ SnapshotAncestral& SnapshotAncestral::operator=(const SnapshotAncestral& outro) 
         sexo_ = copia.sexo_;
         ultimoPeso_ = copia.ultimoPeso_;
         status_ = copia.status_;
+        scoreBase_ = copia.scoreBase_;
         snapshotPai_ = copia.snapshotPai_;
         snapshotMae_ = copia.snapshotMae_;
         copia.snapshotPai_ = nullptr; 
@@ -58,6 +59,7 @@ void SnapshotAncestral::copiarDe(const SnapshotAncestral& outro) {
     sexo_ = outro.sexo_;
     ultimoPeso_ = outro.ultimoPeso_;
     status_ = outro.status_;
+    scoreBase_ = outro.scoreBase_;
     if (outro.snapshotPai_ != nullptr) snapshotPai_ = new SnapshotAncestral(*outro.snapshotPai_);
     if (outro.snapshotMae_ != nullptr) snapshotMae_ = new SnapshotAncestral(*outro.snapshotMae_);
 }
@@ -74,6 +76,8 @@ std::string SnapshotAncestral::get_id() const { return id_; }
 char SnapshotAncestral::get_Sexo() const { return sexo_; }
 double SnapshotAncestral::get_UltimoPeso() const { return ultimoPeso_; }
 std::string SnapshotAncestral::get_Status() const { return status_; }
+double SnapshotAncestral::get_ScoreBase() const { return scoreBase_; }
+void SnapshotAncestral::set_ScoreBase(double s) { scoreBase_ = s; }
 
 const SnapshotAncestral* SnapshotAncestral::get_SnapshotPai() const { return snapshotPai_; }
 const SnapshotAncestral* SnapshotAncestral::get_SnapshotMae() const { return snapshotMae_; }
@@ -97,6 +101,7 @@ bool SnapshotAncestral::atualizarAncestral(const SnapshotAncestral& novo) {
     if (registrado_ && id_ == novo.id_) {
         ultimoPeso_ = novo.ultimoPeso_;
         status_ = novo.status_;
+        scoreBase_ = novo.scoreBase_;
         achou = true;
     }
     if (snapshotPai_ != nullptr && snapshotPai_->atualizarAncestral(novo)) achou = true;
@@ -106,7 +111,7 @@ bool SnapshotAncestral::atualizarAncestral(const SnapshotAncestral& novo) {
 
 void SnapshotAncestral::escrever(std::ostream& out) const {
     out << (registrado_ ? 1 : 0) << ' ' << codificar(id_) << ' ' << (sexo_ == ' ' ? '_' : sexo_) << ' '
-        << ultimoPeso_ << ' ' << codificar(status_) << ' ' << (snapshotPai_ != nullptr ? 1 : 0);
+        << ultimoPeso_ << ' ' << codificar(status_) << ' ' << scoreBase_ << ' ' << (snapshotPai_ != nullptr ? 1 : 0);
     if (snapshotPai_ != nullptr) { out << ' '; snapshotPai_->escrever(out); }
     out << ' ' << (snapshotMae_ != nullptr ? 1 : 0);
     if (snapshotMae_ != nullptr) { out << ' '; snapshotMae_->escrever(out); }
@@ -116,9 +121,9 @@ bool SnapshotAncestral::ler(std::istream& in) {
     int reg, temPai, temMae;
     std::string id, status;
     char sexo;
-    double peso;
+    double peso, score;
 
-    if (!(in >> reg >> id >> sexo >> peso >> status >> temPai)) return false;
+    if (!(in >> reg >> id >> sexo >> peso >> status >> score >> temPai)) return false;
 
     liberar();
     registrado_ = (reg != 0);
@@ -126,6 +131,7 @@ bool SnapshotAncestral::ler(std::istream& in) {
     sexo_ = (sexo == '_') ? ' ' : sexo;
     ultimoPeso_ = peso;
     status_ = decodificar(status);
+    scoreBase_ = score;
 
     if (temPai != 0) {
         snapshotPai_ = new SnapshotAncestral();

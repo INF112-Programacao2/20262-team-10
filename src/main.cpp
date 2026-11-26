@@ -317,6 +317,7 @@ void importarArquivoEmLote(Farm* fazendaAtual, const std::string& caminhoArquivo
     }
 
     arquivo.close();
+    fazendaAtual->recalcularScoresGeneticos();
     std::cout << "Importacao concluida! Areas criadas: " << areasImportadas
               << " | Animais importados: " << animaisImportados << "\n";
 }
@@ -764,6 +765,7 @@ void menuMovimentacaoReproducao(Farm* fazendaAtual) {
         << "[3] Realizar Cobertura (Touro x Vaca)\n"
         << "[4] Registrar Nascimento\n"
         << "[5] Promover Animais\n"
+        << "[6] Recalcular Scores Geneticos\n"
         << "[0] Voltar\n"
         << "Opcao: ";
 
@@ -855,7 +857,13 @@ void menuMovimentacaoReproducao(Farm* fazendaAtual) {
             pausarTela();
         }
         else if (opcao == 5) {
+            fazendaAtual->recalcularScoresGeneticos();
             fazendaAtual->promoverAnimalGlobal();
+            pausarTela();
+        }
+        else if (opcao == 6) {
+            fazendaAtual->recalcularScoresGeneticos();
+            std::cout << "Scores geneticos recalculados.\n";
             pausarTela();
         }
         else {

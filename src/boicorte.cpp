@@ -17,11 +17,18 @@ double Boicorte::getmetaAbatePeso() const { return metaAbatePeso; }
 bool Boicorte::getFaseEngorda() const { return faseEngorda; }
 std::string Boicorte::getTipo() const { return "boicorte"; }
 bool Boicorte::podeSerPromovido() const { return false; }
+
+// rendimento de carcaca em relacao a referencia de 52%
+bool Boicorte::obterRazaoProducao(double& razao) const {
+    if (rendimentoCarcaca <= 0.0) return false;
+    razao = rendimentoCarcaca / 0.52;
+    return true;
+}
 //sets
 void Boicorte::setrendimentoCarcaca(double r) {
     if (r < 0.0) throw std::invalid_argument("O rendimento de carcaca nao pode ser negativo!");
     if (r > 1.0 && r <= 100.0) {
-        rendimentoCarcaca = r / 100.0; // converte percentagem (ex: 52) para decimal (0.52)
+        rendimentoCarcaca = r / 100.0; 
     } else if (r <= 1.0) {
         rendimentoCarcaca = r;
     } else {
@@ -158,7 +165,7 @@ Boicorte* Boicorte::carregarBoicorte(std::string id) {
 void Boicorte::imprimirFichaParcial() const{
     std :: cout << "===Animal:" << getTipo() << "\n"
     << "ID:" << _id << "\nSexo:" << sexo << "\nPeso:" << peso
-    << "\nIdade:" << idadeMeses << "\nFase de engorda:";
+    << "\nIdade:" << idadeMeses << "\nScore genetico:" << scoreGenetico << "\nFase de engorda:";
     (faseEngorda) ? std::cout << "SIM" : std::cout <<"NAO";
     std::cout <<"\n";
 }

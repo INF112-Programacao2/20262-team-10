@@ -32,6 +32,9 @@ class Farm {
         int diaAtualSimulacao;
 
         Animal* encontrarAnimalOpcional(const std::string& identificador) const;
+        // media do score base de todos os animais 
+        double calcularMediaScoreBase() const; 
+       
 
     public:
         Farm(std::string nome, std::string localizacao, User* proprietario);
@@ -67,6 +70,7 @@ class Farm {
         void realizarCobertura(const std::string& idMacho, const std::string& idFemea);
         void registrarNascimento(const std::string& idFemea, const std::string& nomeArea, std::string id, char sexo, double peso);
         void calcularMeritoTouro(std::string idTouro);
+        void recalcularScoresGeneticos();
         void emitirRelatorioOperacional();
         // gets
         int getQuantidadeTotalAnimais();

@@ -11,6 +11,7 @@ class SnapshotAncestral {
         char sexo_;
         double ultimoPeso_;
         std::string status_; 
+        double scoreBase_; 
 
         SnapshotAncestral* snapshotPai_;
         SnapshotAncestral* snapshotMae_;
@@ -21,7 +22,7 @@ class SnapshotAncestral {
     public: 
         SnapshotAncestral();
         SnapshotAncestral(std::string id, char sexo, double ultimoPeso, std::string status);
-        SnapshotAncestral(std::string id, char sexo, double ultimoPeso, std::string status, const SnapshotAncestral* snapPai, const SnapshotAncestral* snapMae);
+        SnapshotAncestral(std::string id, char sexo, double ultimoPeso, std::string status, const SnapshotAncestral* snapPai, const SnapshotAncestral* snapMae, double scoreBase = 0.0);
 
         SnapshotAncestral(const SnapshotAncestral& outro);
         SnapshotAncestral& operator=(const SnapshotAncestral& outro);
@@ -32,12 +33,14 @@ class SnapshotAncestral {
         char get_Sexo() const;
         double get_UltimoPeso() const;
         std::string get_Status() const; 
+        double get_ScoreBase() const;
 
         //getters 
         const SnapshotAncestral* get_SnapshotPai() const;
         const SnapshotAncestral* get_SnapshotMae() const;
 
         //setters 
+        void set_ScoreBase(double s);
         void set_SnapshotPai(const SnapshotAncestral* snapPai);
         void set_SnapshotMae(const SnapshotAncestral* snapMae);
 

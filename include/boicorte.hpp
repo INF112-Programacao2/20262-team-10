@@ -34,6 +34,7 @@ public:
     bool prontoAbate();
     double calcularValorVendaMercado();
     double calcularArrobaLiquidas();
+    bool obterRazaoProducao(double& razao) const override;
     void salvarEmArquivo() override;
     static Boicorte* carregarBoicorte(std::string id);
 };

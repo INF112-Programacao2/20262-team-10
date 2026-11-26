@@ -8,6 +8,7 @@ class SnapshotAncestral:
         status="",
         snapshot_pai=None,
         snapshot_mae=None,
+        score_base=0.0,
     ):
         self.registrado = registrado
         self.id_animal = id_animal
@@ -16,6 +17,7 @@ class SnapshotAncestral:
         self.status = status
         self.snapshot_pai = snapshot_pai
         self.snapshot_mae = snapshot_mae
+        self.score_base = score_base  # 0 = desconhecido
 
     @staticmethod
     def _codificar(texto):
@@ -30,7 +32,7 @@ class SnapshotAncestral:
         peso_fmt = f"{self.ultimo_peso:.2f}"
         status_fmt = self._codificar(self.status)
 
-        tokens = [reg, id_fmt, sexo_fmt, peso_fmt, status_fmt]
+        tokens = [reg, id_fmt, sexo_fmt, peso_fmt, status_fmt, f"{self.score_base:.2f}"]
 
         if self.snapshot_pai is not None and self.snapshot_pai.registrado:
             tokens.append("1")
@@ -60,8 +62,8 @@ def gerar_teste_gigante(caminho_arquivo="teste_gigante.txt"):
     vacas_registradas = []
     touros_registrados = []
 
-    avo_paterno_elite = SnapshotAncestral(True, "TR_ANC_01", "M", 920.0, "Ativo")
-    avo_materno_elite = SnapshotAncestral(True, "VC_ANC_01", "F", 580.0, "Ativo")
+    avo_paterno_elite = SnapshotAncestral(True, "TR_ANC_01", "M", 920.0, "Ativo", score_base=78.0)
+    avo_materno_elite = SnapshotAncestral(True, "VC_ANC_01", "F", 580.0, "Ativo", score_base=82.0)
 
     with open(caminho_arquivo, "w", encoding="utf-8") as f:
         f.write("AREA Retiro_Seca seco 100.0\n")

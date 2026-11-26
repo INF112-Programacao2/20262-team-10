@@ -128,6 +128,11 @@ void Area::promoverAnimal() {
 
         if (rebanho[i]->podeSerPromovido() && rebanho[i]->getTipo() == "bezerro") {
             std::cout << "O animal " << rebanho[i]->getId() << " ja esta na idade apropriada para promocao.\n";
+            Bezerro* bezSugestao = dynamic_cast<Bezerro*>(rebanho[i]);
+            if (bezSugestao != nullptr) {
+                std::cout << "Score genetico: " << rebanho[i]->getScoreGenetico()
+                          << " | destino sugerido: " << bezSugestao->recomendarDestinoMaturidade() << "\n";
+            }
             std::cout << "Gostaria de realizar a promocao [Y/N]? ";
             string resposta;
             std::cin >> resposta;
@@ -142,6 +147,7 @@ void Area::promoverAnimal() {
                     //snapshot
                     t->setSnapshotPai(*rebanho[i]->getSnapshotPai());
                     t->setSnapshotMae(*rebanho[i]->getSnapshotMae());
+                    t->copiarDadosGeneticosDe(*rebanho[i]);
 
                     delete rebanho[i];
                     rebanho[i] = t;
@@ -155,6 +161,7 @@ void Area::promoverAnimal() {
                     //snapshot
                     v->setSnapshotPai(*rebanho[i]->getSnapshotPai());
                     v->setSnapshotMae(*rebanho[i]->getSnapshotMae());
+                    v->copiarDadosGeneticosDe(*rebanho[i]);
                     
                     delete rebanho[i];
                     rebanho[i] = v;
