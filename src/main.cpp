@@ -29,6 +29,13 @@ void pausarTela() {
     std::getline(std::cin, tmp);
 }
 
+void salvarFazendaComFeedback(Farm* fazendaAtual) {
+    if (fazendaAtual == nullptr) return;
+    std::cout << "\nSalvando dados da fazenda, aguarde..." << std::flush;
+    fazendaAtual->salvarFazenda();
+    std::cout << " Concluido!\n";
+}
+
 User* moduloLogin() {
     while (true) {
         limparTela();
@@ -129,13 +136,14 @@ Farm* menuMinhasFazendas(User* usuarioAtual) {
             std::cout << "\nNome da fazenda que deseja abrir: ";
             std::getline(std::cin >> std::ws, nomeEscolhido);
 
+            std::cout << "Carregando fazenda '" << nomeEscolhido << "', aguarde..." << std::flush;
             Farm* fazenda = Farm::carregarFazenda(usuarioAtual, nomeEscolhido);
             if (fazenda != nullptr) {
-                std::cout << "Fazenda '" << nomeEscolhido << "' carregada com sucesso!\n";
+                std::cout << " Concluido!\nFazenda '" << nomeEscolhido << "' carregada com sucesso!\n";
                 pausarTela();
                 return fazenda;
             } else {
-                std::cout << "Erro: Fazenda nao encontrada para este usuario.\n";
+                std::cout << "\nErro: Fazenda nao encontrada para este usuario.\n";
                 pausarTela();
             }
         }
@@ -161,14 +169,15 @@ Farm* menuMinhasFazendas(User* usuarioAtual) {
 
             Farm* novaFazenda = nullptr;
             try {
+                std::cout << "Criando e salvando fazenda, aguarde..." << std::flush;
                 novaFazenda = new Farm(nomeFazenda, localizacao, usuarioAtual);
                 novaFazenda->salvarFazenda();
-                std::cout << "Fazenda criada e salva com sucesso!\n";
+                std::cout << " Concluido!\nFazenda criada e salva com sucesso!\n";
                 pausarTela();
                 return novaFazenda;
             } catch (const std::exception& e) {
                 delete novaFazenda;
-                std::cerr << "Erro ao criar fazenda: " << e.what() << "\n";
+                std::cerr << "\nErro ao criar fazenda: " << e.what() << "\n";
                 pausarTela();
             }
         }
@@ -184,6 +193,8 @@ void importarArquivoEmLote(Farm* fazendaAtual, const std::string& caminhoArquivo
     if (!arquivo.is_open()) {
         throw std::runtime_error("Nao foi possivel abrir o arquivo: " + caminhoArquivo);
     }
+
+    std::cout << "Importando arquivo '" << caminhoArquivo << "', aguarde...\n" << std::flush;
 
     std::string linha;
     int areasImportadas = 0;
@@ -317,7 +328,9 @@ void importarArquivoEmLote(Farm* fazendaAtual, const std::string& caminhoArquivo
     }
 
     arquivo.close();
+    std::cout << "Recalculando scores geneticos..." << std::flush;
     fazendaAtual->recalcularScoresGeneticos();
+    std::cout << " Concluido!\n";
     std::cout << "Importacao concluida! Areas criadas: " << areasImportadas
               << " | Animais importados: " << animaisImportados << "\n";
 }
@@ -353,7 +366,7 @@ void menuRelatorios(Farm* fazendaAtual) {
     }
 }
 
-void menuGerenciarAreas(Farm* fazendaAtual, User* usuarioAtual) {
+void menuGerenciarAreas(Farm* fazendaAtual, User* usuarioAtual, bool& alterou) {
     while (true) {
         limparTela();
         std::cout << "=== GERENCIAR AREAS | ATUAL: "<< (fazendaAtual->getAreaAtual().empty() ? "Nenhuma" : fazendaAtual->getAreaAtual()) << " ===\n"
@@ -392,6 +405,7 @@ void menuGerenciarAreas(Farm* fazendaAtual, User* usuarioAtual) {
             Area* novaArea = new Area(nomeArea, estado, hectares);
             try {
                 fazendaAtual->adicionarArea(novaArea);
+                alterou = true;
             } catch (...) {
                 delete novaArea;
                 throw;
@@ -433,6 +447,7 @@ void menuGerenciarAreas(Farm* fazendaAtual, User* usuarioAtual) {
                 std::cout << "Novo estado (seco/ruim/intermediario/bom/muito bom): ";
                 std::getline(std::cin >> std::ws, novoEstado);
                 areaAlvo->setEstadoPasto(novoEstado);
+                alterou = true;
                 std::cout << "Estado do pasto atualizado com sucesso!\n";
             }
             else if (subOp == 2) {
@@ -444,6 +459,7 @@ void menuGerenciarAreas(Farm* fazendaAtual, User* usuarioAtual) {
                 }
                 limparBuffer();
                 areaAlvo->setArea(novosHectares);
+                alterou = true;
                 std::cout << "Tamanho da area atualizado com sucesso!\n";
             }
             else {
@@ -483,6 +499,7 @@ void menuGerenciarAreas(Farm* fazendaAtual, User* usuarioAtual) {
                 throw std::runtime_error("Area nao encontrada na fazenda!");
             }
             fazendaAtual->removerArea(areaAlvo);
+            alterou = true;
             pausarTela();
         }
         else {
@@ -492,7 +509,7 @@ void menuGerenciarAreas(Farm* fazendaAtual, User* usuarioAtual) {
     }
 }
 
-void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual) {
+void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual, bool& alterou) {
     while (true) {
         limparTela();
         std::cout << "=== GERENCIAR ANIMAIS | AREA ATUAL: "
@@ -632,6 +649,7 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual) {
             try {
                 if (novoAnimal != nullptr) {
                     fazendaAtual->adicionarAnimalNaArea(areaDestino, novoAnimal);
+                    alterou = true;
                 }
             } catch (...) {
                 delete novoAnimal;
@@ -696,6 +714,7 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual) {
                 } else {
                     v->setEmLactacao(false);
                 }
+                alterou = true;
                 std::cout << "Fase de lactacao atualizada com sucesso!\n";
             }
             else if (tipo == "boicorte") {
@@ -705,12 +724,14 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual) {
                 std::cin >> eng;
                 limparBuffer();
                 b->setFaseEngorda(eng == 'S' || eng == 's');
+                alterou = true;
                 std::cout << "Fase de engorda atualizada com sucesso!\n";
             }
             else if (tipo == "bezerro") {
                 Bezerro* bz = dynamic_cast<Bezerro*>(animal);
                 bz->realizarDesmame();
                 if (bz->getDesmamado()) {
+                    alterou = true;
                     std::cout << "Status de desmame verificado/atualizado!\n";
                 }
             }
@@ -747,6 +768,7 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual) {
             }
 
             areaAlvo->removerAnimal(id);
+            alterou = true;
             pausarTela();
         }
         else {
@@ -756,7 +778,7 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual) {
     }
 }
 
-void menuMovimentacaoReproducao(Farm* fazendaAtual) {
+void menuMovimentacaoReproducao(Farm* fazendaAtual, bool& alterou) {
     while (true) {
         limparTela();
         std::cout << "=== MOVIMENTACAO E REPRODUCAO ===\n"
@@ -787,6 +809,7 @@ void menuMovimentacaoReproducao(Farm* fazendaAtual) {
             std::cout << "Area de destino: ";
             std::getline(std::cin >> std::ws, nomeArea);
             fazendaAtual->transferirAnimalEntreAreas(id, nomeArea);
+            alterou = true;
             pausarTela();
         }
         else if (opcao == 2) {
@@ -810,6 +833,7 @@ void menuMovimentacaoReproducao(Farm* fazendaAtual) {
                 std::getline(std::cin >> std::ws, areaDestino);
 
                 fazendaAtual->transferirLoteDeAnimaisEntreAreas(ids, qtd, areaDestino);
+                alterou = true;
                 delete[] ids;
             } catch (...) {
                 delete[] ids;
@@ -826,6 +850,7 @@ void menuMovimentacaoReproducao(Farm* fazendaAtual) {
             std::cin >> idTouro;
             limparBuffer();
             fazendaAtual->realizarCobertura(idTouro, idVaca);
+            alterou = true;
             std::cout << "Cobertura registrada com sucesso!\n";
             pausarTela();
         }
@@ -853,17 +878,22 @@ void menuMovimentacaoReproducao(Farm* fazendaAtual) {
 
             char sexoFmt = static_cast<char>(std::toupper(static_cast<unsigned char>(sexo)));
             std::string idGerado = fazendaAtual->registrarNascimento(idMae, areaNascimento, sexoFmt, pesoNascimento);
+            alterou = true;
             std::cout << "Nascimento registrado com sucesso! ID do novo bezerro: " << idGerado << "\n";
             pausarTela();
         }
         else if (opcao == 5) {
+            std::cout << "Recalculando scores e promovendo animais, aguarde...\n" << std::flush;
             fazendaAtual->recalcularScoresGeneticos();
             fazendaAtual->promoverAnimalGlobal();
+            alterou = true;
             pausarTela();
         }
         else if (opcao == 6) {
+            std::cout << "Recalculando scores geneticos, aguarde..." << std::flush;
             fazendaAtual->recalcularScoresGeneticos();
-            std::cout << "Scores geneticos recalculados.\n";
+            alterou = true;
+            std::cout << " Concluido!\n";
             pausarTela();
         }
         else {
@@ -996,7 +1026,7 @@ int main(int argc, char* argv[]) {
             if (argc > 1 && !importouArquivoInicial) {
                 try {
                     importarArquivoEmLote(fazendaAtual, argv[1]);
-                    fazendaAtual->salvarFazenda();
+                    salvarFazendaComFeedback(fazendaAtual);
                 } catch (const std::exception& e) {
                     std::cerr << "Erro ao importar arquivo inicial: " << e.what() << "\n";
                 }
@@ -1028,19 +1058,21 @@ int main(int argc, char* argv[]) {
                 }
                 limparBuffer();
 
+                bool precisaSalvar = false;
+
                 try {
                     switch (opcao) {
                         case 1:
                             menuRelatorios(fazendaAtual);
                             break;
                         case 2:
-                            menuGerenciarAreas(fazendaAtual, usuarioAtual);
+                            menuGerenciarAreas(fazendaAtual, usuarioAtual, precisaSalvar);
                             break;
                         case 3:
-                            menuGerenciarAnimais(fazendaAtual, usuarioAtual);
+                            menuGerenciarAnimais(fazendaAtual, usuarioAtual, precisaSalvar);
                             break;
                         case 4:
-                            menuMovimentacaoReproducao(fazendaAtual);
+                            menuMovimentacaoReproducao(fazendaAtual, precisaSalvar);
                             break;
                         case 5:
                             menuCotacoesRacoes(usuarioAtual);
@@ -1050,22 +1082,23 @@ int main(int argc, char* argv[]) {
                             std::cout << "Caminho/nome do arquivo (.txt): ";
                             std::getline(std::cin >> std::ws, caminhoArquivo);
                             importarArquivoEmLote(fazendaAtual, caminhoArquivo);
+                            salvarFazendaComFeedback(fazendaAtual);
                             pausarTela();
                             break;
                         }
                         case 7:
-                            fazendaAtual->salvarFazenda();
+                            salvarFazendaComFeedback(fazendaAtual);
                             usuarioAtual->salvarEmArquivo();
                             std::cout << "Dados da fazenda, areas, rebanho e cotacoes salvos.\n";
                             pausarTela();
                             break;
                         case 8:
-                            fazendaAtual->salvarFazenda();
+                            salvarFazendaComFeedback(fazendaAtual);
                             usuarioAtual->salvarEmArquivo();
                             sessaoAtiva = false;
                             break;
                         case 0:
-                            fazendaAtual->salvarFazenda();
+                            salvarFazendaComFeedback(fazendaAtual);
                             usuarioAtual->salvarEmArquivo();
                             sessaoAtiva = false;
                             usuarioLogado = false;
@@ -1076,11 +1109,14 @@ int main(int argc, char* argv[]) {
                             break;
                     }
 
-                    if (fazendaAtual != nullptr && opcao != 0 && opcao != 8) {
-                        fazendaAtual->salvarFazenda();
+                    if (precisaSalvar && fazendaAtual != nullptr) {
+                        salvarFazendaComFeedback(fazendaAtual);
                     }
 
                 } catch (const std::exception& e) {
+                    if (precisaSalvar && fazendaAtual != nullptr) {
+                        salvarFazendaComFeedback(fazendaAtual);
+                    }
                     std::cerr << "Erro: " << e.what() << "\n";
                     pausarTela();
                 }
