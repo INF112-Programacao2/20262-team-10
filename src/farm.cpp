@@ -888,10 +888,10 @@ void Farm::salvarFazenda() {
     std::filesystem::create_directories("./data");
     std::string idDono = proprietario->getId();
 
-    // 1. Salva tabela compartilhada de ancestrais (ja filtrada e limpa)
+    //Salva tabela compartilhada de ancestrais (ja filtrada e limpa)
     salvarAncestrais();
 
-    // 2. Salva dados da fazenda
+    //Salva dados da fazenda
     std::ifstream leituraFaz("./data/fazendas.txt");
     std::ofstream tempFaz("./data/fazendas_temp.txt");
     if (!tempFaz.is_open()) {
@@ -955,7 +955,7 @@ void Farm::salvarFazenda() {
     std::remove("./data/fazendas.txt");
     std::rename("./data/fazendas_temp.txt", "./data/fazendas.txt");
 
-    // 3. Salva areas da fazenda
+    //Salva areas da fazenda
     std::ifstream leituraAreas("./data/areas.txt");
     std::ofstream tempAreas("./data/areas_temp.txt");
     if (!tempAreas.is_open()) {
@@ -1007,7 +1007,7 @@ void Farm::salvarFazenda() {
     std::remove("./data/areas.txt");
     std::rename("./data/areas_temp.txt", "./data/areas.txt");
 
-    // 4. Salva todos os animais nas respectivas tabelas
+    //Salva todos os animais nas respectivas tabelas
     for (int i = 0; i < qtdAreas; i++) {
         if (area[i] == nullptr) continue;
         Animal** rebanho = area[i]->getRebanho();
