@@ -36,10 +36,84 @@ void salvarFazendaComFeedback(Farm* fazendaAtual) {
     std::cout << " Concluido!\n";
 }
 
+bool existemUsuariosCadastrados() {
+    namespace fs = std::filesystem;
+    const std::string pastasPossiveis[] = {"usuarios", "users", "data/usuarios", "dados/usuarios"};
+    for (const std::string& pasta : pastasPossiveis) {
+        if (fs::exists(pasta) && fs::is_directory(pasta)) {
+            for (const auto& entry : fs::directory_iterator(pasta)) {
+                if (entry.is_regular_file()) {
+                    return true;
+                }
+            }
+        }
+    }
+    if (fs::exists("usuarios.txt") || fs::exists("users.txt")) {
+        std::ifstream arq(fs::exists("usuarios.txt") ? "usuarios.txt" : "users.txt");
+        return arq.peek() != std::ifstream::traits_type::eof();
+    }
+    return false;
+}
+
 User* moduloLogin() {
     while (true) {
         limparTela();
-        std::cout << "===SISTEMA DE LOGIN===\n" << "[1] Fazer Login\n"
+        bool temUsuarios = existemUsuariosCadastrados();
+
+        if (!temUsuarios) {
+            std::cout << "--- BEM-VINDO AO SISTEMA DE GESTAO ---\n"
+            << "Boas-vindas, verificamos que nunca criou um usuario, deseja cadastrar o primeiro usuario?\n\n"
+            << "[1] Cadastrar Primeiro Usuario\n"
+            << "[0] Sair do Sistema\n"
+            << "Opcao: ";
+
+            int opcao;
+            std::cin >> opcao;
+            if (std::cin.fail()) {
+                limparBuffer();
+                continue;
+            }
+            limparBuffer();
+
+            if (opcao == 0) return nullptr;
+
+            if (opcao == 1) {
+                std::string login = "", senha = "", nome = "", cargo = "";
+                std::cout << "\n--- CADASTRAR PRIMEIRO USUARIO ---\n";
+                std::cout << "Login: ";
+                std::getline(std::cin >> std::ws, login);
+                std::cout << "Senha: ";
+                std::getline(std::cin >> std::ws, senha);
+                std::cout << "Nome do proprietario: ";
+                std::getline(std::cin >> std::ws, nome);
+                std::cout << "Cargo: ";
+                std::getline(std::cin >> std::ws, cargo);
+
+                if (!login.empty() && !nome.empty() && !senha.empty() && !cargo.empty()) {
+                    User* usuarioRegister = nullptr;
+                    try {
+                        usuarioRegister = new User(login, senha, nome, cargo);
+                        usuarioRegister->salvarEmArquivo();
+                        std::cout << "Primeiro usuario criado com sucesso! Agora voce ja pode fazer login.\n";
+                        delete usuarioRegister;
+                        pausarTela();
+                    } catch (const std::exception& e) {
+                        delete usuarioRegister;
+                        std::cerr << "Erro ao criar conta: " << e.what() << "\n";
+                        pausarTela();
+                    }
+                } else {
+                    std::cout << "Erro: Todos os campos sao obrigatorios!\n";
+                    pausarTela();
+                }
+            } else {
+                std::cout << "Opcao invalida.\n";
+                pausarTela();
+            }
+            continue;
+        }
+
+        std::cout << "---SISTEMA DE LOGIN---\n" << "[1] Fazer Login\n"
         << "[2] Criar Nova Conta\n" << "[3] Sair do Sistema\n"
         << "Opcao: ";
         int opcao;
@@ -63,7 +137,7 @@ User* moduloLogin() {
 
             User* u = User::carregarUsuario(login, senha);
             if (u != nullptr) {
-                std::cout << "Login Realizado com Sucesso.\n";
+                std::cout << "Login realizado com sucesso! Bem-vindo(a), " << u->getNomeProprietario() << "!\n";
                 pausarTela();
                 return u;
             } else {
@@ -100,6 +174,46 @@ User* moduloLogin() {
                 pausarTela();
             }
         }
+        else {
+            std::cout << "Opcao invalida.\n";
+            pausarTela();
+        }
+    }
+}
+
+Farm* criarNovaFazendaFluxo(User* usuarioAtual) {
+    std::cout << "\n--- CRIAR NOVA FAZENDA ---\n";
+    std::string nomeFazenda, localizacao;
+    std::cout << "Nome da Fazenda: ";
+    std::getline(std::cin >> std::ws, nomeFazenda);
+    std::cout << "Localizacao: ";
+    std::getline(std::cin >> std::ws, localizacao);
+
+    if (nomeFazenda.empty() || localizacao.empty()) {
+        std::cout << "Erro: Nome e localizacao sao obrigatorios!\n";
+        pausarTela();
+        return nullptr;
+    }
+
+    if (Farm::existeFazendaDoUsuario(usuarioAtual, nomeFazenda)) {
+        std::cout << "Erro: Voce ja possui uma fazenda com esse nome!\n";
+        pausarTela();
+        return nullptr;
+    }
+
+    Farm* novaFazenda = nullptr;
+    try {
+        std::cout << "Criando e salvando fazenda, aguarde..." << std::flush;
+        novaFazenda = new Farm(nomeFazenda, localizacao, usuarioAtual);
+        novaFazenda->salvarFazenda();
+        std::cout << " Concluido!\nFazenda criada e salva com sucesso!\n";
+        pausarTela();
+        return novaFazenda;
+    } catch (const std::exception& e) {
+        delete novaFazenda;
+        std::cerr << "\nErro ao criar fazenda: " << e.what() << "\n";
+        pausarTela();
+        return nullptr;
     }
 }
 
@@ -129,7 +243,14 @@ Farm* menuMinhasFazendas(User* usuarioAtual) {
             std::cout << "\n--- ABRIR FAZENDA ---\n";
             int total = Farm::listarFazendasDoUsuario(usuarioAtual);
             if (total == 0) {
-                pausarTela();
+                char resp;
+                std::cout << "Nenhuma fazenda cadastrada ainda. Deseja criar uma agora? [S/N]: ";
+                std::cin >> resp;
+                limparBuffer();
+                if (resp == 'S' || resp == 's') {
+                    Farm* criada = criarNovaFazendaFluxo(usuarioAtual);
+                    if (criada != nullptr) return criada;
+                }
                 continue;
             }
             std::string nomeEscolhido;
@@ -148,38 +269,8 @@ Farm* menuMinhasFazendas(User* usuarioAtual) {
             }
         }
         else if (opcao == 3) {
-            std::cout << "\n--- CRIAR NOVA FAZENDA ---\n";
-            std::string nomeFazenda, localizacao;
-            std::cout << "Nome da Fazenda: ";
-            std::getline(std::cin >> std::ws, nomeFazenda);
-            std::cout << "Localizacao: ";
-            std::getline(std::cin >> std::ws, localizacao);
-
-            if (nomeFazenda.empty() || localizacao.empty()) {
-                std::cout << "Erro: Nome e localizacao sao obrigatorios!\n";
-                pausarTela();
-                continue;
-            }
-
-            if (Farm::existeFazendaDoUsuario(usuarioAtual, nomeFazenda)) {
-                std::cout << "Erro: Voce ja possui uma fazenda com esse nome!\n";
-                pausarTela();
-                continue;
-            }
-
-            Farm* novaFazenda = nullptr;
-            try {
-                std::cout << "Criando e salvando fazenda, aguarde..." << std::flush;
-                novaFazenda = new Farm(nomeFazenda, localizacao, usuarioAtual);
-                novaFazenda->salvarFazenda();
-                std::cout << " Concluido!\nFazenda criada e salva com sucesso!\n";
-                pausarTela();
-                return novaFazenda;
-            } catch (const std::exception& e) {
-                delete novaFazenda;
-                std::cerr << "\nErro ao criar fazenda: " << e.what() << "\n";
-                pausarTela();
-            }
+            Farm* criada = criarNovaFazendaFluxo(usuarioAtual);
+            if (criada != nullptr) return criada;
         }
         else {
             std::cout << "Opcao invalida.\n";
@@ -498,8 +589,16 @@ void menuGerenciarAreas(Farm* fazendaAtual, User* usuarioAtual, bool& alterou) {
             if (areaAlvo == nullptr) {
                 throw std::runtime_error("Area nao encontrada na fazenda!");
             }
-            fazendaAtual->removerArea(areaAlvo);
-            alterou = true;
+            char confirma;
+            std::cout << "Tem certeza que deseja remover a area '" << nomeArea << "'? [S/N]: ";
+            std::cin >> confirma;
+            limparBuffer();
+            if (confirma == 'S' || confirma == 's') {
+                fazendaAtual->removerArea(areaAlvo);
+                alterou = true;
+            } else {
+                std::cout << "Remocao cancelada.\n";
+            }
             pausarTela();
         }
         else {
@@ -767,8 +866,16 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual, bool& alterou)
                 throw std::runtime_error("Area nao encontrada!");
             }
 
-            areaAlvo->removerAnimal(id);
-            alterou = true;
+            char confirma;
+            std::cout << "Tem certeza que deseja remover o animal '" << id << "'? [S/N]: ";
+            std::cin >> confirma;
+            limparBuffer();
+            if (confirma == 'S' || confirma == 's') {
+                areaAlvo->removerAnimal(id);
+                alterou = true;
+            } else {
+                std::cout << "Remocao cancelada.\n";
+            }
             pausarTela();
         }
         else {
