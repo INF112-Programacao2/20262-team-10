@@ -6,7 +6,7 @@
 
 Projeto desenvolvido para a disciplina de **Programação Orientada a Objetos (INF 112)**, do curso de Ciência da Computação da **Universidade Federal de Viçosa (UFV)**.
 
-O **FarmManager** é um sistema completo de gestão zootécnica, financeira, operacional e genealógica para propriedades rurais em **C++17** via terminal (CLI). Mais do que um cadastro de registros, o sistema aplica algoritmos de cálculo nutricional, projeção financeira (*Break-Even*), integração com APIs de cotação em tempo real, avaliação genética multi-geracional e apoio à decisão no manejo do rebanho.
+O **FarmManager** é um sistema completo de gestão zootécnica, financeira, operacional e genealógica para propriedades rurais em **C++17** via terminal (CLI). Mais do que um cadastro de registros, o sistema aplica algoritmos de cálculo nutricional, penalização por superlotação de pastagens, projeção financeira (*Break-Even*), integração com APIs de cotação em tempo real, avaliação genética multi-geracional e apoio à decisão no manejo do rebanho.
 
 ---
 
@@ -17,19 +17,20 @@ Um gerenciador de registros tradicional apenas armazena e consulta dados (CRUD).
 1. **Planejamento de Gastos e Estoque de Ração (`Area`, `Farm`, `Animal`):**
    * Calcula polimorficamente o consumo diário individual de cada animal conforme peso vivo, categoria (`vaca`, `touro`, `boicorte`, `bezerro`) e fase produtiva (lactação, engorda, desmame/recria).
    * Converte o consumo em **sacos de ração por dia** e projeta a demanda para **30 dias**, separada por tipo (`Ração Engorda`, `Ração Avulsa` e `Ração Recria`), além do custo diário em reais (`R$`).
-2. **Análise Financeira e Ponto de Equilíbrio (*Break-Even*):**
+2. **Controle de Lotação e Penalidade Financeira por Superlotação (`Area`):**
+   * Calcula a capacidade máxima de cabeças/hectare conforme a qualidade do pasto (`seco` = 0,5; `ruim` = 1,0; `intermediario` = 2,0; `bom` = 3,0; `muito bom` = 4,0) e exibe a taxa de ocupação percentual.
+   * **Impacto real no custo:** quando uma área ultrapassa **100% da capacidade**, o sistema aplica um **fator multiplicador proporcional (`lotação / 100.0`)** sobre o consumo de sacos e sobre o gasto diário de ração dos animais daquela área, simulando a necessidade maior de suplementação em pasto superlotado.
+3. **Análise Financeira e Ponto de Equilíbrio (*Break-Even*):**
    * Cruza a receita diária estimada (produção de leite, ganho de peso com ágio por sexo/idade e rendimento de carcaça) contra o gasto diário com alimentação e manejo.
    * No relatório de *Break-Even* (`emitirRelatorioBreakEvenEVendas`), informa se o caixa já está positivo, **quantos dias faltam no ritmo atual para empatar o caixa**, ou alerta quando a operação diária está no prejuízo.
-3. **Algoritmo de Score Genético em $O(N \log N)$ (`Farm::recalcularScoresGeneticos`):**
-   * Ordena animais vivos e registros históricos (`SnapshotAncestral`) com **MergeSort** próprio e realiza cruzamentos com **Busca Binária** (sem `std::vector` ou `std::sort`), escalando com eficiência para grandes rebanhos.
+4. **Algoritmo de Score Genético em $O(N \log N)$ (`Farm::recalcularScoresGeneticos`):**
+   * Ordena animais vivos e registros históricos (`SnapshotAncestral`) com **MergeSort** próprio e realiza cruzamentos com **Busca Binária** (sem `std::vector` ou `std::sort`), escalando com eficiência para milhares de animais.
    * Calcula o `scoreBase` (0 a 100) ponderando peso atual vs. peso esperado para a idade, ganho médio diário e indicador produtivo (leite na vaca / rendimento de carcaça no boi de corte).
-   * Ajusta o `scoreGenetico` percorrendo recursivamente até **3 gerações de ancestrais** (com decaimento de peso por geração), somando a contribuição de **todos os descendentes** ($\ge 6$ meses, inclusive já vendidos/removidos) em relação à média do rebanho e aplicando penalidade quando falta histórico genealógico.
+   * Ajusta o `scoreGenetico` percorrendo recursivamente até **3 gerações de ancestrais** (com decaimento de peso `0,5` por geração), somando a contribuição de **todos os descendentes** ($\ge 6$ meses, inclusive já vendidos/removidos) em relação à média do rebanho e aplicando penalidade quando falta histórico genealógico.
    * Mantém a tabela compartilhada de ancestrais enxuta via coleta/limpeza recursiva (`limpezaDeAncestrais`), preservando apenas registros ligados a animais vivos na fazenda.
-4. **Apoio à Decisão Reprodutiva e de Maturidade:**
+5. **Apoio à Decisão Reprodutiva e de Maturidade:**
    * **Bloqueio de consanguinidade (`Vaca::emprenhar`):** impede coberturas entre parentes próximos (mesmo pai, mesma mãe ou relação pai/filha e mãe/filho) e valida idade mínima reprodutiva (15 meses) e status de quarentena.
-   * **Recomendação automática na promoção (`Bezerro::recomendarDestinoMaturidade`):** ao atingir 12 meses, fêmeas são direcionadas para `vaca` e machos são recomendados para `touro` (se `scoreGenetico >= 60`) ou `boicorte` (caso contrário).
-5. **Controle de Lotação de Pastagens (`Area`):**
-   * Calcula a capacidade máxima de cabeças/hectare conforme a qualidade do pasto (`seco` = 0,5; `ruim` = 1,0; `intermediario` = 2,0; `bom` = 3,0; `muito bom` = 4,0) e exibe a taxa de ocupação percentual, alertando sobre superlotação.
+   * **Recomendação automática na promoção (`Bezerro::recomendarDestinoMaturidade` & `Area::promoverAnimal`):** ao atingir 12 meses, fêmeas são direcionadas para `vaca` e machos são recomendados para `touro` (se `scoreGenetico >= 60`) ou `boicorte` (caso contrário). Durante a promoção, o sistema preserva `idPai`, `idMae` e os dados de score genético (`copiarDadosGeneticosDe`) na nova categoria.
 
 ---
 
@@ -67,7 +68,7 @@ Com a fazenda aberta, o menu principal oferece:
   * Transferir um animal ou um lote de animais entre áreas.
   * Realizar cobertura (`Touro x Vaca`) com validação de parentesco e idade.
   * Registrar nascimento (cria o bezerro na área escolhida, vincula pai/mãe e atualiza scores genéticos).
-  * Promover bezerros elegíveis ($\ge 12$ meses) com recomendação automática de destino.
+  * Promover bezerros elegíveis ($\ge 12$ meses) com recomendação automática de destino e preservação genética.
   * Recalcular manualmente os scores genéticos de todo o rebanho.
 * **`[5] Cotações e Rações` (`menuCotacoesRacoes`):**
   * Visualizar valores atuais (dólar, litro do leite, arroba do boi, arroba da vaca, peso e preço das sacas de ração).
@@ -77,6 +78,24 @@ Com a fazenda aberta, o menu principal oferece:
   * Importa áreas (`AREA`), animais (`ANIMAL`) e registros históricos (`ANCESTRAL`) a partir de arquivos de texto estruturados, recalculando os scores genéticos e salvando ao final. Também é possível passar o caminho do arquivo diretamente como argumento na linha de comando (`./bin/main arquivo.txt`).
 * **`[7] Salvar Tudo Agora` / `[8] Trocar de Fazenda` / `[0] Salvar e Voltar ao Login`:**
   * Persistência explícita e automática dos dados da fazenda e do usuário.
+
+---
+
+## 📄 Formato de Importação em Lote (`.txt`) e Massa de Teste
+
+A função `importarArquivoEmLote` (acessível pelo menu `[6]` ou via `./bin/main <arquivo.txt>`) lê arquivos linha a linha ignorando linhas vazias e comentários iniciados por `#`:
+
+```text
+AREA <nome_area> <estado_pasto_com_underscore> <hectares>
+ANIMAL <nome_area> vaca <ID|AUTO> <peso> <idade_meses> <em_lactacao_0_ou_1> <litros_dia> [idPai idMae ...]
+ANIMAL <nome_area> touro <ID|AUTO> <peso> <idade_meses> <valor_dose_semen> [idPai idMae ...]
+ANIMAL <nome_area> boicorte <ID|AUTO> <peso> <idade_meses> <em_engorda_0_ou_1> <rendimento_carcaca> [idPai idMae ...]
+ANIMAL <nome_area> bezerro <ID|AUTO> <sexo_M_ou_F> <peso> <idade_meses> <desmamado_0_ou_1> [idPai idMae ...]
+ANCESTRAL <dados_serializados_SnapshotAncestral>
+```
+
+* O token `AUTO` gera automaticamente o próximo ID disponível com o prefixo da categoria (`VC`, `TR`, `BC`, `BZ`).
+* O script [geradorTeste.py](geradorTeste.py) gera o arquivo `teste_gigante.txt` com **6 áreas e 5.000 animais** (incluindo genealogia multi-geracional em `SnapshotAncestral`) para validar o comportamento e o desempenho em $O(N \log N)$ do sistema.
 
 ---
 
@@ -97,13 +116,30 @@ Todos os dados do sistema são salvos localmente no diretório `./data/` em arqu
 
 ---
 
-## 🏛️ Arquitetura e Restrições Acadêmicas
+## 🏛️ Arquitetura, Estrutura do Projeto e Status dos Módulos
 
 O projeto foi construído sob restrições acadêmicas de POO em C++17 com foco no domínio de ponteiros e memória:
 
 * **Sem coleções da STL (`std::vector`, `std::list`, `std::map`):** toda agregação utiliza **arrays dinâmicos manuais** (`Animal**`, `Area**`, `SnapshotAncestral*`, `std::string*`, `SacaRacao**`, `RegistroSanitario**`) com realocação e liberação rigorosa nos destrutores.
-* **Polimorfismo:** classe abstrata `Animal` com métodos virtuais puros especializados em `Vaca`, `Touro`, `Bezerro` e `Boicorte`, além de especialização de `Area` em `AreaQuarentena`.
-* **Módulos adicionais no repositório:** classes para controle sanitário e período de carência (`Medicamento`, `RegistroSanitario`, `HistoricoSanitario`), isolamento (`AreaQuarentena`) e registro de baixas (`RegistroBaixa`).
+* **Polimorfismo:** classe abstrata `Animal` com métodos virtuais puros especializados em `Vaca`, `Touro`, `Bezerro` e `Boicorte`.
+
+### Estrutura do Repositório
+```text
+.
+├── include/            # Cabeçalhos (.hpp) das classes de domínio e sistema
+├── src/                # Implementações (.cpp) e ponto de entrada (main.cpp)
+├── data/               # Arquivos de persistência local (.txt)
+├── docs/               # Diagrama UML de classes (PDF e PNG)
+├── build/              # Objetos compilados (.o)
+├── bin/                # Executável final (main)
+├── geradorTeste.py     # Gerador de massa de teste (teste_gigante.txt)
+└── Makefile            # Automação de build com g++ (-std=c++17)
+```
+
+### Status dos Módulos
+* **Ativos e integrados na CLI (`main.cpp`):** `User`, `Farm`, `Area`, `Animal`, `Vaca`, `Touro`, `Bezerro`, `Boicorte`, `SnapshotAncestral`, `SacaRacao`.
+* **Implementados no código (prontos para integração futura aos menus):** `Medicamento`, `RegistroSanitario`, `HistoricoSanitario` e `RegistroBaixa`.
+* **Comentados/desativados nesta versão:** `AreaQuarentena`, `GerenciadorCertificado` (`certificado.hpp/cpp`) e `ParserPlanilha` (`parserplanilha.hpp/cpp` — substituído pelo fluxo de importação em lote no `main.cpp`).
 
 ---
 
@@ -140,6 +176,12 @@ make
 
 # Ou executar já importando um arquivo de lote (.txt) após abrir a fazenda
 ./bin/main teste_gigante.txt
+```
+
+Para gerar uma nova massa de testes de 5.000 animais:
+
+```bash
+python3 geradorTeste.py
 ```
 
 Para remover os arquivos objeto (`build/`) e o executável (`bin/`) antes de uma recompilação limpa:
