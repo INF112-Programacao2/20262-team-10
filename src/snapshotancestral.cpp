@@ -18,17 +18,20 @@ namespace {
 }
 
 SnapshotAncestral::SnapshotAncestral()
-    : registrado_(false), id_(""), sexo_(' '), ultimoPeso_(0.0), status_(""), scoreBase_(0.0), idPai(""), idMae("") {}
+    : registrado_(false), id_(""), sexo_(' '), ultimoPeso_(0.0), ultimaIdadeMeses(0),
+      status_(""), scoreBase_(0.0), idPai(""), idMae("") {}
 
 SnapshotAncestral::SnapshotAncestral(std::string id, char sexo, double ultimoPeso, std::string status,
-                                     double scoreBase, std::string idPai, std::string idMae)
-    : registrado_(true), id_(id), sexo_(sexo), ultimoPeso_(ultimoPeso),
+                                     double scoreBase, std::string idPai, std::string idMae,
+                                     int ultimaIdadeMeses)
+    : registrado_(true), id_(id), sexo_(sexo), ultimoPeso_(ultimoPeso), ultimaIdadeMeses(ultimaIdadeMeses),
       status_(status), scoreBase_(scoreBase), idPai(idPai), idMae(idMae) {}
 
 bool SnapshotAncestral::get_Registrado() const { return registrado_; }
 std::string SnapshotAncestral::get_id() const { return id_; }
 char SnapshotAncestral::get_Sexo() const { return sexo_; }
 double SnapshotAncestral::get_UltimoPeso() const { return ultimoPeso_; }
+int SnapshotAncestral::getUltimaIdadeMeses() const { return ultimaIdadeMeses; }
 std::string SnapshotAncestral::get_Status() const { return status_; }
 double SnapshotAncestral::get_ScoreBase() const { return scoreBase_; }
 std::string SnapshotAncestral::getIdPai() const { return idPai; }
@@ -36,14 +39,16 @@ std::string SnapshotAncestral::getIdMae() const { return idMae; }
 
 void SnapshotAncestral::set_ScoreBase(double s) { scoreBase_ = s; }
 void SnapshotAncestral::setUltimoPeso(double p) { ultimoPeso_ = p; }
+void SnapshotAncestral::setUltimaIdadeMeses(int idade) { ultimaIdadeMeses = idade; }
 void SnapshotAncestral::setStatus(const std::string& s) { status_ = s; }
 void SnapshotAncestral::setIdPai(const std::string& idPai) { this->idPai = idPai; }
 void SnapshotAncestral::setIdMae(const std::string& idMae) { this->idMae = idMae; }
 
 void SnapshotAncestral::atualizarDados(double ultimoPeso, const std::string& status, double scoreBase,
-                                       const std::string& idPai, const std::string& idMae) {
+                                       const std::string& idPai, const std::string& idMae, int ultimaIdadeMeses) {
     registrado_ = true;
     ultimoPeso_ = ultimoPeso;
+    this->ultimaIdadeMeses = ultimaIdadeMeses;
     status_ = status;
     scoreBase_ = scoreBase;
     if (!idPai.empty()) this->idPai = idPai;
@@ -55,6 +60,7 @@ void SnapshotAncestral::escrever(std::ostream& out) const {
     out << codificar(id_) << ' '
         << sexoFmt << ' '
         << ultimoPeso_ << ' '
+        << ultimaIdadeMeses << ' '
         << codificar(status_) << ' '
         << scoreBase_ << ' '
         << codificar(idPai) << ' '
@@ -65,8 +71,9 @@ bool SnapshotAncestral::ler(std::istream& in) {
     std::string idLido, statusLido, idPaiLido, idMaeLido;
     char sexoLido;
     double pesoLido, scoreLido;
+    int idadeLida;
 
-    if (!(in >> idLido >> sexoLido >> pesoLido >> statusLido >> scoreLido >> idPaiLido >> idMaeLido)) {
+    if (!(in >> idLido >> sexoLido >> pesoLido >> idadeLida >> statusLido >> scoreLido >> idPaiLido >> idMaeLido)) {
         return false;
     }
 
@@ -74,6 +81,7 @@ bool SnapshotAncestral::ler(std::istream& in) {
     id_ = decodificar(idLido);
     sexo_ = (sexoLido == '_') ? ' ' : sexoLido;
     ultimoPeso_ = pesoLido;
+    ultimaIdadeMeses = idadeLida;
     status_ = decodificar(statusLido);
     scoreBase_ = scoreLido;
     idPai = decodificar(idPaiLido);

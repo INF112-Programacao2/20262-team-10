@@ -5,6 +5,7 @@
 #include "area.hpp"
 #include "farm.hpp"
 #include "animal.hpp"
+#include "boicorte.hpp"
 #include "touro.hpp"
 #include "bezerro.hpp"
 #include "vaca.hpp"
@@ -130,10 +131,12 @@ void Area::promoverAnimal() {
         if (rebanho[i]->podeSerPromovido() && rebanho[i]->getTipo() == "bezerro") {
             std::cout << "O animal " << rebanho[i]->getId() << " ja esta na idade apropriada para promocao.\n";
             Bezerro* bezSugestao = dynamic_cast<Bezerro*>(rebanho[i]);
-            if (bezSugestao != nullptr) {
-                std::cout << "Score genetico: " << rebanho[i]->getScoreGenetico()
-                          << " | destino sugerido: " << bezSugestao->recomendarDestinoMaturidade() << "\n";
-            }
+            std::string destino = (bezSugestao != nullptr)
+                ? bezSugestao->recomendarDestinoMaturidade()
+                : ((rebanho[i]->getScoreGenetico() >= 60.0) ? "touro" : "boicorte");
+
+            std::cout << "Score genetico: " << rebanho[i]->getScoreGenetico()
+                      << " | destino sugerido: " << destino << "\n";
             std::cout << "Gostaria de realizar a promocao [Y/N]? ";
             string resposta;
             std::cin >> resposta;
@@ -141,15 +144,27 @@ void Area::promoverAnimal() {
 
             if (resposta == "Y" || resposta == "y") {
                 if (rebanho[i]->getSexo() == 'M') {
-                    Touro* t = new Touro(rebanho[i]->getId(),
-                        rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), 0, rebanho[i]->getQtdvacinas(), nullptr, 0.0);
-                    t->setIdPai(rebanho[i]->getPai());
-                    t->setIdMae(rebanho[i]->getMae());
-                    t->copiarDadosGeneticosDe(*rebanho[i]);
+                    if (destino == "touro") {
+                        Touro* t = new Touro(rebanho[i]->getId(),
+                            rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), 0, rebanho[i]->getQtdvacinas(), nullptr, 0.0);
+                        t->setIdPai(rebanho[i]->getPai());
+                        t->setIdMae(rebanho[i]->getMae());
+                        t->copiarDadosGeneticosDe(*rebanho[i]);
 
-                    delete rebanho[i];
-                    rebanho[i] = t;
-                    std::cout << "Bezerro promovido a touro com sucesso!\n";
+                        delete rebanho[i];
+                        rebanho[i] = t;
+                        std::cout << "Bezerro promovido a touro com sucesso!\n";
+                    } else {
+                        Boicorte* b = new Boicorte(rebanho[i]->getId(),
+                            rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), 0, rebanho[i]->getQtdvacinas());
+                        b->setIdPai(rebanho[i]->getPai());
+                        b->setIdMae(rebanho[i]->getMae());
+                        b->copiarDadosGeneticosDe(*rebanho[i]);
+
+                        delete rebanho[i];
+                        rebanho[i] = b;
+                        std::cout << "Bezerro promovido a boi de corte com sucesso!\n";
+                    }
                 } else if (rebanho[i]->getSexo() == 'F') {
                     Vaca* v = new Vaca(rebanho[i]->getId(),
                         rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), 0, rebanho[i]->getQtdvacinas(), nullptr);

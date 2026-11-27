@@ -119,7 +119,7 @@ bool Animal::obterRazaoProducao([[maybe_unused]] double &razao) const
 
 SnapshotAncestral Animal::criarSnapshot(const std::string &status) const
 {
-    return SnapshotAncestral(_id, sexo, peso, status, scoreBase, idPai, idMae);
+    return SnapshotAncestral(_id, sexo, peso, status, scoreBase, idPai, idMae, idadeMeses);
 }
 
 void Animal::registrarPesagem(double novoPeso, int novaIdadeMeses)

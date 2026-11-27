@@ -628,7 +628,8 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual, bool& alterou)
         << "[1] Adicionar Animal na Area Atual\n"
         << "[2] Buscar Animal por ID (Ficha e Gasto Individual)\n"
         << "[3] Atualizar Fase (Lactacao / Engorda / Desmame)\n"
-        << "[4] Remover Animal\n"
+        << "[4] Remover Animal (Venda / Morte / Saida)\n"
+        << "[5] Consultar Genealogia (Ancestrais e Filhos)\n"
         << "[0] Voltar\n"
         << "Opcao: ";
 
@@ -881,17 +882,40 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual, bool& alterou)
                 throw std::runtime_error("Area nao encontrada!");
             }
 
+            std::cout << "Motivo da saida ([1] Vendido | [2] Morto | [3] Removido/Outro): ";
+            int motivo;
+            if (!(std::cin >> motivo)) {
+                limparBuffer();
+                throw std::invalid_argument("Entrada invalida.");
+            }
+            limparBuffer();
+
+            std::string statusSaida = "removido";
+            if (motivo == 1) statusSaida = "vendido";
+            else if (motivo == 2) statusSaida = "morto";
+
             char confirma;
-            std::cout << "Tem certeza que deseja remover o animal '" << id << "'? [S/N]: ";
+            std::cout << "Tem certeza que deseja remover o animal '" << id << "' (" << statusSaida << ")? [S/N]: ";
             std::cin >> confirma;
             limparBuffer();
             if (confirma == 'S' || confirma == 's') {
-                fazendaAtual->marcarAncestralRemovido(id);
+                fazendaAtual->marcarAncestralRemovido(id, statusSaida);
                 areaAlvo->removerAnimal(id);
+                fazendaAtual->limpezaDeAncestrais();
                 alterou = true;
             } else {
                 std::cout << "Remocao cancelada.\n";
             }
+            pausarTela();
+        }
+        else if (opcao == 5) {
+            std::string id;
+            std::cout << "ID do Animal (vivo ou no historico): ";
+            std::cin >> id;
+            limparBuffer();
+
+            fazendaAtual->exibirAncestrais(id);
+            fazendaAtual->exibirFilhos(id);
             pausarTela();
         }
         else {

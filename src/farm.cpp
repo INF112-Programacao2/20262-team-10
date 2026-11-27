@@ -12,7 +12,7 @@
 #include <iostream>
 #include <stdexcept>
 
-static const int GERACOES_AVALIADAS = 2;
+static const int GERACOES_AVALIADAS = 3;
 static const double SCORE_REFERENCIA = 50.0;
 static const double PONTOS_POR_ANCESTRAL = 2.0;
 
@@ -27,6 +27,8 @@ static void mergeAncestrais(SnapshotAncestral* arr, SnapshotAncestral* tmp, int 
     for (int idx = esq; idx <= dir; idx++) arr[idx] = tmp[idx];
 }
 
+
+//pesquisada na internet como implementar, a logica original nao e minha (Paulo Vitor)
 static void mergeSortAncestraisRec(SnapshotAncestral* arr, SnapshotAncestral* tmp, int esq, int dir) {
     if (esq >= dir) return;
     int meio = esq + (dir - esq) / 2;
@@ -90,16 +92,16 @@ static void ordenarAnimais(Animal** arr, int n) {
     delete[] tmp;
 }
 
-static Animal* buscarAnimalBinario(Animal** arr, int n, const std::string& id) {
+static int buscarIndiceAnimalBinario(Animal** arr, int n, const std::string& id) {
     int esq = 0, dir = n - 1;
     while (esq <= dir) {
         int meio = esq + (dir - esq) / 2;
         const std::string& atual = arr[meio]->getId();
-        if (atual == id) return arr[meio];
+        if (atual == id) return meio;
         if (atual < id) esq = meio + 1;
         else dir = meio - 1;
     }
-    return nullptr;
+    return -1;
 }
 
 static int contarAncestraisRec(const SnapshotAncestral* arr, int n, const std::string& id, int niveis) {
@@ -123,6 +125,50 @@ static double somarEfeitoAncestraisRec(const SnapshotAncestral* arr, int n, cons
     return efeito
          + somarEfeitoAncestraisRec(arr, n, arr[idx].getIdPai(), niveis - 1, pesoGeracao * 0.5, media)
          + somarEfeitoAncestraisRec(arr, n, arr[idx].getIdMae(), niveis - 1, pesoGeracao * 0.5, media);
+}
+
+static void marcarAncestraisNecessariosRec(const SnapshotAncestral* arr, int n,
+                                           const std::string& id, bool* necessario) {
+    if (id.empty()) return;
+    int idx = buscarAncestralBinario(arr, n, id);
+    if (idx == -1 || necessario[idx]) return;
+    necessario[idx] = true;
+    marcarAncestraisNecessariosRec(arr, n, arr[idx].getIdPai(), necessario);
+    marcarAncestraisNecessariosRec(arr, n, arr[idx].getIdMae(), necessario);
+}
+
+static std::string rotuloGeracao(int nivel, const std::string& lado) {
+    if (nivel == 1) return lado;
+    if (nivel == 2) return "Avo (" + lado + ")";
+    if (nivel == 3) return "Bisavo (" + lado + ")";
+    return "Geracao " + std::to_string(nivel) + " (" + lado + ")";
+}
+
+static void exibirAncestraisRec(const SnapshotAncestral* arr, int n, const std::string& id,
+                                const std::string& lado, int nivel, int maxGeracoes) {
+    const int LIMITE_SEGURANCA = 20;
+    if (id.empty() || nivel > LIMITE_SEGURANCA) return;
+    if (maxGeracoes > 0 && nivel > maxGeracoes) return;
+
+    std::string indent(nivel * 2, ' ');
+    std::string rotulo = rotuloGeracao(nivel, lado);
+    int idx = buscarAncestralBinario(arr, n, id);
+
+    if (idx == -1 || !arr[idx].get_Registrado()) {
+        std::cout << indent << rotulo << ": " << id << " (sem registro detalhado)\n";
+        return;
+    }
+
+    const SnapshotAncestral& s = arr[idx];
+    std::cout << indent << rotulo << ": " << s.get_id()
+              << " | Sexo: " << s.get_Sexo()
+              << " | Peso: " << s.get_UltimoPeso() << " kg"
+              << " | Idade: " << s.getUltimaIdadeMeses() << "m"
+              << " | Score base: " << s.get_ScoreBase()
+              << " | Status: " << (s.get_Status().empty() ? "desconhecido" : s.get_Status()) << "\n";
+
+    exibirAncestraisRec(arr, n, s.getIdPai(), "Pai", nivel + 1, maxGeracoes);
+    exibirAncestraisRec(arr, n, s.getIdMae(), "Mae", nivel + 1, maxGeracoes);
 }
 
 static int obterMaiorProximoIdGlobal() {
@@ -359,7 +405,8 @@ void Farm::registrarOuAtualizarAncestral(const SnapshotAncestral& snap) {
     int idx = buscarAncestralBinario(ancestrais, qtdAncestrais, snap.get_id());
     if (idx != -1) {
         ancestrais[idx].atualizarDados(snap.get_UltimoPeso(), snap.get_Status(),
-                                       snap.get_ScoreBase(), snap.getIdPai(), snap.getIdMae());
+                                       snap.get_ScoreBase(), snap.getIdPai(), snap.getIdMae(),
+                                       snap.getUltimaIdadeMeses());
         return;
     }
 
@@ -388,24 +435,223 @@ void Farm::registrarAncestralDeAnimal(Animal* a, const std::string& status) {
     registrarOuAtualizarAncestral(a->criarSnapshot(status));
 }
 
-void Farm::marcarAncestralRemovido(const std::string& id) {
+void Farm::marcarAncestralRemovido(const std::string& id, const std::string& status) {
     if (id.empty()) return;
     Animal* animal = encontrarAnimalOpcional(id);
     if (animal != nullptr) {
-        animal->calcularScoreBase();
-        registrarAncestralDeAnimal(animal, "removido");
+        bool temVinculo = !animal->getPai().empty() || !animal->getMae().empty() || animal->getQtdFilhos() > 0;
+
+        if (!temVinculo) {
+            for (int i = 0; i < qtdAreas && !temVinculo; i++) {
+                if (area[i] == nullptr) continue;
+                Animal** rebanho = area[i]->getRebanho();
+                int qtd = area[i]->getQtdAnimais();
+                for (int j = 0; j < qtd; j++) {
+                    if (rebanho[j] == nullptr) continue;
+                    if (rebanho[j]->getPai() == id || rebanho[j]->getMae() == id) {
+                        temVinculo = true;
+                        break;
+                    }
+                    Vaca* v = dynamic_cast<Vaca*>(rebanho[j]);
+                    if (v != nullptr && v->getPrenha() && v->getIdTouroPai() == id) {
+                        temVinculo = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!temVinculo) {
+            for (int i = 0; i < qtdAncestrais; i++) {
+                if (ancestrais[i].getIdPai() == id || ancestrais[i].getIdMae() == id) {
+                    temVinculo = true;
+                    break;
+                }
+            }
+        }
+
+        if (temVinculo) {
+            animal->calcularScoreBase();
+            registrarAncestralDeAnimal(animal, status);
+        }
         return;
     }
+
     int idx = buscarAncestralBinario(ancestrais, qtdAncestrais, id);
     if (idx != -1) {
-        ancestrais[idx].setStatus("removido");
+        ancestrais[idx].setStatus(status);
     }
+}
+
+void Farm::limpezaDeAncestrais() {
+    if (ancestrais == nullptr || qtdAncestrais == 0) return;
+
+    int totalVivos = getQuantidadeTotalAnimais();
+    if (totalVivos == 0) {
+        qtdAncestrais = 0;
+        return;
+    }
+
+    ordenarAncestrais(ancestrais, qtdAncestrais);
+
+    Animal** vivos = new Animal*[totalVivos];
+    bool* necessario = new bool[qtdAncestrais];
+
+    try {
+        int idxVivos = 0;
+        for (int i = 0; i < qtdAreas; ++i) {
+            if (area[i] == nullptr) continue;
+            Animal** rebanho = area[i]->getRebanho();
+            int qtd = area[i]->getQtdAnimais();
+            for (int j = 0; j < qtd; ++j) {
+                if (rebanho[j] != nullptr) {
+                    vivos[idxVivos++] = rebanho[j];
+                }
+            }
+        }
+        ordenarAnimais(vivos, idxVivos);
+
+        for (int i = 0; i < qtdAncestrais; ++i) {
+            necessario[i] = false;
+        }
+
+        // 1. Marca ascendentes de animais vivos, touros de vacas prenhas e filhos registrados em idFilhos
+        for (int i = 0; i < idxVivos; ++i) {
+            Animal* a = vivos[i];
+            bool temPaiOuMae = !a->getPai().empty() || !a->getMae().empty();
+
+            if (temPaiOuMae) {
+                marcarAncestraisNecessariosRec(ancestrais, qtdAncestrais, a->getPai(), necessario);
+                marcarAncestraisNecessariosRec(ancestrais, qtdAncestrais, a->getMae(), necessario);
+            }
+
+            Vaca* v = dynamic_cast<Vaca*>(a);
+            if (v != nullptr && v->getPrenha() && !v->getIdTouroPai().empty()) {
+                marcarAncestraisNecessariosRec(ancestrais, qtdAncestrais, v->getIdTouroPai(), necessario);
+            }
+
+            std::string* filhos = a->getFilhos();
+            for (int k = 0; filhos != nullptr && k < a->getQtdFilhos(); ++k) {
+                int idxFilho = buscarAncestralBinario(ancestrais, qtdAncestrais, filhos[k]);
+                if (idxFilho != -1) {
+                    necessario[idxFilho] = true;
+                }
+            }
+
+            if (temPaiOuMae || a->getQtdFilhos() > 0) {
+                int idxProprio = buscarAncestralBinario(ancestrais, qtdAncestrais, a->getId());
+                if (idxProprio != -1) {
+                    necessario[idxProprio] = true;
+                }
+            }
+        }
+
+        // 2. Marca filhos (vivos, vendidos, mortos ou removidos) que ainda possuem pai ou mae vivos na fazenda
+        for (int i = 0; i < qtdAncestrais; ++i) {
+            const std::string& idPai = ancestrais[i].getIdPai();
+            const std::string& idMae = ancestrais[i].getIdMae();
+            bool paiVivo = !idPai.empty() && buscarIndiceAnimalBinario(vivos, idxVivos, idPai) != -1;
+            bool maeViva = !idMae.empty() && buscarIndiceAnimalBinario(vivos, idxVivos, idMae) != -1;
+
+            if (paiVivo || maeViva) {
+                necessario[i] = true;
+                if (paiVivo) {
+                    int idxPai = buscarAncestralBinario(ancestrais, qtdAncestrais, idPai);
+                    if (idxPai != -1) necessario[idxPai] = true;
+                }
+                if (maeViva) {
+                    int idxMae = buscarAncestralBinario(ancestrais, qtdAncestrais, idMae);
+                    if (idxMae != -1) necessario[idxMae] = true;
+                }
+            }
+        }
+
+        // 3. Compacta o array descartando quem nao possui mais parentes vivos na fazenda
+        int novoQtd = 0;
+        for (int i = 0; i < qtdAncestrais; ++i) {
+            if (necessario[i]) {
+                if (novoQtd != i) {
+                    ancestrais[novoQtd] = ancestrais[i];
+                }
+                novoQtd++;
+            }
+        }
+        qtdAncestrais = novoQtd;
+    } catch (...) {
+        delete[] necessario;
+        delete[] vivos;
+        throw;
+    }
+
+    delete[] necessario;
+    delete[] vivos;
 }
 
 const SnapshotAncestral* Farm::buscarAncestral(const std::string& id) const {
     if (id.empty()) return nullptr;
     int idx = buscarAncestralBinario(ancestrais, qtdAncestrais, id);
     return (idx != -1) ? &ancestrais[idx] : nullptr;
+}
+
+void Farm::exibirAncestrais(const std::string& idAnimal, int maxGeracoes) const {
+    Animal* vivo = encontrarAnimalOpcional(idAnimal);
+    const SnapshotAncestral* hist = buscarAncestral(idAnimal);
+
+    if (vivo == nullptr && hist == nullptr) {
+        std::cout << "Animal '" << idAnimal << "' nao encontrado na fazenda nem no historico genealogico.\n";
+        return;
+    }
+
+    std::string idPai = (vivo != nullptr) ? vivo->getPai() : hist->getIdPai();
+    std::string idMae = (vivo != nullptr) ? vivo->getMae() : hist->getIdMae();
+
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout << "\n--- Ancestrais de " << idAnimal << " ---\n";
+    if (idPai.empty() && idMae.empty()) {
+        std::cout << "  Nenhum ancestral registrado.\n";
+        return;
+    }
+
+    exibirAncestraisRec(ancestrais, qtdAncestrais, idPai, "Pai", 1, maxGeracoes);
+    exibirAncestraisRec(ancestrais, qtdAncestrais, idMae, "Mae", 1, maxGeracoes);
+}
+
+void Farm::exibirFilhos(const std::string& idAnimal) const {
+    Animal* vivo = encontrarAnimalOpcional(idAnimal);
+    const SnapshotAncestral* hist = buscarAncestral(idAnimal);
+
+    if (vivo == nullptr && hist == nullptr) {
+        std::cout << "Animal '" << idAnimal << "' nao encontrado na fazenda nem no historico genealogico.\n";
+        return;
+    }
+
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout << "\n--- Filhos de " << idAnimal << " ---\n";
+
+    int encontrados = 0;
+    for (int i = 0; i < qtdAncestrais; ++i) {
+        if (!ancestrais[i].get_Registrado()) continue;
+        if (ancestrais[i].getIdPai() == idAnimal || ancestrais[i].getIdMae() == idAnimal) {
+            const SnapshotAncestral& f = ancestrais[i];
+            Animal* filhoVivo = encontrarAnimalOpcional(f.get_id());
+            double pesoExibir = (filhoVivo != nullptr) ? filhoVivo->getPeso() : f.get_UltimoPeso();
+            int idadeExibir = (filhoVivo != nullptr) ? filhoVivo->getIdadeMeses() : f.getUltimaIdadeMeses();
+            double scoreExibir = (filhoVivo != nullptr) ? filhoVivo->getScoreBase() : f.get_ScoreBase();
+            std::string statusExibir = (filhoVivo != nullptr) ? "ativo" : (f.get_Status().empty() ? "removido" : f.get_Status());
+
+            std::cout << "  - " << f.get_id()
+                      << " | Sexo: " << f.get_Sexo()
+                      << " | Peso: " << pesoExibir << " kg"
+                      << " | Idade: " << idadeExibir << "m"
+                      << " | Score base: " << scoreExibir
+                      << " | Status: " << statusExibir << "\n";
+            encontrados++;
+        }
+    }
+
+    if (encontrados == 0) {
+        std::cout << "  Nenhum filho registrado.\n";
+    }
 }
 
 Animal* Farm::encontrarAnimalOpcional(const std::string& identificador) const {
@@ -468,22 +714,24 @@ double Farm::calcularMediaScoreBase() const {
     return (n > 0) ? soma / n : 50.0;
 }
 
-// Recalcula o score genetico em O(N log N) usando o registro compartilhado de ancestrais
+// Recalcula o score genetico em O(N log N) considerando ancestrais e todos os filhos (vivos ou vendidos/removidos)
 void Farm::recalcularScoresGeneticos() {
     const double PONTOS_POR_DESCENDENTE = 1.5;
     const double TETO_AJUSTE_DESCENDENTES = 6.0;
     const int IDADE_MINIMA_DESCENDENTE = 6;
 
     int totalAnimais = getQuantidadeTotalAnimais();
-    if (totalAnimais == 0) return;
+    if (totalAnimais == 0) {
+        limpezaDeAncestrais();
+        return;
+    }
 
     Animal** todos = new Animal*[totalAnimais];
-    int idxTodos = 0;
-
-    ordenarAncestrais(ancestrais, qtdAncestrais);
-    int qtdAntes = qtdAncestrais;
+    bool* temVinculo = nullptr;
+    double* ajusteDesc = nullptr;
 
     try {
+        int idxTodos = 0;
         for (int i = 0; i < qtdAreas; ++i) {
             if (area[i] == nullptr) continue;
             Animal** rebanho = area[i]->getRebanho();
@@ -491,27 +739,72 @@ void Farm::recalcularScoresGeneticos() {
             for (int j = 0; j < qtd; ++j) {
                 Animal* atual = rebanho[j];
                 if (atual == nullptr) continue;
-
                 atual->calcularScoreBase();
                 todos[idxTodos++] = atual;
+            }
+        }
 
-                int idxAnc = buscarAncestralBinario(ancestrais, qtdAntes, atual->getId());
-                if (idxAnc != -1) {
-                    ancestrais[idxAnc].atualizarDados(atual->getPeso(), "ativo", atual->getScoreBase(),
-                                                      atual->getPai(), atual->getMae());
-                } else {
-                    if (qtdAncestrais == capacidadeAncestrais) {
-                        int novaCap = (capacidadeAncestrais == 0) ? 16 : capacidadeAncestrais * 2;
-                        SnapshotAncestral* novo = new SnapshotAncestral[novaCap];
-                        for (int c = 0; c < qtdAncestrais; c++) {
-                            novo[c] = ancestrais[c];
-                        }
-                        delete[] ancestrais;
-                        ancestrais = novo;
-                        capacidadeAncestrais = novaCap;
+        ordenarAnimais(todos, idxTodos);
+        ordenarAncestrais(ancestrais, qtdAncestrais);
+
+        // 1. Identifica quais animais vivos possuem vinculo genealogico (pai, mae, filho ou cobertura ativa)
+        temVinculo = new bool[idxTodos];
+        for (int i = 0; i < idxTodos; ++i) temVinculo[i] = false;
+
+        for (int i = 0; i < idxTodos; ++i) {
+            Animal* a = todos[i];
+            if (!a->getPai().empty() || !a->getMae().empty() || a->getQtdFilhos() > 0) {
+                temVinculo[i] = true;
+            }
+            if (!a->getPai().empty()) {
+                int idxPai = buscarIndiceAnimalBinario(todos, idxTodos, a->getPai());
+                if (idxPai != -1) temVinculo[idxPai] = true;
+            }
+            if (!a->getMae().empty()) {
+                int idxMae = buscarIndiceAnimalBinario(todos, idxTodos, a->getMae());
+                if (idxMae != -1) temVinculo[idxMae] = true;
+            }
+            Vaca* v = dynamic_cast<Vaca*>(a);
+            if (v != nullptr && v->getPrenha() && !v->getIdTouroPai().empty()) {
+                int idxTouro = buscarIndiceAnimalBinario(todos, idxTodos, v->getIdTouroPai());
+                if (idxTouro != -1) temVinculo[idxTouro] = true;
+            }
+        }
+
+        // Pais vivos de filhos ja vendidos/mortos/removidos tambem possuem vinculo
+        for (int i = 0; i < qtdAncestrais; ++i) {
+            if (!ancestrais[i].getIdPai().empty()) {
+                int idxPai = buscarIndiceAnimalBinario(todos, idxTodos, ancestrais[i].getIdPai());
+                if (idxPai != -1) temVinculo[idxPai] = true;
+            }
+            if (!ancestrais[i].getIdMae().empty()) {
+                int idxMae = buscarIndiceAnimalBinario(todos, idxTodos, ancestrais[i].getIdMae());
+                if (idxMae != -1) temVinculo[idxMae] = true;
+            }
+        }
+
+        // 2. Insere ou atualiza em ancestrais APENAS quem tem vinculo genealogico
+        int qtdAntes = qtdAncestrais;
+        for (int i = 0; i < idxTodos; ++i) {
+            if (!temVinculo[i]) continue;
+            Animal* atual = todos[i];
+
+            int idxAnc = buscarAncestralBinario(ancestrais, qtdAntes, atual->getId());
+            if (idxAnc != -1) {
+                ancestrais[idxAnc].atualizarDados(atual->getPeso(), "ativo", atual->getScoreBase(),
+                                                  atual->getPai(), atual->getMae(), atual->getIdadeMeses());
+            } else {
+                if (qtdAncestrais == capacidadeAncestrais) {
+                    int novaCap = (capacidadeAncestrais == 0) ? 16 : capacidadeAncestrais * 2;
+                    SnapshotAncestral* novo = new SnapshotAncestral[novaCap];
+                    for (int c = 0; c < qtdAncestrais; c++) {
+                        novo[c] = ancestrais[c];
                     }
-                    ancestrais[qtdAncestrais++] = atual->criarSnapshot("ativo");
+                    delete[] ancestrais;
+                    ancestrais = novo;
+                    capacidadeAncestrais = novaCap;
                 }
+                ancestrais[qtdAncestrais++] = atual->criarSnapshot("ativo");
             }
         }
 
@@ -519,8 +812,10 @@ void Farm::recalcularScoresGeneticos() {
             ordenarAncestrais(ancestrais, qtdAncestrais);
         }
 
-        ordenarAnimais(todos, idxTodos);
+        // 3. Limpa registros sem nenhum parente vivo na fazenda
+        limpezaDeAncestrais();
 
+        // 4. Media do score base do rebanho vivo
         double soma = 0.0;
         int nMedia = 0;
         for (int i = 0; i < idxTodos; ++i) {
@@ -531,6 +826,31 @@ void Farm::recalcularScoresGeneticos() {
         }
         const double mediaRebanho = (nMedia > 0) ? (soma / nMedia) : 50.0;
 
+        // 5. Acumula ajuste de descendentes considerando TODOS os filhos (vivos, vendidos, mortos ou removidos)
+        ajusteDesc = new double[idxTodos];
+        for (int i = 0; i < idxTodos; ++i) ajusteDesc[i] = 0.0;
+
+        for (int k = 0; k < qtdAncestrais; ++k) {
+            const SnapshotAncestral& filho = ancestrais[k];
+            if (!filho.get_Registrado()) continue;
+            if (filho.getUltimaIdadeMeses() < IDADE_MINIMA_DESCENDENTE || filho.get_ScoreBase() <= 0.0) continue;
+
+            double contrib = ((filho.get_ScoreBase() - mediaRebanho) / SCORE_REFERENCIA) * PONTOS_POR_DESCENDENTE;
+
+            const std::string& idPai = filho.getIdPai();
+            const std::string& idMae = filho.getIdMae();
+
+            if (!idPai.empty()) {
+                int idxPai = buscarIndiceAnimalBinario(todos, idxTodos, idPai);
+                if (idxPai != -1) ajusteDesc[idxPai] += contrib;
+            }
+            if (!idMae.empty() && idMae != idPai) {
+                int idxMae = buscarIndiceAnimalBinario(todos, idxTodos, idMae);
+                if (idxMae != -1) ajusteDesc[idxMae] += contrib;
+            }
+        }
+
+        // 6. Aplica ajuste de ancestrais + descendentes em cada animal vivo
         for (int i = 0; i < idxTodos; ++i) {
             Animal* animal = todos[i];
 
@@ -540,24 +860,22 @@ void Farm::recalcularScoresGeneticos() {
             double ajusteAnc = somarEfeitoAncestraisRec(ancestrais, qtdAncestrais, animal->getPai(), GERACOES_AVALIADAS, 1.0, mediaRebanho)
                              + somarEfeitoAncestraisRec(ancestrais, qtdAncestrais, animal->getMae(), GERACOES_AVALIADAS, 1.0, mediaRebanho);
 
-            double ajusteDesc = 0.0;
-            std::string* filhos = animal->getFilhos();
-            for (int k = 0; filhos != nullptr && k < animal->getQtdFilhos(); ++k) {
-                Animal* filho = buscarAnimalBinario(todos, idxTodos, filhos[k]);
-                if (filho == nullptr || filho->getIdadeMeses() < IDADE_MINIMA_DESCENDENTE || filho->getScoreBase() <= 0.0) continue;
-                ajusteDesc += ((filho->getScoreBase() - mediaRebanho) / SCORE_REFERENCIA) * PONTOS_POR_DESCENDENTE;
-            }
-            if (ajusteDesc > TETO_AJUSTE_DESCENDENTES) ajusteDesc = TETO_AJUSTE_DESCENDENTES;
-            if (ajusteDesc < -TETO_AJUSTE_DESCENDENTES) ajusteDesc = -TETO_AJUSTE_DESCENDENTES;
+            double descLim = ajusteDesc[i];
+            if (descLim > TETO_AJUSTE_DESCENDENTES) descLim = TETO_AJUSTE_DESCENDENTES;
+            if (descLim < -TETO_AJUSTE_DESCENDENTES) descLim = -TETO_AJUSTE_DESCENDENTES;
 
-            animal->setAjusteDescendentes(ajusteDesc);
+            animal->setAjusteDescendentes(descLim);
             animal->recalcularScoreGenetico(qtdAnc, ajusteAnc);
         }
     } catch (...) {
+        delete[] ajusteDesc;
+        delete[] temVinculo;
         delete[] todos;
         throw;
     }
 
+    delete[] ajusteDesc;
+    delete[] temVinculo;
     delete[] todos;
 }
 
@@ -570,7 +888,7 @@ void Farm::salvarFazenda() {
     std::filesystem::create_directories("./data");
     std::string idDono = proprietario->getId();
 
-    // 1. Salva tabela compartilhada de ancestrais
+    // 1. Salva tabela compartilhada de ancestrais (ja filtrada e limpa)
     salvarAncestrais();
 
     // 2. Salva dados da fazenda

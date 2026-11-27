@@ -83,8 +83,11 @@ class Farm {
         void salvarAncestrais() const;
         void registrarOuAtualizarAncestral(const SnapshotAncestral& snap);
         void registrarAncestralDeAnimal(Animal* a, const std::string& status = "ativo");
-        void marcarAncestralRemovido(const std::string& id);
+        void marcarAncestralRemovido(const std::string& id, const std::string& status = "removido");
+        void limpezaDeAncestrais();
         const SnapshotAncestral* buscarAncestral(const std::string& id) const;
+        void exibirAncestrais(const std::string& idAnimal, int maxGeracoes = -1) const;
+        void exibirFilhos(const std::string& idAnimal) const;
 
         // gets
         int getQuantidadeTotalAnimais();
