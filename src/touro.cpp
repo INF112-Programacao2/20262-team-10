@@ -1,13 +1,16 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <cstdio>
 #include "farm.hpp"
 #include "touro.hpp"
 
 Touro::Touro(std::string id, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais, double vDS)
-: Animal(id, 'M', p, iM, qtdF, qtdV, filhosIniciais), valorDoseSemen(vDS), meritoGeneticoPTA(0.0), dosesEstoque(0), qtdCoberturas(0) {}
+: Animal(id, 'M', p, iM, qtdF, qtdV, filhosIniciais), valorDoseSemen(vDS), dosesEstoque(0), qtdCoberturas(0) {
+    if (vDS < 0.0) throw std::invalid_argument("O valor da dose de semen nao pode ser negativo!");
+}
 
-Touro::Touro() : Animal(), valorDoseSemen(0.0), meritoGeneticoPTA(0.0), dosesEstoque(0), qtdCoberturas(0) {
+Touro::Touro() : Animal(), valorDoseSemen(0.0), dosesEstoque(0), qtdCoberturas(0) {
     sexo = 'M';
 }
 
@@ -15,7 +18,6 @@ Touro::~Touro(){}
 
 //gets
 double Touro:: getValorDoseSemen()const {return valorDoseSemen;}
-double Touro:: getMerito()const {return meritoGeneticoPTA;}
 int Touro:: getDosesEstoque()const {return dosesEstoque;}
 int Touro:: getQtdCoberturas()const {return qtdCoberturas;}
 std::string Touro::getTipo() const {return "touro";}
@@ -24,10 +26,6 @@ bool Touro::podeSerPromovido() const {return false;}
 void Touro::setValorDoseSemen(double v) {
     if (v < 0.0) throw std::invalid_argument("O valor da dose de semen nao pode ser negativo!");
     valorDoseSemen = v;
-}
-
-void Touro::setMerito(double m) {
-    meritoGeneticoPTA = m;
 }
 
 void Touro::setDosesEstoque(int d) {
@@ -48,7 +46,7 @@ double Touro::calcularSacosDiarios(SacaRacao** relatorioRacao) const {
     if (relatorioRacao == nullptr) return 0.0;
     double pesoSaco = 0.0;
     for (int i = 0; i < 3; i++) {
-        if (relatorioRacao[i]->name == "Racao Avulsa") {
+        if (relatorioRacao[i] != nullptr && relatorioRacao[i]->name == "Racao Avulsa") {
             pesoSaco = relatorioRacao[i]->peso;
             break;
         }
@@ -62,7 +60,7 @@ double Touro::calcularGastoDiario([[maybe_unused]] double precoLeite, SacaRacao*
     if (relatorioRacao == nullptr) return 0.0;
     double precoRacao = 0.0;
     for (int i = 0; i < 3; i++) {
-        if (relatorioRacao[i]->name == "Racao Avulsa") {
+        if (relatorioRacao[i] != nullptr && relatorioRacao[i]->name == "Racao Avulsa") {
             precoRacao = relatorioRacao[i]->preco;
             break;
         }
@@ -109,14 +107,14 @@ void Touro::salvarEmArquivo() {
         if(leitura.is_open()) {
             Touro aux;
             while(aux.carregarBase(leitura) &&
-                  (leitura >> aux.valorDoseSemen >> aux.meritoGeneticoPTA >> aux.dosesEstoque >> aux.qtdCoberturas)) {
+                  (leitura >> aux.valorDoseSemen >> aux.dosesEstoque >> aux.qtdCoberturas)) {
                 if(aux._id == _id) {
                     escreverBase(temp);
-                    temp << " " << valorDoseSemen << " " << meritoGeneticoPTA << " " << dosesEstoque << " " << qtdCoberturas << "\n";
+                    temp << " " << valorDoseSemen << " " << dosesEstoque << " " << qtdCoberturas << "\n";
                     touroAtualizado = true;
                 } else {
                     aux.escreverBase(temp);
-                    temp << " " << aux.valorDoseSemen << " " << aux.meritoGeneticoPTA << " " << aux.dosesEstoque << " " << aux.qtdCoberturas << "\n";
+                    temp << " " << aux.valorDoseSemen << " " << aux.dosesEstoque << " " << aux.qtdCoberturas << "\n";
                 }
             }
             leitura.close();
@@ -124,7 +122,7 @@ void Touro::salvarEmArquivo() {
 
         if(!touroAtualizado) {
             escreverBase(temp);
-            temp << " " << valorDoseSemen << " " << meritoGeneticoPTA << " " << dosesEstoque << " " << qtdCoberturas << "\n";
+            temp << " " << valorDoseSemen << " " << dosesEstoque << " " << qtdCoberturas << "\n";
         }
     } catch (...) {
         if(leitura.is_open()) leitura.close();
@@ -149,7 +147,7 @@ Touro* Touro::carregarTouro(std::string id) {
     Touro* touroCarregado = new Touro();
     try {
         while(touroCarregado->carregarBase(arquivo) &&
-              (arquivo >> touroCarregado->valorDoseSemen >> touroCarregado->meritoGeneticoPTA >> touroCarregado->dosesEstoque >> touroCarregado->qtdCoberturas)) {
+              (arquivo >> touroCarregado->valorDoseSemen >> touroCarregado->dosesEstoque >> touroCarregado->qtdCoberturas)) {
             if(touroCarregado->_id == id) {
                 arquivo.close();
                 return touroCarregado;
@@ -174,16 +172,12 @@ void Touro::imprimirFichaParcial() const{
 }
 
 double Touro::calcularValorVendaMercado(double precoArroba) {
-    if(precoArroba<0) throw std::invalid_argument("O preco do arroba nao pode ser negativo!");
-    double valorCarne = (peso/15.0) * precoArroba;
-    double bonusGenetico =0.0;
-    if(meritoGeneticoPTA>0){ //valor de referencia 150
-        bonusGenetico = meritoGeneticoPTA * 150.0;
-    }
+    if (precoArroba < 0) throw std::invalid_argument("O preco do arroba nao pode ser negativo!");
+    double valorCarne = (peso / 30.0) * precoArroba;
     double valorBancoSemen = (dosesEstoque * valorDoseSemen) * 0.7;
 
     if (idadeMeses > 84) {
         return valorCarne + valorBancoSemen;
     }
-    return valorCarne + bonusGenetico + valorBancoSemen;
+    return (valorCarne * getFatorPrecoGenetico()) + valorBancoSemen;
 }

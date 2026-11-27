@@ -6,7 +6,7 @@
 class Vaca;
 class Touro : public Animal{
 private:
-    double valorDoseSemen, meritoGeneticoPTA;
+    double valorDoseSemen;
     int dosesEstoque, qtdCoberturas;
     Touro();
 public:
@@ -17,14 +17,12 @@ public:
     ~Touro();
     //gets
     double getValorDoseSemen()const;
-    double getMerito()const;
     int getDosesEstoque()const;
     int getQtdCoberturas()const;
     std::string getTipoRacao() const override;
     double calcularSacosDiarios(SacaRacao** relatorioRacao) const override;
     //sets
     void setValorDoseSemen(double v);
-    void setMerito(double m);
     void setDosesEstoque(int d);
     void setQtdCoberturas(int q);
     //metodos herança
