@@ -143,6 +143,34 @@ O projeto foi construído sob restrições acadêmicas de POO em C++17 com foco 
 
 ---
 
+## 👥 Equipe e Divisão de Responsabilidades
+
+* **Paulo Vitor**
+  * Estrutura geral do projeto e `Makefile`.
+  * Implementação de `Farm`, `Area`, `User` (cotações/API e `sacaRacao.hpp`), trânsito/adição/remoção de animais e integração entre `Farm`, `Area` e `User`.
+  * Leitura e escrita de arquivos (`Farm`, `Area` e subclasses de `Animal`), refatoração do `SnapshotAncestral` (`ancestrais.txt`), testes de carga (`geradorTeste.py`) e correção de bugs e vazamentos de memória.
+  * Participação na lógica do score genético, na importação em lote e em ajustes na `main.cpp`.
+
+* **Vitor**
+  * Implementação da classe base `Animal` e suas subclasses (`Vaca`, `Touro`, `Bezerro`, `Boicorte`), seus métodos e persistência circular dos dados.
+  * Desenvolvimento de ~90% da interface CLI (`main.cpp`).
+  * Participação na lógica do score genético e na importação em lote.
+
+* **Marco Tulio**
+  * Implementação base do `SnapshotAncestral` e participação na lógica do score genético.
+  * Evolução final do relatório de *Break-Even*, integração dos gastos sanitários ao cálculo de gastos da `main` e módulo de certificado (`certificado.hpp`/`certificado.cpp`).
+
+* **Elioenai**
+  * Motor do tempo e parser de planilhas Excel/CSV (`parserplanilha.hpp`/`parser.cpp`) para conversão em dados legíveis pelo sistema.
+
+* **Rhuan**
+  * Módulo sanitário completo, controle de quarentena, saúde animal e registro de baixas (`Medicamento`, `RegistroSanitario`, `HistoricoSanitario`, `AreaQuarentena`, `RegistroBaixa`).
+
+* **Equipe (Geral)**
+  * Modelagem UML (`docs/Diagrama_Classes_FarmManager.pdf`).
+
+---
+
 ## 💻 Diagrama Arquitetural de Classes
 
 <div align="center">
