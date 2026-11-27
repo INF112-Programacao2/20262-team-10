@@ -12,6 +12,28 @@
 #include <iostream>
 #include <stdexcept>
 
+static int obterMaiorProximoIdGlobal() {
+    std::ifstream arqFaz("./data/fazendas.txt");
+    if (!arqFaz.is_open()) {
+        return 1;
+    }
+
+    std::string donoLido, nomeLido, locLida, areaAtualLida;
+    int baixasLidas, diaLido, proxIdLido;
+    double caixaLido, lucroLido, prejuizoLido;
+    int maior = 1;
+
+    while (arqFaz >> donoLido >> nomeLido >> locLida >> areaAtualLida
+                  >> baixasLidas >> caixaLido >> lucroLido >> prejuizoLido >> diaLido >> proxIdLido) {
+        if (proxIdLido > maior) {
+            maior = proxIdLido;
+        }
+    }
+
+    arqFaz.close();
+    return maior;
+}
+
 Farm::Farm(std::string s, std::string l, User* propr) {
     if (propr == nullptr) {
         throw std::invalid_argument("Proprietario da fazenda invalido!");
@@ -29,7 +51,7 @@ Farm::Farm(std::string s, std::string l, User* propr) {
     lucroAcumuladoVendas = 0.0;
     prejuizoAcumuladoMortes = 0.0;
     diaAtualSimulacao = 0;
-    proximoIdAnimal = 1;
+    proximoIdAnimal = obterMaiorProximoIdGlobal();
 }
 
 ContagemRebanho Farm::getContagemGlobalPorTipo() const {
@@ -216,7 +238,7 @@ void Farm::recalcularScoresGeneticos() {
         }
     }
 
-    //mesma atualizacao de snapshots feita em salvarFazenda, so que agr com o score base
+    // atualiza os dados dos ancestrais que ainda estao vivos na fazenda
     for (int i = 0; i < qtdAreas; ++i) {
         if (area[i] == nullptr) continue;
         Animal** rebanhoAtual = area[i]->getRebanho();
@@ -266,33 +288,7 @@ void Farm::salvarFazenda() {
     if (proprietario == nullptr) throw std::runtime_error("Proprietario invalido para salvar fazenda!");
     if (nome.empty()) throw std::invalid_argument("Nome da fazenda invalido!");
 
-    recalcularScoresGeneticos(); // score atualizado antes de gravar
-
-    // atualiza os dados dos ancestrais que ainda estao vivos na fazenda
-    // atualizacao percorre recursivamente a arvore
-    for (int i = 0; i < qtdAreas; ++i) {
-        if (area[i] == nullptr) continue;
-        Animal** rebanhoAtual = area[i]->getRebanho();
-        int quantidade = area[i]->getQtdAnimais();
-        for (int j = 0; j < quantidade; ++j) {
-            if (rebanhoAtual[j] == nullptr) continue;
-            SnapshotAncestral dadosAtuais = rebanhoAtual[j]->criarSnapshot();
-            for (int a = 0; a < qtdAreas; ++a) {
-                if (area[a] == nullptr) continue;
-                Animal** rebanhoAlvo = area[a]->getRebanho();
-                int qtdAlvos = area[a]->getQtdAnimais();
-                for (int k = 0; k < qtdAlvos; ++k) {
-                    if (rebanhoAlvo[k] == nullptr) continue;
-                    rebanhoAlvo[k]->getSnapshotPai()->atualizarAncestral(dadosAtuais);
-                    rebanhoAlvo[k]->getSnapshotMae()->atualizarAncestral(dadosAtuais);
-                    Vaca* vacaAlvo = dynamic_cast<Vaca*>(rebanhoAlvo[k]);
-                    if (vacaAlvo != nullptr) {
-                        vacaAlvo->getSnapshotTouroPai().atualizarAncestral(dadosAtuais);
-                    }
-                }
-            }
-        }
-    }
+    recalcularScoresGeneticos(); // score e snapshots atualizados antes de gravar
 
     std::filesystem::create_directories("./data");
     std::string idDono = proprietario->getId();
@@ -456,7 +452,9 @@ Farm* Farm::carregarFazenda(User* proprietario, std::string nomeFazenda) {
                 fazendaCarregada->lucroAcumuladoVendas = lucroLido;
                 fazendaCarregada->prejuizoAcumuladoMortes = prejuizoLido;
                 fazendaCarregada->diaAtualSimulacao = diaLido;
-                fazendaCarregada->proximoIdAnimal = (proxIdLido > 0) ? proxIdLido : 1;
+                int maiorGlobal = obterMaiorProximoIdGlobal();
+                int proxBase = (proxIdLido > 0) ? proxIdLido : 1;
+                fazendaCarregada->proximoIdAnimal = (proxBase > maiorGlobal) ? proxBase : maiorGlobal;
                 areaSelecionadaSalva = formatarTextoFarmCarregar(areaAtualLida);
                 break;
             }
@@ -656,9 +654,21 @@ bool Farm::transferirAnimalEntreAreas(std::string idAnimal, std::string nomeArea
     if (indexOrigem == indexDestino) {
         return true;
     }
+    if (area[indexDestino]->buscarAnimal(idAnimal) != nullptr) {
+        throw std::runtime_error("Ja existe um animal com este ID na area de destino.");
+    }
 
     Animal* temporario = area[indexOrigem]->extrairAnimal(idAnimal);
-    area[indexDestino]->adicionarAnimal(temporario);
+    if (temporario == nullptr) {
+        throw std::runtime_error("Erro ao extrair animal da area de origem.");
+    }
+
+    try {
+        area[indexDestino]->adicionarAnimal(temporario);
+    } catch (...) {
+        area[indexOrigem]->adicionarAnimal(temporario, true);
+        throw;
+    }
 
     std::cout << "Animal transferido com sucesso para a area " << nomeArea << std::endl;
     return true;
@@ -727,12 +737,13 @@ std::string Farm::registrarNascimento(const std::string& idFemea, const std::str
     }
 
     Bezerro* filhote = new Bezerro(id, sexo, peso);
+    bool inseridoNaArea = false;
     try {
-        std::string idPai = mae->parir();
+        std::string idPai = mae->getIdTouroPai();
         filhote->setIdMae(idFemea);
         filhote->setIdPai(idPai);
 
-        // Snapshot completo da mae e do touro 
+        // Snapshot completo da mae e do touro
         mae->calcularScoreBase();
         filhote->setSnapshotMae(mae->criarSnapshot());
         if (mae->getSnapshotTouroPai().get_Registrado()) {
@@ -744,7 +755,12 @@ std::string Farm::registrarNascimento(const std::string& idFemea, const std::str
         filhote->calcularScoreBase();
         filhote->recalcularScoreGenetico(calcularMediaScoreBase());
 
+        // Insere na area antes de alterar o estado da mae
         destino->adicionarAnimal(filhote);
+        inseridoNaArea = true;
+
+        mae->parir();
+        mae->getSnapshotTouroPai() = SnapshotAncestral();
         mae->adicionarFilho(id);
 
         if (!idPai.empty()) {
@@ -755,12 +771,15 @@ std::string Farm::registrarNascimento(const std::string& idFemea, const std::str
             }
         }
     } catch (...) {
-        delete filhote;
+        if (!inseridoNaArea) {
+            delete filhote;
+        }
         throw;
     }
 
     return id;
 }
+
 double Farm::calcularGastoTotalDiarioFazenda() {
     if (proprietario == nullptr) {
         throw std::runtime_error("Proprietario nao definido na fazenda!");
