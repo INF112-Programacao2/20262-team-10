@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <fstream>
+#include <limits>
 #include "area.hpp"
 #include "farm.hpp"
 #include "animal.hpp"
@@ -9,7 +10,6 @@
 #include "vaca.hpp"
 #include "user.hpp"
 #include "sacaRacao.hpp"
-#include "snapshotancestral.hpp"
 
 Area::Area(string n, string estado, double a) {
     if (a <= 0) {
@@ -20,6 +20,7 @@ Area::Area(string n, string estado, double a) {
     area = a;
     qtdAtualDeAnimais = 0;
     rebanho = new Animal*[1];
+    rebanho[0] = nullptr;
     atualizarCapacidadeMaxima();
 }
 
@@ -115,7 +116,7 @@ void Area::removerAnimal(string idAnimal) {
         return;
     }
 
-    delete animalParaAbate; 
+    delete animalParaAbate;
     std::cout << "Animal removido e deletado com sucesso!" << std::endl;
 }
 
@@ -136,17 +137,14 @@ void Area::promoverAnimal() {
             std::cout << "Gostaria de realizar a promocao [Y/N]? ";
             string resposta;
             std::cin >> resposta;
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-        if (resposta == "Y" || resposta == "y") {
+            if (resposta == "Y" || resposta == "y") {
                 if (rebanho[i]->getSexo() == 'M') {
                     Touro* t = new Touro(rebanho[i]->getId(),
                         rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), 0, rebanho[i]->getQtdvacinas(), nullptr, 0.0);
                     t->setIdPai(rebanho[i]->getPai());
                     t->setIdMae(rebanho[i]->getMae());
-
-                    //snapshot
-                    t->setSnapshotPai(*rebanho[i]->getSnapshotPai());
-                    t->setSnapshotMae(*rebanho[i]->getSnapshotMae());
                     t->copiarDadosGeneticosDe(*rebanho[i]);
 
                     delete rebanho[i];
@@ -157,12 +155,8 @@ void Area::promoverAnimal() {
                         rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), 0, rebanho[i]->getQtdvacinas(), nullptr);
                     v->setIdPai(rebanho[i]->getPai());
                     v->setIdMae(rebanho[i]->getMae());
-
-                    //snapshot
-                    v->setSnapshotPai(*rebanho[i]->getSnapshotPai());
-                    v->setSnapshotMae(*rebanho[i]->getSnapshotMae());
                     v->copiarDadosGeneticosDe(*rebanho[i]);
-                    
+
                     delete rebanho[i];
                     rebanho[i] = v;
                     std::cout << "Bezerro promovido a vaca com sucesso!\n";
@@ -224,6 +218,7 @@ Animal* Area::extrairAnimal(string idAnimal) {
 
     int novoTamanho = (qtdAtualDeAnimais - 1 > 0) ? (qtdAtualDeAnimais - 1) : 1;
     Animal** rebanhoNovaAlocacao = new Animal*[novoTamanho];
+    rebanhoNovaAlocacao[0] = nullptr;
 
     for (int i = 0; i < indexAnimalRemovido; i++) {
         rebanhoNovaAlocacao[i] = rebanho[i];
@@ -282,8 +277,6 @@ ConsumoRacao Area::getSacosGastosNaArea(SacaRacao** relatorioRacoes) {
 
     return total;
 }
-
-
 
 double Area::getGastoIndividual(string id, double precoLeite, SacaRacao** relatorioRacoes) {
     Animal* animalAchado = buscarAnimal(id);

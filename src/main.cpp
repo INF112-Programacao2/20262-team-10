@@ -48,9 +48,14 @@ bool existemUsuariosCadastrados() {
             }
         }
     }
-    if (fs::exists("usuarios.txt") || fs::exists("users.txt")) {
-        std::ifstream arq(fs::exists("usuarios.txt") ? "usuarios.txt" : "users.txt");
-        return arq.peek() != std::ifstream::traits_type::eof();
+    const std::string arquivosPossiveis[] = {"./data/usuarios.txt", "./data/users.txt", "usuarios.txt", "users.txt"};
+    for (const std::string& caminho : arquivosPossiveis) {
+        if (fs::exists(caminho)) {
+            std::ifstream arq(caminho);
+            if (arq.peek() != std::ifstream::traits_type::eof()) {
+                return true;
+            }
+        }
     }
     return false;
 }
@@ -307,7 +312,14 @@ void importarArquivoEmLote(Farm* fazendaAtual, const std::string& caminhoArquivo
             continue;
         }
 
-        if (comando == "AREA") {
+        if (comando == "ANCESTRAL") {
+            SnapshotAncestral snap;
+            if (!snap.ler(iss)) {
+                throw std::runtime_error("Dados invalidos para ancestral na linha " + std::to_string(linhaAtual));
+            }
+            fazendaAtual->registrarOuAtualizarAncestral(snap);
+        }
+        else if (comando == "AREA") {
             std::string nomeArea, estadoPasto;
             double hectares;
             if (!(iss >> nomeArea >> estadoPasto >> hectares)) {
@@ -402,10 +414,10 @@ void importarArquivoEmLote(Farm* fazendaAtual, const std::string& caminhoArquivo
                     SnapshotAncestral snapPai;
                     SnapshotAncestral snapMae;
                     if (snapPai.ler(iss)) {
-                        novoAnimal->setSnapshotPai(snapPai);
+                        fazendaAtual->registrarOuAtualizarAncestral(snapPai);
                     }
                     if (snapMae.ler(iss)) {
-                        novoAnimal->setSnapshotMae(snapMae);
+                        fazendaAtual->registrarOuAtualizarAncestral(snapMae);
                     }
                 }
 
@@ -736,8 +748,11 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual, bool& alterou)
                 limparBuffer();
 
                 char sexoFmt = static_cast<char>(std::toupper(static_cast<unsigned char>(sexo)));
+                bool desmamado = (idade >= 7);
+                double consumoLeite = desmamado ? 0.0 : 4.0;
+                int idadeDesmame = desmamado ? idade : 0;
                 std::string id = fazendaAtual->gerarProximoId("bezerro");
-                novoAnimal = new Bezerro(id, sexoFmt, peso, idade, 0, vacinas, nullptr, 4.0, 0.7, 0, idade >= 7);
+                novoAnimal = new Bezerro(id, sexoFmt, peso, idade, 0, vacinas, nullptr, consumoLeite, 0.7, idadeDesmame, desmamado);
             }
             else {
                 std::cout << "Opcao Invalida.\n";
@@ -871,6 +886,7 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual, bool& alterou)
             std::cin >> confirma;
             limparBuffer();
             if (confirma == 'S' || confirma == 's') {
+                fazendaAtual->marcarAncestralRemovido(id);
                 areaAlvo->removerAnimal(id);
                 alterou = true;
             } else {

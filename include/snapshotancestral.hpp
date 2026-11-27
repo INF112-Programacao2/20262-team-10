@@ -12,21 +12,13 @@ class SnapshotAncestral {
         double ultimoPeso_;
         std::string status_; 
         double scoreBase_; 
-
-        SnapshotAncestral* snapshotPai_;
-        SnapshotAncestral* snapshotMae_;
-
-        void copiarDe(const SnapshotAncestral& outro);
-        void liberar();
+        std::string idPai;
+        std::string idMae;
 
     public: 
         SnapshotAncestral();
-        SnapshotAncestral(std::string id, char sexo, double ultimoPeso, std::string status);
-        SnapshotAncestral(std::string id, char sexo, double ultimoPeso, std::string status, const SnapshotAncestral* snapPai, const SnapshotAncestral* snapMae, double scoreBase = 0.0);
-
-        SnapshotAncestral(const SnapshotAncestral& outro);
-        SnapshotAncestral& operator=(const SnapshotAncestral& outro);
-        ~SnapshotAncestral();
+        SnapshotAncestral(std::string id, char sexo, double ultimoPeso, std::string status,
+                          double scoreBase = 0.0, std::string idPai = "", std::string idMae = "");
 
         bool get_Registrado() const;
         std::string get_id() const;
@@ -34,19 +26,19 @@ class SnapshotAncestral {
         double get_UltimoPeso() const;
         std::string get_Status() const; 
         double get_ScoreBase() const;
-
-        //getters 
-        const SnapshotAncestral* get_SnapshotPai() const;
-        const SnapshotAncestral* get_SnapshotMae() const;
+        std::string getIdPai() const;
+        std::string getIdMae() const;
 
         //setters 
         void set_ScoreBase(double s);
-        void set_SnapshotPai(const SnapshotAncestral* snapPai);
-        void set_SnapshotMae(const SnapshotAncestral* snapMae);
+        void setUltimoPeso(double p);
+        void setStatus(const std::string& s);
+        void setIdPai(const std::string& idPai);
+        void setIdMae(const std::string& idMae);
 
-        bool atualizarAncestral(const SnapshotAncestral& novo);
+        void atualizarDados(double ultimoPeso, const std::string& status, double scoreBase,
+                            const std::string& idPai, const std::string& idMae);
 
-        // salvar a arvore inteira 
         void escrever(std::ostream& out) const;
         bool ler(std::istream& in);
 };

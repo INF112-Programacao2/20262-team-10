@@ -17,15 +17,11 @@ protected:
     std::string* idFilhos;
 
     // Score genetico
-    double pesoNascimento;        
-    double ganhoMedioPeso;        
+    double pesoNascimento;
+    double ganhoMedioPeso;
     double scoreBase;             // 0 a 100
-    double ajusteDescendentes;    
-    double scoreGenetico;        
-
-    // Snapshot ancestral
-    SnapshotAncestral snapshotPai;
-    SnapshotAncestral snapshotMae;
+    double ajusteDescendentes;
+    double scoreGenetico;
 
     Animal();
     std::string formatarTextoSalvar(std::string texto) const;
@@ -75,45 +71,16 @@ public:
     void setAjusteDescendentes(double pontos);
 
     // score genetico
-    void registrarPesagem(double novoPeso, int novaIdadeMeses); 
-    int contarAncestraisSalvos() const;
-    double calcularAjusteAncestrais(double mediaRebanho = 50.0) const;
-    double calcularScoreBase();          
-    void recalcularScoreGenetico(double mediaRebanho = 50.0); 
-    double getFatorPrecoGenetico() const; 
-    void copiarDadosGeneticosDe(const Animal& outro); 
+    void registrarPesagem(double novoPeso, int novaIdadeMeses);
+    double calcularScoreBase();
+    void recalcularScoreGenetico(int qtdAncestrais, double ajusteAncestrais);
+    double getFatorPrecoGenetico() const;
+    void copiarDadosGeneticosDe(const Animal& outro);
 
-    // get do snapshot
-    SnapshotAncestral* getSnapshotPai() {
-        return &snapshotPai;
-    }
+    // cria um registro plano para a tabela compartilhada de ancestrais
+    SnapshotAncestral criarSnapshot(const std::string& status = "ativo") const;
 
-    const SnapshotAncestral* getSnapshotPai() const {
-        return &snapshotPai;
-    }
-
-    SnapshotAncestral* getSnapshotMae() {
-        return &snapshotMae;
-    }
-
-    const SnapshotAncestral* getSnapshotMae() const {
-        return &snapshotMae;
-    }
-
-    // set do snapshot
-    void setSnapshotPai(const SnapshotAncestral& salva) {
-        snapshotPai = salva;
-    }
-
-    void setSnapshotMae(const SnapshotAncestral& salva) {
-        snapshotMae = salva;
-    }
-
-    // cria um snapshot completo, incluindo sua árvore ancestral
-    SnapshotAncestral criarSnapshot() const { return SnapshotAncestral(_id, sexo, peso, estadoSaude, &snapshotPai, &snapshotMae, scoreBase );
-    }
-
-    // metodos usados para verificar promoção
+    // metodos usados para verificar promocao
     virtual std::string getTipo() const = 0;
     virtual bool podeSerPromovido() const = 0;
 

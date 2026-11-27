@@ -7,6 +7,7 @@
 #include "area.hpp"
 #include "user.hpp"
 #include "sacaRacao.hpp"
+#include "snapshotancestral.hpp"
 
 class Farm {
     private:
@@ -18,6 +19,11 @@ class Farm {
         Area** area;
         int proximoIdAnimal;
         int qtdAreas;
+
+        // registro compartilhado de ancestrais
+        SnapshotAncestral* ancestrais;
+        int qtdAncestrais;
+        int capacidadeAncestrais;
 
         // resumo de dados
         int qtdTotalDeAnimais;
@@ -71,6 +77,15 @@ class Farm {
         void registrarNascimento(const std::string& idFemea, const std::string& nomeArea, std::string id, char sexo, double peso);
         void recalcularScoresGeneticos();
         void emitirRelatorioOperacional();
+
+        // ancestrais compartilhados
+        void carregarAncestrais();
+        void salvarAncestrais() const;
+        void registrarOuAtualizarAncestral(const SnapshotAncestral& snap);
+        void registrarAncestralDeAnimal(Animal* a, const std::string& status = "ativo");
+        void marcarAncestralRemovido(const std::string& id);
+        const SnapshotAncestral* buscarAncestral(const std::string& id) const;
+
         // gets
         int getQuantidadeTotalAnimais();
         ContagemRebanho getContagemGlobalPorTipo() const;

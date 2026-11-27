@@ -3,14 +3,127 @@
 #include "touro.hpp"
 #include "boicorte.hpp"
 #include "vaca.hpp"
+#include "bezerro.hpp"
 #include <fstream>
 #include <ostream>
 #include <cstdio>
 #include <iomanip>
 #include <filesystem>
-#include "bezerro.hpp"
 #include <iostream>
 #include <stdexcept>
+
+static const int GERACOES_AVALIADAS = 2;
+static const double SCORE_REFERENCIA = 50.0;
+static const double PONTOS_POR_ANCESTRAL = 2.0;
+
+static void mergeAncestrais(SnapshotAncestral* arr, SnapshotAncestral* tmp, int esq, int meio, int dir) {
+    int i = esq, j = meio + 1, k = esq;
+    while (i <= meio && j <= dir) {
+        if (arr[i].get_id() <= arr[j].get_id()) tmp[k++] = arr[i++];
+        else tmp[k++] = arr[j++];
+    }
+    while (i <= meio) tmp[k++] = arr[i++];
+    while (j <= dir) tmp[k++] = arr[j++];
+    for (int idx = esq; idx <= dir; idx++) arr[idx] = tmp[idx];
+}
+
+static void mergeSortAncestraisRec(SnapshotAncestral* arr, SnapshotAncestral* tmp, int esq, int dir) {
+    if (esq >= dir) return;
+    int meio = esq + (dir - esq) / 2;
+    mergeSortAncestraisRec(arr, tmp, esq, meio);
+    mergeSortAncestraisRec(arr, tmp, meio + 1, dir);
+    mergeAncestrais(arr, tmp, esq, meio, dir);
+}
+
+static void ordenarAncestrais(SnapshotAncestral* arr, int n) {
+    if (arr == nullptr || n <= 1) return;
+    SnapshotAncestral* tmp = new SnapshotAncestral[n];
+    try {
+        mergeSortAncestraisRec(arr, tmp, 0, n - 1);
+    } catch (...) {
+        delete[] tmp;
+        throw;
+    }
+    delete[] tmp;
+}
+
+static int buscarAncestralBinario(const SnapshotAncestral* arr, int n, const std::string& id) {
+    int esq = 0, dir = n - 1;
+    while (esq <= dir) {
+        int meio = esq + (dir - esq) / 2;
+        const std::string& atual = arr[meio].get_id();
+        if (atual == id) return meio;
+        if (atual < id) esq = meio + 1;
+        else dir = meio - 1;
+    }
+    return -1;
+}
+
+static void mergeAnimais(Animal** arr, Animal** tmp, int esq, int meio, int dir) {
+    int i = esq, j = meio + 1, k = esq;
+    while (i <= meio && j <= dir) {
+        if (arr[i]->getId() <= arr[j]->getId()) tmp[k++] = arr[i++];
+        else tmp[k++] = arr[j++];
+    }
+    while (i <= meio) tmp[k++] = arr[i++];
+    while (j <= dir) tmp[k++] = arr[j++];
+    for (int idx = esq; idx <= dir; idx++) arr[idx] = tmp[idx];
+}
+
+static void mergeSortAnimaisRec(Animal** arr, Animal** tmp, int esq, int dir) {
+    if (esq >= dir) return;
+    int meio = esq + (dir - esq) / 2;
+    mergeSortAnimaisRec(arr, tmp, esq, meio);
+    mergeSortAnimaisRec(arr, tmp, meio + 1, dir);
+    mergeAnimais(arr, tmp, esq, meio, dir);
+}
+
+static void ordenarAnimais(Animal** arr, int n) {
+    if (arr == nullptr || n <= 1) return;
+    Animal** tmp = new Animal*[n];
+    try {
+        mergeSortAnimaisRec(arr, tmp, 0, n - 1);
+    } catch (...) {
+        delete[] tmp;
+        throw;
+    }
+    delete[] tmp;
+}
+
+static Animal* buscarAnimalBinario(Animal** arr, int n, const std::string& id) {
+    int esq = 0, dir = n - 1;
+    while (esq <= dir) {
+        int meio = esq + (dir - esq) / 2;
+        const std::string& atual = arr[meio]->getId();
+        if (atual == id) return arr[meio];
+        if (atual < id) esq = meio + 1;
+        else dir = meio - 1;
+    }
+    return nullptr;
+}
+
+static int contarAncestraisRec(const SnapshotAncestral* arr, int n, const std::string& id, int niveis) {
+    if (id.empty() || niveis <= 0) return 0;
+    int idx = buscarAncestralBinario(arr, n, id);
+    if (idx == -1 || !arr[idx].get_Registrado()) return 0;
+    return 1 + contarAncestraisRec(arr, n, arr[idx].getIdPai(), niveis - 1)
+             + contarAncestraisRec(arr, n, arr[idx].getIdMae(), niveis - 1);
+}
+
+static double somarEfeitoAncestraisRec(const SnapshotAncestral* arr, int n, const std::string& id,
+                                       int niveis, double pesoGeracao, double media) {
+    if (id.empty() || niveis <= 0) return 0.0;
+    int idx = buscarAncestralBinario(arr, n, id);
+    if (idx == -1 || !arr[idx].get_Registrado()) return 0.0;
+
+    double efeito = 0.0;
+    if (arr[idx].get_ScoreBase() > 0.0) {
+        efeito = ((arr[idx].get_ScoreBase() - media) / SCORE_REFERENCIA) * PONTOS_POR_ANCESTRAL * pesoGeracao;
+    }
+    return efeito
+         + somarEfeitoAncestraisRec(arr, n, arr[idx].getIdPai(), niveis - 1, pesoGeracao * 0.5, media)
+         + somarEfeitoAncestraisRec(arr, n, arr[idx].getIdMae(), niveis - 1, pesoGeracao * 0.5, media);
+}
 
 static int obterMaiorProximoIdGlobal() {
     std::ifstream arqFaz("./data/fazendas.txt");
@@ -45,6 +158,10 @@ Farm::Farm(std::string s, std::string l, User* propr) {
     area = nullptr;
     qtdAreas = 0;
 
+    ancestrais = nullptr;
+    qtdAncestrais = 0;
+    capacidadeAncestrais = 0;
+
     qtdTotalDeAnimais = 0;
     qtdBaixas = 0;
     saldoCaixa = 0.0;
@@ -52,6 +169,8 @@ Farm::Farm(std::string s, std::string l, User* propr) {
     prejuizoAcumuladoMortes = 0.0;
     diaAtualSimulacao = 0;
     proximoIdAnimal = obterMaiorProximoIdGlobal();
+
+    carregarAncestrais();
 }
 
 ContagemRebanho Farm::getContagemGlobalPorTipo() const {
@@ -148,6 +267,7 @@ Farm::~Farm() {
         }
         delete[] area;
     }
+    delete[] ancestrais;
 }
 
 static std::string formatarTextoFarmSalvar(std::string texto) {
@@ -164,6 +284,128 @@ static std::string formatarTextoFarmCarregar(std::string texto) {
         if (texto[i] == '_') texto[i] = ' ';
     }
     return texto;
+}
+
+void Farm::carregarAncestrais() {
+    delete[] ancestrais;
+    ancestrais = nullptr;
+    qtdAncestrais = 0;
+    capacidadeAncestrais = 0;
+
+    std::ifstream arq("./data/ancestrais.txt");
+    if (!arq.is_open()) {
+        return;
+    }
+
+    SnapshotAncestral aux;
+    while (aux.ler(arq)) {
+        if (aux.get_id().empty()) continue;
+        if (qtdAncestrais == capacidadeAncestrais) {
+            int novaCap = (capacidadeAncestrais == 0) ? 16 : capacidadeAncestrais * 2;
+            SnapshotAncestral* novo = new SnapshotAncestral[novaCap];
+            for (int i = 0; i < qtdAncestrais; i++) {
+                novo[i] = ancestrais[i];
+            }
+            delete[] ancestrais;
+            ancestrais = novo;
+            capacidadeAncestrais = novaCap;
+        }
+        ancestrais[qtdAncestrais++] = aux;
+    }
+    arq.close();
+
+    if (qtdAncestrais > 1) {
+        ordenarAncestrais(ancestrais, qtdAncestrais);
+        int unico = 0;
+        for (int i = 0; i < qtdAncestrais; i++) {
+            if (unico > 0 && ancestrais[i].get_id() == ancestrais[unico - 1].get_id()) {
+                ancestrais[unico - 1] = ancestrais[i];
+            } else {
+                ancestrais[unico++] = ancestrais[i];
+            }
+        }
+        qtdAncestrais = unico;
+    }
+}
+
+void Farm::salvarAncestrais() const {
+    std::filesystem::create_directories("./data");
+    std::ofstream temp("./data/ancestrais_temp.txt");
+    if (!temp.is_open()) {
+        throw std::runtime_error("Falha ao criar arquivo temporario de ancestrais.");
+    }
+
+    try {
+        for (int i = 0; i < qtdAncestrais; i++) {
+            if (ancestrais[i].get_Registrado() && !ancestrais[i].get_id().empty()) {
+                ancestrais[i].escrever(temp);
+                temp << "\n";
+            }
+        }
+    } catch (...) {
+        temp.close();
+        std::remove("./data/ancestrais_temp.txt");
+        throw;
+    }
+
+    temp.close();
+    std::remove("./data/ancestrais.txt");
+    std::rename("./data/ancestrais_temp.txt", "./data/ancestrais.txt");
+}
+
+void Farm::registrarOuAtualizarAncestral(const SnapshotAncestral& snap) {
+    if (!snap.get_Registrado() || snap.get_id().empty()) return;
+
+    int idx = buscarAncestralBinario(ancestrais, qtdAncestrais, snap.get_id());
+    if (idx != -1) {
+        ancestrais[idx].atualizarDados(snap.get_UltimoPeso(), snap.get_Status(),
+                                       snap.get_ScoreBase(), snap.getIdPai(), snap.getIdMae());
+        return;
+    }
+
+    if (qtdAncestrais == capacidadeAncestrais) {
+        int novaCap = (capacidadeAncestrais == 0) ? 16 : capacidadeAncestrais * 2;
+        SnapshotAncestral* novo = new SnapshotAncestral[novaCap];
+        for (int i = 0; i < qtdAncestrais; i++) {
+            novo[i] = ancestrais[i];
+        }
+        delete[] ancestrais;
+        ancestrais = novo;
+        capacidadeAncestrais = novaCap;
+    }
+
+    int pos = qtdAncestrais;
+    while (pos > 0 && ancestrais[pos - 1].get_id() > snap.get_id()) {
+        ancestrais[pos] = ancestrais[pos - 1];
+        pos--;
+    }
+    ancestrais[pos] = snap;
+    qtdAncestrais++;
+}
+
+void Farm::registrarAncestralDeAnimal(Animal* a, const std::string& status) {
+    if (a == nullptr || a->getId().empty()) return;
+    registrarOuAtualizarAncestral(a->criarSnapshot(status));
+}
+
+void Farm::marcarAncestralRemovido(const std::string& id) {
+    if (id.empty()) return;
+    Animal* animal = encontrarAnimalOpcional(id);
+    if (animal != nullptr) {
+        animal->calcularScoreBase();
+        registrarAncestralDeAnimal(animal, "removido");
+        return;
+    }
+    int idx = buscarAncestralBinario(ancestrais, qtdAncestrais, id);
+    if (idx != -1) {
+        ancestrais[idx].setStatus("removido");
+    }
+}
+
+const SnapshotAncestral* Farm::buscarAncestral(const std::string& id) const {
+    if (id.empty()) return nullptr;
+    int idx = buscarAncestralBinario(ancestrais, qtdAncestrais, id);
+    return (idx != -1) ? &ancestrais[idx] : nullptr;
 }
 
 Animal* Farm::encontrarAnimalOpcional(const std::string& identificador) const {
@@ -208,7 +450,6 @@ void Farm::adicionarArea(Area* a, bool silencioso) {
     if (!silencioso) {
         std::cout << "Nova area --" << a->getNomeArea() << "-- foi adicionada com sucesso!" << std::endl;
     }
-
 }
 
 double Farm::calcularMediaScoreBase() const {
@@ -218,82 +459,121 @@ double Farm::calcularMediaScoreBase() const {
         if (area[i] == nullptr) continue;
         Animal** rebanho = area[i]->getRebanho();
         for (int j = 0; j < area[i]->getQtdAnimais(); ++j) {
-            if (rebanho[j] != nullptr && rebanho[j]->getScoreBase() > 0.0) { soma += rebanho[j]->getScoreBase(); n++; }
+            if (rebanho[j] != nullptr && rebanho[j]->getScoreBase() > 0.0) {
+                soma += rebanho[j]->getScoreBase();
+                n++;
+            }
         }
     }
     return (n > 0) ? soma / n : 50.0;
 }
 
-// Recalcula o score genetico de todos os animais da fazenda, em tres passos:
+// Recalcula o score genetico em O(N log N) usando o registro compartilhado de ancestrais
 void Farm::recalcularScoresGeneticos() {
     const double PONTOS_POR_DESCENDENTE = 1.5;
     const double TETO_AJUSTE_DESCENDENTES = 6.0;
-    const int IDADE_MINIMA_DESCENDENTE = 6; 
+    const int IDADE_MINIMA_DESCENDENTE = 6;
 
-    for (int i = 0; i < qtdAreas; ++i) {
-        if (area[i] == nullptr) continue;
-        Animal** rebanho = area[i]->getRebanho();
-        for (int j = 0; j < area[i]->getQtdAnimais(); ++j) {
-            if (rebanho[j] != nullptr) rebanho[j]->calcularScoreBase();
-        }
-    }
+    int totalAnimais = getQuantidadeTotalAnimais();
+    if (totalAnimais == 0) return;
 
-    // atualiza os dados dos ancestrais que ainda estao vivos na fazenda
-    for (int i = 0; i < qtdAreas; ++i) {
-        if (area[i] == nullptr) continue;
-        Animal** rebanhoAtual = area[i]->getRebanho();
-        for (int j = 0; j < area[i]->getQtdAnimais(); ++j) {
-            if (rebanhoAtual[j] == nullptr) continue;
-            SnapshotAncestral dadosAtuais = rebanhoAtual[j]->criarSnapshot();
-            for (int a = 0; a < qtdAreas; ++a) {
-                if (area[a] == nullptr) continue;
-                Animal** rebanhoAlvo = area[a]->getRebanho();
-                for (int k = 0; k < area[a]->getQtdAnimais(); ++k) {
-                    if (rebanhoAlvo[k] == nullptr) continue;
-                    rebanhoAlvo[k]->getSnapshotPai()->atualizarAncestral(dadosAtuais);
-                    rebanhoAlvo[k]->getSnapshotMae()->atualizarAncestral(dadosAtuais);
-                    Vaca* vacaAlvo = dynamic_cast<Vaca*>(rebanhoAlvo[k]);
-                    if (vacaAlvo != nullptr) vacaAlvo->getSnapshotTouroPai().atualizarAncestral(dadosAtuais);
+    Animal** todos = new Animal*[totalAnimais];
+    int idxTodos = 0;
+
+    ordenarAncestrais(ancestrais, qtdAncestrais);
+    int qtdAntes = qtdAncestrais;
+
+    try {
+        for (int i = 0; i < qtdAreas; ++i) {
+            if (area[i] == nullptr) continue;
+            Animal** rebanho = area[i]->getRebanho();
+            int qtd = area[i]->getQtdAnimais();
+            for (int j = 0; j < qtd; ++j) {
+                Animal* atual = rebanho[j];
+                if (atual == nullptr) continue;
+
+                atual->calcularScoreBase();
+                todos[idxTodos++] = atual;
+
+                int idxAnc = buscarAncestralBinario(ancestrais, qtdAntes, atual->getId());
+                if (idxAnc != -1) {
+                    ancestrais[idxAnc].atualizarDados(atual->getPeso(), "ativo", atual->getScoreBase(),
+                                                      atual->getPai(), atual->getMae());
+                } else {
+                    if (qtdAncestrais == capacidadeAncestrais) {
+                        int novaCap = (capacidadeAncestrais == 0) ? 16 : capacidadeAncestrais * 2;
+                        SnapshotAncestral* novo = new SnapshotAncestral[novaCap];
+                        for (int c = 0; c < qtdAncestrais; c++) {
+                            novo[c] = ancestrais[c];
+                        }
+                        delete[] ancestrais;
+                        ancestrais = novo;
+                        capacidadeAncestrais = novaCap;
+                    }
+                    ancestrais[qtdAncestrais++] = atual->criarSnapshot("ativo");
                 }
             }
         }
-    }
 
-    const double mediaRebanho = calcularMediaScoreBase();
-
-    for (int i = 0; i < qtdAreas; ++i) {
-        if (area[i] == nullptr) continue;
-        Animal** rebanho = area[i]->getRebanho();
-        for (int j = 0; j < area[i]->getQtdAnimais(); ++j) {
-            Animal* pai = rebanho[j];
-            if (pai == nullptr) continue;
-
-            double ajuste = 0.0;
-            std::string* filhos = pai->getFilhos();
-            for (int k = 0; filhos != nullptr && k < pai->getQtdFilhos(); ++k) {
-                Animal* filho = encontrarAnimalOpcional(filhos[k]);
-                if (filho == nullptr || filho->getIdadeMeses() < IDADE_MINIMA_DESCENDENTE || filho->getScoreBase() <= 0.0) continue;
-                ajuste += ((filho->getScoreBase() - mediaRebanho) / 50.0) * PONTOS_POR_DESCENDENTE;
-            }
-            if (ajuste > TETO_AJUSTE_DESCENDENTES) ajuste = TETO_AJUSTE_DESCENDENTES;
-            if (ajuste < -TETO_AJUSTE_DESCENDENTES) ajuste = -TETO_AJUSTE_DESCENDENTES;
-
-            pai->setAjusteDescendentes(ajuste);
-            pai->recalcularScoreGenetico(mediaRebanho);
+        if (qtdAncestrais > qtdAntes) {
+            ordenarAncestrais(ancestrais, qtdAncestrais);
         }
+
+        ordenarAnimais(todos, idxTodos);
+
+        double soma = 0.0;
+        int nMedia = 0;
+        for (int i = 0; i < idxTodos; ++i) {
+            if (todos[i]->getScoreBase() > 0.0) {
+                soma += todos[i]->getScoreBase();
+                nMedia++;
+            }
+        }
+        const double mediaRebanho = (nMedia > 0) ? (soma / nMedia) : 50.0;
+
+        for (int i = 0; i < idxTodos; ++i) {
+            Animal* animal = todos[i];
+
+            int qtdAnc = contarAncestraisRec(ancestrais, qtdAncestrais, animal->getPai(), GERACOES_AVALIADAS)
+                       + contarAncestraisRec(ancestrais, qtdAncestrais, animal->getMae(), GERACOES_AVALIADAS);
+
+            double ajusteAnc = somarEfeitoAncestraisRec(ancestrais, qtdAncestrais, animal->getPai(), GERACOES_AVALIADAS, 1.0, mediaRebanho)
+                             + somarEfeitoAncestraisRec(ancestrais, qtdAncestrais, animal->getMae(), GERACOES_AVALIADAS, 1.0, mediaRebanho);
+
+            double ajusteDesc = 0.0;
+            std::string* filhos = animal->getFilhos();
+            for (int k = 0; filhos != nullptr && k < animal->getQtdFilhos(); ++k) {
+                Animal* filho = buscarAnimalBinario(todos, idxTodos, filhos[k]);
+                if (filho == nullptr || filho->getIdadeMeses() < IDADE_MINIMA_DESCENDENTE || filho->getScoreBase() <= 0.0) continue;
+                ajusteDesc += ((filho->getScoreBase() - mediaRebanho) / SCORE_REFERENCIA) * PONTOS_POR_DESCENDENTE;
+            }
+            if (ajusteDesc > TETO_AJUSTE_DESCENDENTES) ajusteDesc = TETO_AJUSTE_DESCENDENTES;
+            if (ajusteDesc < -TETO_AJUSTE_DESCENDENTES) ajusteDesc = -TETO_AJUSTE_DESCENDENTES;
+
+            animal->setAjusteDescendentes(ajusteDesc);
+            animal->recalcularScoreGenetico(qtdAnc, ajusteAnc);
+        }
+    } catch (...) {
+        delete[] todos;
+        throw;
     }
+
+    delete[] todos;
 }
 
 void Farm::salvarFazenda() {
     if (proprietario == nullptr) throw std::runtime_error("Proprietario invalido para salvar fazenda!");
     if (nome.empty()) throw std::invalid_argument("Nome da fazenda invalido!");
 
-    recalcularScoresGeneticos(); // score e snapshots atualizados antes de gravar
+    recalcularScoresGeneticos();
 
     std::filesystem::create_directories("./data");
     std::string idDono = proprietario->getId();
 
-    // 1. Salva dados da fazenda
+    // 1. Salva tabela compartilhada de ancestrais
+    salvarAncestrais();
+
+    // 2. Salva dados da fazenda
     std::ifstream leituraFaz("./data/fazendas.txt");
     std::ofstream tempFaz("./data/fazendas_temp.txt");
     if (!tempFaz.is_open()) {
@@ -357,7 +637,7 @@ void Farm::salvarFazenda() {
     std::remove("./data/fazendas.txt");
     std::rename("./data/fazendas_temp.txt", "./data/fazendas.txt");
 
-    // 2. Salva areas da fazenda
+    // 3. Salva areas da fazenda
     std::ifstream leituraAreas("./data/areas.txt");
     std::ofstream tempAreas("./data/areas_temp.txt");
     if (!tempAreas.is_open()) {
@@ -375,7 +655,6 @@ void Farm::salvarFazenda() {
                 std::string fazendaFmt = formatarTextoFarmCarregar(fazendaLida);
 
                 if (donoFmt == idDono && fazendaFmt == nome) {
-                    // Pula os pares tipo/id antigos desta area para reescrever atualizados
                     for (int i = 0; i < qtdAnimaisLida; i++) {
                         std::string tipoSkip, idSkip;
                         leituraAreas >> tipoSkip >> idSkip;
@@ -410,7 +689,7 @@ void Farm::salvarFazenda() {
     std::remove("./data/areas.txt");
     std::rename("./data/areas_temp.txt", "./data/areas.txt");
 
-    // 3. Salva todos os animais nas respectivas tabelas
+    // 4. Salva todos os animais nas respectivas tabelas
     for (int i = 0; i < qtdAreas; i++) {
         if (area[i] == nullptr) continue;
         Animal** rebanho = area[i]->getRebanho();
@@ -522,10 +801,6 @@ Farm* Farm::carregarFazenda(User* proprietario, std::string nomeFazenda) {
     }
 }
 
-// double Farm::venderAnimal(string id) {
-//     precoVenda = buscarAnimalGlobal(id).;
-// }
-
 void Farm::removerArea(Area* a) {
     if (a == nullptr) {
         throw std::invalid_argument("Area invalida para remocao!");
@@ -575,7 +850,6 @@ void Farm::removerArea(Area* a) {
 
     std::cout << "Area removida com sucesso!" << std::endl;
 }
-
 
 int Farm::getQuantidadeTotalAnimais() {
     qtdTotalDeAnimais = 0;
@@ -690,7 +964,6 @@ bool Farm::transferirLoteDeAnimaisEntreAreas(std::string* ids, int qtdAnimais, s
         throw std::invalid_argument("Erro: Area de destino nao encontrada na fazenda.");
     }
 
-    // Valida todos os IDs antes para evitar transferencia pela metade
     for (int i = 0; i < qtdAnimais; i++) {
         buscarAnimalGlobal(ids[i]);
     }
@@ -711,6 +984,7 @@ void Farm::realizarCobertura(const std::string& idMacho, const std::string& idFe
     if (vaca == nullptr) throw std::invalid_argument("O animal informado como femea nao e uma vaca!");
 
     touro->cobrirFemea(vaca);
+    registrarAncestralDeAnimal(touro, "ativo");
 }
 
 std::string Farm::registrarNascimento(const std::string& idFemea, const std::string& nomeArea, char sexo, double peso, std::string id) {
@@ -731,7 +1005,6 @@ std::string Farm::registrarNascimento(const std::string& idFemea, const std::str
         throw std::invalid_argument("Area de destino nao encontrada!");
     }
 
-    // So gera e consome o proximo ID depois que todas as validacoes passaram
     if (id.empty()) {
         id = gerarProximoId("bezerro");
     }
@@ -743,33 +1016,39 @@ std::string Farm::registrarNascimento(const std::string& idFemea, const std::str
         filhote->setIdMae(idFemea);
         filhote->setIdPai(idPai);
 
-        // Snapshot completo da mae e do touro
         mae->calcularScoreBase();
-        filhote->setSnapshotMae(mae->criarSnapshot());
-        if (mae->getSnapshotTouroPai().get_Registrado()) {
-            filhote->setSnapshotPai(mae->getSnapshotTouroPai());
+        registrarAncestralDeAnimal(mae, "ativo");
+
+        Animal* machoVivo = idPai.empty() ? nullptr : encontrarAnimalOpcional(idPai);
+        if (machoVivo != nullptr) {
+            machoVivo->calcularScoreBase();
+            registrarAncestralDeAnimal(machoVivo, "ativo");
         }
 
-        // score genetico inicial do bezerro
+        double mediaRebanho = calcularMediaScoreBase();
+        int qtdAnc = contarAncestraisRec(ancestrais, qtdAncestrais, idPai, GERACOES_AVALIADAS)
+                   + contarAncestraisRec(ancestrais, qtdAncestrais, idFemea, GERACOES_AVALIADAS);
+        double ajusteAnc = somarEfeitoAncestraisRec(ancestrais, qtdAncestrais, idPai, GERACOES_AVALIADAS, 1.0, mediaRebanho)
+                         + somarEfeitoAncestraisRec(ancestrais, qtdAncestrais, idFemea, GERACOES_AVALIADAS, 1.0, mediaRebanho);
+
         filhote->setPesoNascimento(peso);
         filhote->calcularScoreBase();
-        filhote->recalcularScoreGenetico(calcularMediaScoreBase());
+        filhote->recalcularScoreGenetico(qtdAnc, ajusteAnc);
 
-        // Insere na area antes de alterar o estado da mae
         destino->adicionarAnimal(filhote);
         inseridoNaArea = true;
 
         mae->parir();
-        mae->getSnapshotTouroPai() = SnapshotAncestral();
         mae->adicionarFilho(id);
 
-        if (!idPai.empty()) {
-            Animal* macho = encontrarAnimalOpcional(idPai);
-            Touro* pai = dynamic_cast<Touro*>(macho);
+        if (machoVivo != nullptr) {
+            Touro* pai = dynamic_cast<Touro*>(machoVivo);
             if (pai != nullptr) {
                 pai->adicionarFilho(id);
             }
         }
+
+        registrarAncestralDeAnimal(filhote, "ativo");
     } catch (...) {
         if (!inseridoNaArea) {
             delete filhote;
@@ -883,7 +1162,6 @@ ConsumoRacao Farm::calcularConsumoRacaoDiarioFazenda() {
     }
     return total;
 }
-
 
 int Farm::listarFazendasDoUsuario(User* proprietario) {
     if (proprietario == nullptr) throw std::invalid_argument("Proprietario invalido!");

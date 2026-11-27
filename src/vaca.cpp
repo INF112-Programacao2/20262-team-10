@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
-#include <sstream>
+#include <cstdio>
 #include "vaca.hpp"
 
 Vaca::Vaca(std::string id, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais)
@@ -18,8 +18,6 @@ double Vaca:: getProducaoLeiteDia()const {return producaoLeiteDia;}
 bool Vaca:: getEmLactacao()const {return emLactacao;}
 std::string Vaca::getTipo() const {return "vaca";}
 std::string Vaca::getIdTouroPai() const {return idTouroPai;}
-SnapshotAncestral& Vaca::getSnapshotTouroPai() { return snapshotTouroPai; }
-const SnapshotAncestral& Vaca::getSnapshotTouroPai() const { return snapshotTouroPai; }
 bool Vaca::podeSerPromovido() const {return false;}
 bool Vaca::getPrenha()const {return prenha;}
 
@@ -48,7 +46,7 @@ double Vaca::calcularGastoDiario([[maybe_unused]] double precoLeite, SacaRacao**
     if (relatorioRacao == nullptr) return 0.0;
     double precoRacao = 0.0;
     for (int i = 0; i < 3; i++) {
-        if (relatorioRacao[i]->name == "Racao Avulsa") {
+        if (relatorioRacao[i] != nullptr && relatorioRacao[i]->name == "Racao Avulsa") {
             precoRacao = relatorioRacao[i]->preco;
             break;
         }
@@ -71,7 +69,7 @@ double Vaca::calcularSacosDiarios(SacaRacao** relatorioRacao) const {
     if (relatorioRacao == nullptr) return 0.0;
     double pesoSaco = 0.0;
     for (int i = 0; i < 3; i++) {
-        if (relatorioRacao[i]->name == "Racao Avulsa") {
+        if (relatorioRacao[i] != nullptr && relatorioRacao[i]->name == "Racao Avulsa") {
             pesoSaco = relatorioRacao[i]->peso;
             break;
         }
@@ -96,9 +94,7 @@ bool Vaca::emprenhar(Touro* macho) {
         throw std::runtime_error("Cobertura bloqueada: parentesco proximo detectado!");
     }
 
-    //salva o snapshot paterno 
     macho->calcularScoreBase();
-    snapshotTouroPai = macho->criarSnapshot();
     prenha = true;
     idTouroPai = macho->getId();
     return true;
@@ -138,28 +134,16 @@ void Vaca::salvarEmArquivo() {
     try {
         if(leitura.is_open()) {
             Vaca aux;
-            while(aux.carregarBase(leitura)) {
-                aux.snapshotTouroPai = SnapshotAncestral();
-                if (!(leitura >> aux.producaoLeiteDia >> aux.emLactacao >> aux.prenha >> aux.idTouroPai)) break;
+            while(aux.carregarBase(leitura) &&
+                  (leitura >> aux.producaoLeiteDia >> aux.emLactacao >> aux.prenha >> aux.idTouroPai)) {
                 aux.idTouroPai = formatarTextoCarregar(aux.idTouroPai);
-                std::string restante;
-                std::getline(leitura, restante);
-                std::istringstream linha(restante);
-                linha >> std::ws;
-                if (linha.peek() != std::char_traits<char>::eof() && !aux.snapshotTouroPai.ler(linha)) {
-                    throw std::runtime_error("Snapshot do touro invalido no arquivo de vacas.");
-                }
                 if(aux._id == _id) {
                     escreverBase(temp);
-                    temp << " " << producaoLeiteDia << " " << emLactacao << " " << prenha << " " << formatarTextoSalvar(idTouroPai) << " ";
-                    snapshotTouroPai.escrever(temp);
-                    temp << "\n";
+                    temp << " " << producaoLeiteDia << " " << emLactacao << " " << prenha << " " << formatarTextoSalvar(idTouroPai) << "\n";
                     vacaAtualizada = true;
                 } else {
                     aux.escreverBase(temp);
-                    temp << " " << aux.producaoLeiteDia << " " << aux.emLactacao << " " << aux.prenha << " " << formatarTextoSalvar(aux.idTouroPai) << " ";
-                    aux.snapshotTouroPai.escrever(temp);
-                    temp << "\n";
+                    temp << " " << aux.producaoLeiteDia << " " << aux.emLactacao << " " << aux.prenha << " " << formatarTextoSalvar(aux.idTouroPai) << "\n";
                 }
             }
             leitura.close();
@@ -167,9 +151,7 @@ void Vaca::salvarEmArquivo() {
 
         if(!vacaAtualizada) {
             escreverBase(temp);
-            temp << " " << producaoLeiteDia << " " << emLactacao << " " << prenha << " " << formatarTextoSalvar(idTouroPai) << " ";
-            snapshotTouroPai.escrever(temp);
-            temp << "\n";
+            temp << " " << producaoLeiteDia << " " << emLactacao << " " << prenha << " " << formatarTextoSalvar(idTouroPai) << "\n";
         }
     } catch (...) {
         if(leitura.is_open()) leitura.close();
@@ -192,7 +174,6 @@ Vaca* Vaca::carregarVaca(std::string id) {
     Vaca* vacaCarregada = new Vaca();
     try {
         while(vacaCarregada->carregarBase(arquivo)) {
-            vacaCarregada->snapshotTouroPai = SnapshotAncestral();
             std::string idTouroLido;
             if (!(arquivo >> vacaCarregada->producaoLeiteDia
                          >> vacaCarregada->emLactacao
@@ -200,17 +181,6 @@ Vaca* Vaca::carregarVaca(std::string id) {
                          >> idTouroLido)) break;
 
             vacaCarregada->idTouroPai = vacaCarregada->formatarTextoCarregar(idTouroLido);
-
-            //snapshot paterno
-            std::string restante;
-            std::getline(arquivo, restante);
-            std::istringstream linha(restante);
-            linha >> std::ws;
-            if (linha.peek() != std::char_traits<char>::eof()) {
-                if (!vacaCarregada->snapshotTouroPai.ler(linha)) {
-                    throw std::runtime_error("Snapshot do touro invalido no arquivo de vacas.");
-                }
-            }
 
             if(vacaCarregada->_id == id) {
                 arquivo.close();
