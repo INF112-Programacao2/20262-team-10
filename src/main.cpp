@@ -443,6 +443,8 @@ void menuRelatorios(Farm* fazendaAtual) {
         limparTela();
         std::cout << "=== RELATORIOS ===\n"<< "[1] Emitir Relatorio Operacional\n"
         << "[2] Emitir Relatorio Break-Even & Vendas\n"
+        << "[3] Ranking Top N Animais por Score Genetico\n"
+        << "[4] Ranking Top N Animais por Valor de Venda\n"
         << "[0] Voltar\n"<< "Opcao: ";
         int opcao;
         std::cin >> opcao;
@@ -460,6 +462,22 @@ void menuRelatorios(Farm* fazendaAtual) {
         }
         else if (opcao == 2) {
             fazendaAtual->emitirRelatorioBreakEvenEVendas();
+            pausarTela();
+        }
+        else if (opcao == 3 || opcao == 4) {
+            int topN;
+            std::cout << "Quantos animais deseja exibir no ranking? ";
+            if (!(std::cin >> topN) || topN <= 0) {
+                limparBuffer();
+                throw std::invalid_argument("Quantidade invalida. Informe um numero inteiro maior que zero.");
+            }
+            limparBuffer();
+
+            if (opcao == 3) {
+                fazendaAtual->listarTopAnimaisPorScore(topN);
+            } else {
+                fazendaAtual->listarTopAnimaisPorValorVenda(topN);
+            }
             pausarTela();
         }
         else {
@@ -782,6 +800,10 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual, bool& alterou)
             limparBuffer();
 
             Animal* animal = fazendaAtual->buscarAnimalGlobal(id);
+            double arrobaRef = (animal->getTipo() == "vaca" || (animal->getTipo() == "bezerro" && animal->getSexo() == 'F'))
+                ? usuarioAtual->getCotacaoArrobaVaca()
+                : usuarioAtual->getCotacaoArrobaBoi();
+            animal->calcularValorVendaSugerido(arrobaRef, usuarioAtual->getPrecoLeite());
             animal->imprimirFichaParcial();
 
             double gastoDia = animal->calcularGastoDiario(usuarioAtual->getPrecoLeite(), usuarioAtual->getRelatorioRacao());
@@ -800,9 +822,21 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual, bool& alterou)
             }
             std::cout << "Pai: " << (animal->getPai().empty() ? "Nao registrado" : animal->getPai()) << "\n"
             << "Mae: " << (animal->getMae().empty() ? "Nao registrada" : animal->getMae()) << "\n"
+            << "Filhos registrados (" << animal->getQtdFilhos() << "): ";
+            if (animal->getQtdFilhos() == 0 || animal->getFilhos() == nullptr) {
+                std::cout << "Nenhum";
+            } else {
+                std::string* listaFilhos = animal->getFilhos();
+                for (int i = 0; i < animal->getQtdFilhos(); i++) {
+                    if (i > 0) std::cout << ", ";
+                    std::cout << listaFilhos[i];
+                }
+            }
+            std::cout << "\n"
             << "Racao: " << (animal->getTipoRacao().empty() ? "Leite" : animal->getTipoRacao())
             << " (" << sacosDia << " sacos/dia)\n"
-            << "Gasto diario individual: R$ " << gastoDia << "\n";
+            << "Gasto diario individual: R$ " << gastoDia << "\n"
+            << "Valor de venda sugerido: R$ " << animal->getValorVendaSugerido() << "\n";
             pausarTela();
         }
         else if (opcao == 3) {

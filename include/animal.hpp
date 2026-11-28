@@ -16,12 +16,13 @@ protected:
     std::string idMae;
     std::string* idFilhos;
 
-    // Score genetico
+    // Score genetico e valor de mercado
     double pesoNascimento;
     double ganhoMedioPeso;
     double scoreBase;             // 0 a 100
     double ajusteDescendentes;
     double scoreGenetico;
+    double valorVendaSugerido;
 
     Animal();
     std::string formatarTextoSalvar(std::string texto) const;
@@ -40,6 +41,7 @@ public:
 
     virtual double calcularGastoDiario(double precoLeite, SacaRacao** relatorioRacao) = 0;
     virtual double calcularReceitaDiaria(double valorMercado) = 0;
+    virtual double calcularValorVendaSugerido(double precoArroba, double precoLeite = 0.0) = 0;
     virtual std::string getTipoRacao() const = 0;
     virtual double calcularSacosDiarios(SacaRacao** relatorioRacao) const = 0;
     virtual void salvarEmArquivo() = 0;
@@ -64,12 +66,15 @@ public:
     double getScoreBase() const;
     double getAjusteDescendentes() const;
     double getScoreGenetico() const;
+    double getValorVendaSugerido() const;
 
     // sets
     void setIdPai(std::string idPai);
     void setIdMae(std::string idMae);
     void setPesoNascimento(double p);
     void setAjusteDescendentes(double pontos);
+    void setValorVendaSugerido(double valor);
+    void adicionarFilho(const std::string& idFilho);
 
     // score genetico
     virtual void registrarPesagem(double novoPeso, int novaIdadeMeses);

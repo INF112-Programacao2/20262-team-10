@@ -812,6 +812,29 @@ void Farm::aplicarScoresFinais(Animal** vivos, int qtdVivos, double mediaRebanho
     }
 }
 
+void Farm::sincronizarFilhosNosPais(Animal** vivos, int qtdVivos) {
+    for (int k = 0; k < qtdAncestrais; ++k) {
+        const SnapshotAncestral& filho = ancestrais[k];
+        if (!filho.get_Registrado() || filho.get_id().empty()) continue;
+
+        const std::string& idPai = filho.getIdPai();
+        const std::string& idMae = filho.getIdMae();
+
+        if (!idPai.empty()) {
+            int idxPai = buscarIndiceAnimalBinario(vivos, qtdVivos, idPai);
+            if (idxPai != -1) {
+                vivos[idxPai]->adicionarFilho(filho.get_id());
+            }
+        }
+        if (!idMae.empty() && idMae != idPai) {
+            int idxMae = buscarIndiceAnimalBinario(vivos, qtdVivos, idMae);
+            if (idxMae != -1) {
+                vivos[idxMae]->adicionarFilho(filho.get_id());
+            }
+        }
+    }
+}
+
 // Recalcula o score genetico em O(N log N) considerando ancestrais e todos os filhos (vivos ou vendidos/removidos)
 void Farm::recalcularScoresGeneticos() {
     int totalAnimais = getQuantidadeTotalAnimais();
@@ -828,11 +851,13 @@ void Farm::recalcularScoresGeneticos() {
         ordenarAncestrais(ancestrais, qtdAncestrais);
 
         atualizarAncestraisComVinculo(todos, qtdVivos);
+        sincronizarFilhosNosPais(todos, qtdVivos);
 
         double mediaRebanho = calcularMediaScoreBase();
         ajusteDesc = new double[qtdVivos];
         calcularAjusteDeDescendentes(todos, qtdVivos, mediaRebanho, ajusteDesc);
         aplicarScoresFinais(todos, qtdVivos, mediaRebanho, ajusteDesc);
+        recalcularValoresVenda();
     } catch (...) {
         delete[] ajusteDesc;
         delete[] todos;
@@ -841,6 +866,131 @@ void Farm::recalcularScoresGeneticos() {
 
     delete[] ajusteDesc;
     delete[] todos;
+}
+
+void Farm::recalcularValoresVenda() {
+    if (proprietario == nullptr) return;
+
+    double precoLeite = proprietario->getPrecoLeite();
+    double arrobaBoi = proprietario->getCotacaoArrobaBoi();
+    double arrobaVaca = proprietario->getCotacaoArrobaVaca();
+
+    for (int i = 0; i < qtdAreas; i++) {
+        if (area[i] == nullptr) continue;
+        Animal** rebanho = area[i]->getRebanho();
+        int qtd = area[i]->getQtdAnimais();
+
+        for (int j = 0; j < qtd; j++) {
+            if (rebanho[j] == nullptr) continue;
+            std::string tipo = rebanho[j]->getTipo();
+            if (tipo == "vaca") {
+                rebanho[j]->calcularValorVendaSugerido(arrobaVaca, precoLeite);
+            } else if (tipo == "bezerro") {
+                double arrobaRef = (rebanho[j]->getSexo() == 'F') ? arrobaVaca : arrobaBoi;
+                rebanho[j]->calcularValorVendaSugerido(arrobaRef, precoLeite);
+            } else {
+                rebanho[j]->calcularValorVendaSugerido(arrobaBoi, precoLeite);
+            }
+        }
+    }
+}
+
+static bool compararPorScoreDecrescente(const Animal* a, const Animal* b) {
+    if (a->getScoreGenetico() != b->getScoreGenetico()) {
+        return a->getScoreGenetico() > b->getScoreGenetico();
+    }
+    if (a->getScoreBase() != b->getScoreBase()) {
+        return a->getScoreBase() > b->getScoreBase();
+    }
+    return a->getId() < b->getId();
+}
+
+static bool compararPorValorVendaDecrescente(const Animal* a, const Animal* b) {
+    if (a->getValorVendaSugerido() != b->getValorVendaSugerido()) {
+        return a->getValorVendaSugerido() > b->getValorVendaSugerido();
+    }
+    if (a->getScoreGenetico() != b->getScoreGenetico()) {
+        return a->getScoreGenetico() > b->getScoreGenetico();
+    }
+    return a->getId() < b->getId();
+}
+
+static void exibirRankingAnimais(Farm* fazenda, Area** areas, int qtdAreas, int quantidade, bool porValorVenda) {
+    if (quantidade <= 0) {
+        throw std::invalid_argument("A quantidade de animais do ranking deve ser maior que zero!");
+    }
+
+    int totalAnimais = fazenda->getQuantidadeTotalAnimais();
+    if (totalAnimais <= 0) {
+        std::cout << "\nNenhum animal cadastrado na fazenda para gerar ranking.\n";
+        return;
+    }
+
+    fazenda->recalcularScoresGeneticos();
+
+    Animal** lista = new Animal*[totalAnimais];
+    int qtdColetada = 0;
+
+    try {
+        for (int i = 0; i < qtdAreas; i++) {
+            if (areas[i] == nullptr) continue;
+            Animal** rebanho = areas[i]->getRebanho();
+            int qtd = areas[i]->getQtdAnimais();
+            for (int j = 0; j < qtd; j++) {
+                if (rebanho[j] != nullptr) {
+                    lista[qtdColetada++] = rebanho[j];
+                }
+            }
+        }
+
+        if (porValorVenda) {
+            std::sort(lista, lista + qtdColetada, compararPorValorVendaDecrescente);
+        } else {
+            std::sort(lista, lista + qtdColetada, compararPorScoreDecrescente);
+        }
+
+        int limite = (quantidade < qtdColetada) ? quantidade : qtdColetada;
+        std::cout << std::fixed << std::setprecision(2);
+        std::cout << "\n=== TOP " << limite << " ANIMAIS POR "
+                  << (porValorVenda ? "VALOR DE VENDA SUGERIDO" : "SCORE GENETICO")
+                  << " (Total no rebanho: " << qtdColetada << ") ===\n";
+
+        for (int i = 0; i < limite; i++) {
+            Animal* a = lista[i];
+            Area* areaAtualAnimal = fazenda->buscarAreaDoAnimal(a->getId());
+            std::string nomeArea = (areaAtualAnimal != nullptr) ? areaAtualAnimal->getNomeArea() : "Sem area";
+
+            std::cout << "#" << (i + 1)
+                      << " | ID: " << a->getId()
+                      << " | Tipo: " << a->getTipo()
+                      << " | Area: " << nomeArea
+                      << " | Peso: " << a->getPeso() << " kg"
+                      << " | Idade: " << a->getIdadeMeses() << "m"
+                      << " | Filhos: " << a->getQtdFilhos();
+
+            if (porValorVenda) {
+                std::cout << " | Valor venda: R$ " << a->getValorVendaSugerido()
+                          << " | Score: " << a->getScoreGenetico() << "\n";
+            } else {
+                std::cout << " | Score: " << a->getScoreGenetico()
+                          << " (base: " << a->getScoreBase() << ")"
+                          << " | Valor venda: R$ " << a->getValorVendaSugerido() << "\n";
+            }
+        }
+    } catch (...) {
+        delete[] lista;
+        throw;
+    }
+
+    delete[] lista;
+}
+
+void Farm::listarTopAnimaisPorScore(int quantidade) {
+    exibirRankingAnimais(this, area, qtdAreas, quantidade, false);
+}
+
+void Farm::listarTopAnimaisPorValorVenda(int quantidade) {
+    exibirRankingAnimais(this, area, qtdAreas, quantidade, true);
 }
 
 static void salvarAnimaisPorTipoEmLote(const std::string& tipo, const std::string& caminho,
@@ -1407,10 +1557,7 @@ std::string Farm::registrarNascimento(const std::string& idFemea, const std::str
         mae->adicionarFilho(id);
 
         if (machoVivo != nullptr) {
-            Touro* pai = dynamic_cast<Touro*>(machoVivo);
-            if (pai != nullptr) {
-                pai->adicionarFilho(id);
-            }
+            machoVivo->adicionarFilho(id);
         }
 
         registrarAncestralDeAnimal(filhote, "ativo");

@@ -30,6 +30,7 @@ public:
     //metodos herança
     double calcularGastoDiario(double precoLeite, SacaRacao** relatorioRacao) override;
     double calcularReceitaDiaria(double precoLeite) override;
+    double calcularValorVendaSugerido(double precoArroba, double precoLeite = 0.0) override;
     std::string getTipo() const override;
     bool podeSerPromovido() const override;
     void imprimirFichaParcial()const override;

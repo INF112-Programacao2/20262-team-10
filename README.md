@@ -28,7 +28,10 @@ Um gerenciador de registros tradicional apenas armazena e consulta dados (CRUD).
    * Calcula o `scoreBase` (0 a 100) ponderando peso atual vs. peso esperado para a idade, ganho médio diário e indicador produtivo (leite na vaca — preservando a última produção conhecida `ultimaProducaoLeiteDia` durante o período seco sem gerar receita — e rendimento de carcaça no boi de corte).
    * Ajusta o `scoreGenetico` percorrendo recursivamente até **3 gerações de ancestrais** (com decaimento de peso `0,5` por geração), somando a contribuição de **todos os descendentes** ($\ge 6$ meses, inclusive já vendidos/removidos) em relação à média do rebanho e aplicando penalidade quando falta histórico genealógico.
    * Mantém a tabela compartilhada de ancestrais enxuta via coleta/limpeza recursiva (`limpezaDeAncestrais`), preservando apenas registros ligados a animais vivos na fazenda.
-5. **Apoio à Decisão Reprodutiva e de Maturidade:**
+5. **Valoração de Mercado Proporcional ao Score e Rankings Personalizados (`Animal::calcularValorVendaSugerido`, `Farm`):**
+   * Cada animal possui o atributo `valorVendaSugerido` e o método polimórfico `calcularValorVendaSugerido(precoArroba, precoLeite)`, que calcula o valor sugerido de venda com base no peso/arroba, produção leiteira/prenhez (vacas), rendimento/acabamento (bois de corte), ágio de idade/sexo (bezerros) ou banco de sêmen (touros), multiplicados pelo fator genético `Animal::getFatorPrecoGenetico()` (`0,85 + 0,003 × scoreGenetico`, gerando de `-12%` a `+15%` conforme o score).
+   * O sistema oferece rankings de tamanho personalizado **Top N** ordenados com `std::sort` tanto por **Score Genético** (`listarTopAnimaisPorScore`) quanto por **Valor de Venda Sugerido** (`listarTopAnimaisPorValorVenda`).
+6. **Apoio à Decisão Reprodutiva e de Maturidade:**
    * **Bloqueio de consanguinidade (`Vaca::emprenhar`):** impede coberturas entre parentes próximos (mesmo pai, mesma mãe ou relação pai/filha e mãe/filho) e valida idade mínima reprodutiva (15 meses) e status de quarentena.
    * **Recomendação automática na promoção (`Bezerro::recomendarDestinoMaturidade` & `Area::promoverAnimal`):** ao atingir 12 meses, fêmeas são direcionadas para `vaca` e machos são recomendados para `touro` (se `scoreGenetico >= 60`) ou `boicorte` (caso contrário). Durante a promoção, `Animal::copiarEstadoParaPromocao` preserva estado de saúde, temperamento, quarentena, `idPai`, `idMae`, filhos e dados de score genético na nova categoria.
 
@@ -56,11 +59,13 @@ Com a fazenda aberta, o menu principal oferece:
 * **`[1] Relatórios` (`menuRelatorios`):**
   * *Relatório Operacional:* total do rebanho por categoria, receita/gasto/lucro diário e consumo diário e mensal (30 dias) de sacos de ração.
   * *Relatório de Caixa e Break-Even:* saldo em caixa, total acumulado em vendas, prejuízo acumulado, lucro diário e estimativa de dias para atingir o ponto de equilíbrio.
+  * *Ranking Top N Animais por Score Genético:* exibe os `N` animais com maior `scoreGenetico` (posição `#1`, `#2`..., ID, tipo, área, peso, idade, filhos, score e valor de venda).
+  * *Ranking Top N Animais por Valor de Venda:* exibe os `N` animais com maior `valorVendaSugerido` (posição `#1`, `#2`..., valor sugerido em `R$` e score).
 * **`[2] Gerenciar Áreas` (`menuGerenciarAreas`):**
   * Listar áreas/pastos (com hectares, estado do pasto, lotação atual/máxima e contagem por tipo de animal), criar nova área (com normalização e validação do estado do pasto), selecionar área ativa e listar seu rebanho, editar estado do pasto ou hectares, consultar resumo de gasto e sacos de ração da área e remover áreas vazias.
 * **`[3] Gerenciar Animais` (`menuGerenciarAnimais`):**
   * Adicionar `Vaca`, `Touro`, `Boicorte` ou `Bezerro` na área atual (com geração automática de IDs `VC`, `TR`, `BC`, `BZ` e validação de peso, idade, vacinas, valores e sexo `M`/`F`).
-  * Buscar animal por ID (exibe ficha completa, área real onde o animal se encontra com sua lotação via `Farm::buscarAreaDoAnimal` e gasto diário individual já considerando o fator de superlotação).
+  * Buscar animal por ID (exibe ficha completa, área real e lotação via `Farm::buscarAreaDoAnimal`, lista/quantidade de filhos registrados, gasto diário individual com fator de superlotação e `valorVendaSugerido` atualizado).
   * Atualizar fase produtiva (lactação e produção de leite, fase de engorda ou desmame com verificação efetiva de mudança de estado).
   * Remover animal (venda, morte ou saída), apagando automaticamente o registro órfão do `.txt` da espécie.
   * Consultar genealogia (árvore de ancestrais e lista de filhos, ativos ou históricos).
@@ -81,21 +86,46 @@ Com a fazenda aberta, o menu principal oferece:
 
 ---
 
-## 📄 Formato de Importação em Lote (`.txt`) e Massa de Teste
+## 📄 Guia Completo de Entrada de Dados e Importação em Lote (`.txt`)
 
-A função `importarArquivoEmLote` (acessível pelo menu `[6]` ou via `./bin/main <arquivo.txt>`) lê arquivos linha a linha ignorando linhas vazias e comentários iniciados por `#`:
+O sistema aceita dados por **três vias**:
+1. **Menus interativos da CLI** (cadastro um a um pelo teclado).
+2. **Importação em lote via arquivo `.txt`** (tanto arquivos pequenos quanto massas gigantes de stress), acionada pelo menu `[6] Importar Lote (.txt)` ou direto na linha de comando (`./bin/main caminho_do_arquivo.txt`).
+3. **Persistência automática em `./data/*.txt`** *(gerenciada internamente pelo programa — não deve ser editada manualmente como arquivo de lote)*.
 
+### Como montar um arquivo de importação em lote (`.txt`)
+A função `importarArquivoEmLote()` lê linha a linha ignorando linhas em branco e comentários iniciados por `#`. Há **3 comandos aceitos**:
+
+1. **`AREA`** — cria uma área/pasto (se ainda não existir na fazenda):
 ```text
 AREA <nome_area> <estado_pasto_com_underscore> <hectares>
-ANIMAL <nome_area> vaca <ID|AUTO> <peso> <idade_meses> <em_lactacao_0_ou_1> <litros_dia> [idPai idMae ...]
-ANIMAL <nome_area> touro <ID|AUTO> <peso> <idade_meses> <valor_dose_semen> [idPai idMae ...]
-ANIMAL <nome_area> boicorte <ID|AUTO> <peso> <idade_meses> <em_engorda_0_ou_1> <rendimento_carcaca> [idPai idMae ...]
-ANIMAL <nome_area> bezerro <ID|AUTO> <sexo_M_ou_F> <peso> <idade_meses> <desmamado_0_ou_1> [idPai idMae ...]
-ANCESTRAL <dados_serializados_SnapshotAncestral>
+```
+2. **`ANCESTRAL`** — registra parentes ou filhos históricos já vendidos/mortos (exatamente **8 campos** no formato plano de `SnapshotAncestral::ler()`):
+```text
+ANCESTRAL <id> <sexo_M_F_ou__> <peso> <idade_meses> <status> <score_base> <idPai_ou__> <idMae_ou__>
+```
+3. **`ANIMAL`** — adiciona um animal vivo na área (com genealogia opcional ao final da linha):
+```text
+ANIMAL <area> vaca     <ID|AUTO> <peso> <idade_meses> <em_lactacao_0_ou_1> <litros_dia> [idPai idMae [snapPai_8_campos] [snapMae_8_campos]]
+ANIMAL <area> touro    <ID|AUTO> <peso> <idade_meses> <valor_dose_semen>                 [idPai idMae [snapPai_8_campos] [snapMae_8_campos]]
+ANIMAL <area> boicorte <ID|AUTO> <peso> <idade_meses> <em_engorda_0_ou_1> <rendimento>   [idPai idMae [snapPai_8_campos] [snapMae_8_campos]]
+ANIMAL <area> bezerro  <ID|AUTO> <sexo_M_ou_F> <peso> <idade_meses> <desmamado_0_ou_1>  [idPai idMae [snapPai_8_campos] [snapMae_8_campos]]
 ```
 
-* O token `AUTO` gera automaticamente o próximo ID disponível com o prefixo da categoria (`VC`, `TR`, `BC`, `BZ`).
-* O script [geradorTeste.py](geradorTeste.py) gera o arquivo `teste_gigante.txt` com **6 áreas e 5.000 animais** (incluindo genealogia multi-geracional em `SnapshotAncestral`) para validar o comportamento e o desempenho em $O(N \log N)$ do sistema.
+### Exemplo prático comentado
+```text
+AREA Pasto1 muito_bom 80.0
+ANCESTRAL TR00 M 920.00 84 vendido 86.00 _ _
+
+ANIMAL Pasto1 touro TR1 880.00 48 150.00 TR00 _
+ANIMAL Pasto1 vaca VC1 560.00 42 1 26.50
+ANIMAL Pasto1 bezerro AUTO M 185.00 8 1 TR1 VC1
+```
+
+### Regras importantes sobre IDs, pais e filhos na importação
+* **`AUTO` vs. ID explícito:** `AUTO` gera automaticamente o próximo ID (`VC`, `TR`, `BC`, `BZ`). Quando outros animais da mesma importação precisarem referenciar aquele animal como `idPai` ou `idMae`, utilize **ID explícito** (ex.: `TR1`, `VC1`) e evite `_` em IDs/nomes.
+* **Vinculação automática de filhos (`qtdFilhos` / `idFilhos`):** não é necessário listar filhos na linha dos pais — ao informar `idPai` e `idMae` nos filhos (sejam animais vivos `ANIMAL` ou históricos `ANCESTRAL`), o método `Farm::sincronizarFilhosNosPais()` popula automaticamente `idFilhos` e `qtdFilhos` em todos os pais vivos (inclusive se os filhos aparecerem antes dos pais no arquivo).
+* **Validação em massa (teste de stress):** para validar o comportamento e o desempenho em $O(N \log N)$, geramos um arquivo de teste em lote com **10 áreas** (incluindo áreas superlotadas), **~20.000 animais vivos** e **~1.980 registros `ANCESTRAL`**, cobrindo **4 a 5 gerações** (trisavós, bisavós, avós, pais, filhos e netos), linhagens contrastantes (*Elite*, *Mediana* e *Fraca*), descendentes históricos vendidos/mortos e animais sem histórico ancestral.
 
 ---
 
@@ -134,7 +164,6 @@ O projeto foi construído sob restrições acadêmicas de POO em C++17 com foco 
 ├── docs/               # Diagrama UML de classes (PDF e PNG)
 ├── build/              # Objetos compilados (.o)
 ├── bin/                # Executável final (main)
-├── geradorTeste.py     # Gerador de massa de teste (teste_gigante.txt)
 └── Makefile            # Automação de build com g++ (-std=c++17)
 ```
 
@@ -150,7 +179,7 @@ O projeto foi construído sob restrições acadêmicas de POO em C++17 com foco 
 * **Paulo Vitor**
   * Estrutura geral do projeto e `Makefile`.
   * Implementação de `Farm`, `Area`, `User` (cotações/API e `sacaRacao.hpp`), trânsito/adição/remoção de animais e integração entre `Farm`, `Area` e `User`.
-  * Leitura e escrita de arquivos (`Farm`, `Area` e subclasses de `Animal`), refatoração do `SnapshotAncestral` (`ancestrais.txt`), testes de carga (`geradorTeste.py`) e correção de bugs e vazamentos de memória.
+  * Leitura e escrita de arquivos (`Farm`, `Area` e subclasses de `Animal`), refatoração do `SnapshotAncestral` (`ancestrais.txt`), testes de carga em massa e correção de bugs e vazamentos de memória.
   * Participação na lógica do score genético, na importação em lote e em ajustes na `main.cpp`.
 
 * **Vitor**
@@ -192,7 +221,6 @@ O projeto foi construído sob restrições acadêmicas de POO em C++17 com foco 
 ### Pré-requisitos
 * Compilador `g++` (GCC com suporte a C++17) e `make`.
 * `curl` instalado no sistema (opcional, apenas para atualização automática das cotações via API).
-* Python 3 (opcional, apenas para gerar arquivos de teste em massa com `geradorTeste.py`).
 
 ### Compilação e Execução
 No diretório raiz do projeto:
@@ -205,13 +233,7 @@ make
 ./bin/main
 
 # Ou executar já importando um arquivo de lote (.txt) após abrir a fazenda
-./bin/main teste_gigante.txt
-```
-
-Para gerar uma nova massa de testes de 5.000 animais:
-
-```bash
-python3 geradorTeste.py
+./bin/main arquivo_lote.txt
 ```
 
 Para remover os arquivos objeto (`build/`) e o executável (`bin/`) antes de uma recompilação limpa:

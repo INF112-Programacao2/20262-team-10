@@ -42,6 +42,7 @@ class Farm {
         double calcularMediaScoreBase() const; 
         int coletarAnimaisVivosOrdenados(Animal** destino);
         void atualizarAncestraisComVinculo(Animal** vivos, int qtdVivos);
+        void sincronizarFilhosNosPais(Animal** vivos, int qtdVivos);
         void calcularAjusteDeDescendentes(Animal** vivos, int qtdVivos, double mediaRebanho, double* ajusteDesc) const;
         void aplicarScoresFinais(Animal** vivos, int qtdVivos, double mediaRebanho, const double* ajusteDesc);
        
@@ -81,6 +82,9 @@ class Farm {
         void realizarCobertura(const std::string& idMacho, const std::string& idFemea);
         void registrarNascimento(const std::string& idFemea, const std::string& nomeArea, std::string id, char sexo, double peso);
         void recalcularScoresGeneticos();
+        void recalcularValoresVenda();
+        void listarTopAnimaisPorScore(int quantidade);
+        void listarTopAnimaisPorValorVenda(int quantidade);
         void emitirRelatorioOperacional();
 
         // ancestrais compartilhados

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <filesystem>
 #include <cstdio>
@@ -77,19 +78,13 @@ bool Touro::cobrirFemea(Vaca* femea) {
     return true;
 }
 
-void Touro::adicionarFilho(std::string idFilho) {
-    std::string* novoArray = new std::string[qtdFilhos + 1];
-    for (int i = 0; i <qtdFilhos;i++) {
-        novoArray[i] = idFilhos[i];
-    }
-    novoArray[qtdFilhos] = idFilho;
-    delete[] idFilhos;
-    idFilhos = novoArray;
-    qtdFilhos++;
-}
-
 double Touro::calcularReceitaDiaria([[maybe_unused]] double valorMercado) {
     return 0.0;
+}
+
+double Touro::calcularValorVendaSugerido(double precoArroba, [[maybe_unused]] double precoLeite) {
+    valorVendaSugerido = calcularValorVendaMercado(precoArroba);
+    return valorVendaSugerido;
 }
 
 void Touro::escreverLinhaArquivo(std::ofstream& out) const {
@@ -170,10 +165,13 @@ Touro* Touro::carregarTouro(std::string id) {
 }
 
 void Touro::imprimirFichaParcial() const{
+    std::cout << std::fixed << std::setprecision(2);
     std :: cout << "===Animal:" << getTipo() << "\n"
     << "ID:" << _id << "\nSexo:" << sexo << "\nPeso:" << peso
-    << "\nIdade:" << idadeMeses << "\nScore genetico:" << scoreGenetico <<"\nValor Dose Material Genetico:"
-    << valorDoseSemen << "\n";
+    << "\nIdade:" << idadeMeses << "\nQtd filhos:" << qtdFilhos
+    << "\nScore genetico:" << scoreGenetico
+    << "\nValor venda sugerido: R$ " << valorVendaSugerido
+    << "\nValor Dose Material Genetico:" << valorDoseSemen << "\n";
 }
 
 double Touro::calcularValorVendaMercado(double precoArroba) {

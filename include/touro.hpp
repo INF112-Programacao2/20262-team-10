@@ -28,6 +28,7 @@ public:
     //metodos herança
     double calcularGastoDiario(double precoLeite,  SacaRacao** relatorioRacao) override;
     double calcularReceitaDiaria(double valorMercado) override;
+    double calcularValorVendaSugerido(double precoArroba, double precoLeite = 0.0) override;
     std::string getTipo() const override;
     bool podeSerPromovido() const override;
     void imprimirFichaParcial()const override;
@@ -35,7 +36,6 @@ public:
     double calcularConsumoSacaDia();
     double calcularValorVendaMercado(double precoArroba);
     bool cobrirFemea(Vaca* femea);
-    void adicionarFilho(std::string idFilho);
     void salvarEmArquivo() override;
     void escreverLinhaArquivo(std::ofstream& out) const override;
     static Touro* carregarTouro(std::string id);

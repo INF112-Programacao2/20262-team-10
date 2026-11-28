@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <filesystem>
 #include "bezerro.hpp"
@@ -132,6 +133,18 @@ double Bezerro::calcularReceitaDiaria(double valorMercado) {
     return (ganhoPesoMedioDiario/30.0) * valorMercado * (1+agio);
 }
 
+double Bezerro::calcularValorVendaSugerido(double precoArroba, [[maybe_unused]] double precoLeite) {
+    if (precoArroba < 0.0) {
+        throw std::invalid_argument("O preco da arroba nao pode ser negativo!");
+    }
+    double agio = 0.05;
+    if (idadeMeses <= 8) agio = (sexo == 'M') ? 0.22 : 0.15;
+    else if (idadeMeses <= 14) agio = (sexo == 'M') ? 0.12 : 0.08;
+
+    valorVendaSugerido = (peso / 30.0) * precoArroba * (1.0 + agio) * getFatorPrecoGenetico();
+    return valorVendaSugerido;
+}
+
 // macho vira touro se o score for >=60, senao vira boi de corte
 std::string Bezerro::recomendarDestinoMaturidade() {
     const double SCORE_MINIMO_TOURO = 60.0;
@@ -222,9 +235,13 @@ Bezerro* Bezerro::carregarBezerro(std::string id) {
 }
 
 void Bezerro::imprimirFichaParcial() const{
+    std::cout << std::fixed << std::setprecision(2);
     std :: cout << "===Animal:" << getTipo() << "\n"
     << "ID:" << _id << "\nSexo:" << sexo << "\nPeso:" << peso 
-    << "\nIdade:" << idadeMeses << "\nScore genetico:" << scoreGenetico << "\nDesmamado:";
+    << "\nIdade:" << idadeMeses << "\nQtd filhos:" << qtdFilhos
+    << "\nScore genetico:" << scoreGenetico
+    << "\nValor venda sugerido: R$ " << valorVendaSugerido
+    << "\nDesmamado:";
     (desmamado) ? std::cout << "SIM" : std::cout << "NAO";
     std::cout <<"\n";
 }

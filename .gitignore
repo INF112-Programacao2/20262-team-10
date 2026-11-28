@@ -1,4 +1,5 @@
 bin/
 build/
 teste_gigante.txt
+geradorTeste.py
 data/*.txt

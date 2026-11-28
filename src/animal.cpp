@@ -43,7 +43,7 @@ Animal::Animal(std::string id, char s, double p)
     idadeMeses = qtdFilhos = qtdVacinas = 0;
     EmQuarentena = false;
     idFilhos = nullptr;
-    pesoNascimento = ganhoMedioPeso = scoreBase = ajusteDescendentes = scoreGenetico = 0.0;
+    pesoNascimento = ganhoMedioPeso = scoreBase = ajusteDescendentes = scoreGenetico = valorVendaSugerido = 0.0;
 }
 
 // inicializador overload
@@ -52,7 +52,7 @@ Animal::Animal(std::string id, char s, double p, int iM, int qtdF,
     : _id(id), sexo(s), peso(p), idadeMeses(iM),
       qtdFilhos(qtdF), qtdVacinas(qtdV), EmQuarentena(false)
 {
-    pesoNascimento = ganhoMedioPeso = scoreBase = ajusteDescendentes = scoreGenetico = 0.0;
+    pesoNascimento = ganhoMedioPeso = scoreBase = ajusteDescendentes = scoreGenetico = valorVendaSugerido = 0.0;
 
     if (qtdFilhos > 0 && filhosIniciais != nullptr)
     {
@@ -88,6 +88,7 @@ double Animal::getGanhoMedioPeso() const { return ganhoMedioPeso; }
 double Animal::getScoreBase() const { return scoreBase; }
 double Animal::getAjusteDescendentes() const { return ajusteDescendentes; }
 double Animal::getScoreGenetico() const { return scoreGenetico; }
+double Animal::getValorVendaSugerido() const { return valorVendaSugerido; }
 
 // sets
 void Animal::setIdPai(std::string idPai)
@@ -109,6 +110,29 @@ void Animal::setPesoNascimento(double p)
 void Animal::setAjusteDescendentes(double pontos)
 {
     ajusteDescendentes = pontos;
+}
+
+void Animal::setValorVendaSugerido(double valor)
+{
+    if (valor < 0.0) throw std::invalid_argument("O valor de venda sugerido nao pode ser negativo!");
+    valorVendaSugerido = valor;
+}
+
+void Animal::adicionarFilho(const std::string& idFilho)
+{
+    if (idFilho.empty()) return;
+    for (int i = 0; i < qtdFilhos; i++) {
+        if (idFilhos[i] == idFilho) return;
+    }
+
+    std::string* novoArray = new std::string[qtdFilhos + 1];
+    for (int i = 0; i < qtdFilhos; i++) {
+        novoArray[i] = idFilhos[i];
+    }
+    novoArray[qtdFilhos] = idFilho;
+    delete[] idFilhos;
+    idFilhos = novoArray;
+    qtdFilhos++;
 }
 
 // score genetico
@@ -191,6 +215,7 @@ void Animal::copiarDadosGeneticosDe(const Animal &outro)
     scoreBase = outro.scoreBase;
     ajusteDescendentes = outro.ajusteDescendentes;
     scoreGenetico = outro.scoreGenetico;
+    valorVendaSugerido = outro.valorVendaSugerido;
 }
 
 void Animal::copiarEstadoParaPromocao(const Animal &outro)
@@ -232,7 +257,7 @@ Animal::Animal()
     idadeMeses = qtdFilhos = qtdVacinas = 0;
     EmQuarentena = false;
     idFilhos = nullptr;
-    pesoNascimento = ganhoMedioPeso = scoreBase = ajusteDescendentes = scoreGenetico = 0.0;
+    pesoNascimento = ganhoMedioPeso = scoreBase = ajusteDescendentes = scoreGenetico = valorVendaSugerido = 0.0;
 }
 
 std::string Animal::formatarTextoSalvar(std::string texto) const
@@ -284,7 +309,7 @@ void Animal::escreverBase(std::ofstream &out) const
     }
 
     out << " " << pesoNascimento << " " << ganhoMedioPeso << " " << scoreBase
-        << " " << ajusteDescendentes << " " << scoreGenetico;
+        << " " << ajusteDescendentes << " " << scoreGenetico << " " << valorVendaSugerido;
 }
 
 bool Animal::carregarBase(std::ifstream &in)
@@ -340,7 +365,7 @@ bool Animal::carregarBase(std::ifstream &in)
         }
     }
 
-    if (!(in >> pesoNascimento >> ganhoMedioPeso >> scoreBase >> ajusteDescendentes >> scoreGenetico))
+    if (!(in >> pesoNascimento >> ganhoMedioPeso >> scoreBase >> ajusteDescendentes >> scoreGenetico >> valorVendaSugerido))
     {
         delete[] idFilhos;
         idFilhos = nullptr;

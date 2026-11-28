@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <filesystem>
@@ -75,6 +76,19 @@ double Vaca::calcularReceitaDiaria(double valorMercado) {
     return 0.0;
 }
 
+double Vaca::calcularValorVendaSugerido(double precoArroba, double precoLeite) {
+    if (precoArroba < 0.0 || precoLeite < 0.0) {
+        throw std::invalid_argument("Cotacoes de venda da vaca nao podem ser negativas!");
+    }
+    double valorCarne = (peso / 30.0) * precoArroba;
+    double producaoRef = (emLactacao && producaoLeiteDia > 0.0) ? producaoLeiteDia : ultimaProducaoLeiteDia;
+    double bonusLeite = producaoRef * precoLeite * 90.0;
+    double fatorPrenhez = prenha ? 1.10 : 1.0;
+
+    valorVendaSugerido = (valorCarne + bonusLeite) * fatorPrenhez * getFatorPrecoGenetico();
+    return valorVendaSugerido;
+}
+
 std::string Vaca::getTipoRacao() const {
     return "Racao Avulsa";
 }
@@ -121,17 +135,6 @@ std::string Vaca::parir() {
     idTouroPai = "";
     setEmLactacao(true);
     return PaiRegistrado;
-}
-
-void Vaca::adicionarFilho(std::string idFilho){
-    std::string* novoArray = new std::string[qtdFilhos + 1];
-    for (int i = 0; i <qtdFilhos;i++) {
-        novoArray[i] = idFilhos[i];
-    }
-    novoArray[qtdFilhos] = idFilho;
-    delete[] idFilhos;
-    idFilhos = novoArray;
-    qtdFilhos++;
 }
 
 void Vaca::escreverLinhaArquivo(std::ofstream& out) const {
@@ -230,9 +233,13 @@ Vaca* Vaca::carregarVaca(std::string id) {
 }
 
 void Vaca::imprimirFichaParcial() const {
+    std::cout << std::fixed << std::setprecision(2);
     std::cout << "===Animal:" << getTipo() << "\n"
     << "ID:" << _id << "\nSexo:" << sexo << "\nPeso:" << peso
-    << "\nIdade:" << idadeMeses << "\nScore genetico:" << scoreGenetico << "\nEm Lactacao:";
+    << "\nIdade:" << idadeMeses << "\nQtd filhos:" << qtdFilhos
+    << "\nScore genetico:" << scoreGenetico
+    << "\nValor venda sugerido: R$ " << valorVendaSugerido
+    << "\nEm Lactacao:";
     (emLactacao) ? std::cout << "SIM" : std::cout << "NAO";
     std::cout << "\n";
 }

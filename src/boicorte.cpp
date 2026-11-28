@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <filesystem>
 #include "boicorte.hpp"
@@ -90,6 +91,16 @@ double Boicorte::calcularReceitaDiaria(double valorMercado) { //precoLeite alias
     return ((rendimentoCarcaca*0.7)/15) * valorMercado;
 }
 
+double Boicorte::calcularValorVendaSugerido(double precoArroba, [[maybe_unused]] double precoLeite) {
+    if (precoArroba < 0.0) {
+        throw std::invalid_argument("O preco da arroba nao pode ser negativo!");
+    }
+    double arrobas = (peso * rendimentoCarcaca) / 15.0;
+    double fatorEngorda = faseEngorda ? 1.05 : 1.0;
+    valorVendaSugerido = arrobas * precoArroba * fatorEngorda * getFatorPrecoGenetico();
+    return valorVendaSugerido;
+}
+
 void Boicorte::escreverLinhaArquivo(std::ofstream& out) const {
     escreverBase(out);
     out << " " << rendimentoCarcaca << " " << metaAbatePeso << " " << faseEngorda << "\n";
@@ -168,9 +179,13 @@ Boicorte* Boicorte::carregarBoicorte(std::string id) {
 }
 
 void Boicorte::imprimirFichaParcial() const{
+    std::cout << std::fixed << std::setprecision(2);
     std :: cout << "===Animal:" << getTipo() << "\n"
     << "ID:" << _id << "\nSexo:" << sexo << "\nPeso:" << peso
-    << "\nIdade:" << idadeMeses << "\nScore genetico:" << scoreGenetico << "\nFase de engorda:";
+    << "\nIdade:" << idadeMeses << "\nQtd filhos:" << qtdFilhos
+    << "\nScore genetico:" << scoreGenetico
+    << "\nValor venda sugerido: R$ " << valorVendaSugerido
+    << "\nFase de engorda:";
     (faseEngorda) ? std::cout << "SIM" : std::cout <<"NAO";
     std::cout <<"\n";
 }
