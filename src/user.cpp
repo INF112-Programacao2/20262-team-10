@@ -6,6 +6,7 @@
 #include <nlohmann/json.hpp>
 #include <iostream>
 #include <cstdio>
+#include <limits>
 
 // https://github.com/nlohmann/json
 //precisa instalar para importar a bbt -> vamos pegar cotacao 
@@ -369,29 +370,35 @@ void User::atualizarCotacaoArroba() {
     }
 }
 
+static double lerDoublePositivo(const std::string& prompt) {
+    double valor;
+    while (true) {
+        std::cout << prompt;
+        if (std::cin >> valor && valor > 0.0) {
+            return valor;
+        }
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "  Valor invalido! Informe um numero maior que zero.\n";
+    }
+}
+
 void User::atualizarCotacoes() {
     atualizarCotacaoArroba();
     atualizarCotacaoDolar();
 
     std::cout << "\nAtualizacao manual:\n";
-    std::cout << "  Preco do litro do leite (R$): ";
-    std::cin >> precoLeite;
+    precoLeite = lerDoublePositivo("  Preco do litro do leite (R$): ");
 
     std::cout << "\nPeso das sacas de racao (kg):\n";
-    std::cout << "  Engorda: ";
-    std::cin >> TiposRacoes[0]->peso;
-    std::cout << "  Avulsa:  ";
-    std::cin >> TiposRacoes[1]->peso;
-    std::cout << "  Recria:  ";
-    std::cin >> TiposRacoes[2]->peso;
+    TiposRacoes[0]->peso = lerDoublePositivo("  Engorda: ");
+    TiposRacoes[1]->peso = lerDoublePositivo("  Avulsa:  ");
+    TiposRacoes[2]->peso = lerDoublePositivo("  Recria:  ");
 
     std::cout << "\nPreco das sacas de racao (R$):\n";
-    std::cout << "  Engorda: ";
-    std::cin >> TiposRacoes[0]->preco;
-    std::cout << "  Avulsa:  ";
-    std::cin >> TiposRacoes[1]->preco;
-    std::cout << "  Recria:  ";
-    std::cin >> TiposRacoes[2]->preco;
+    TiposRacoes[0]->preco = lerDoublePositivo("  Engorda: ");
+    TiposRacoes[1]->preco = lerDoublePositivo("  Avulsa:  ");
+    TiposRacoes[2]->preco = lerDoublePositivo("  Recria:  ");
 
     salvarEmArquivo();
     std::cout << "\nCotacoes atualizadas e salvas com sucesso!\n";

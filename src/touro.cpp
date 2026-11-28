@@ -92,6 +92,11 @@ double Touro::calcularReceitaDiaria([[maybe_unused]] double valorMercado) {
     return 0.0;
 }
 
+void Touro::escreverLinhaArquivo(std::ofstream& out) const {
+    escreverBase(out);
+    out << " " << valorDoseSemen << " " << dosesEstoque << " " << qtdCoberturas << "\n";
+}
+
 void Touro::salvarEmArquivo() {
     if(_id.empty()) throw std::invalid_argument("ID do touro invalido!");
     std::filesystem::create_directories("./data");

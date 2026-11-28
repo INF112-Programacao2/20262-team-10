@@ -37,6 +37,7 @@ public:
     bool cobrirFemea(Vaca* femea);
     void adicionarFilho(std::string idFilho);
     void salvarEmArquivo() override;
+    void escreverLinhaArquivo(std::ofstream& out) const override;
     static Touro* carregarTouro(std::string id);
 };
 

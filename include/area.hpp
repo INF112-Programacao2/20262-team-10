@@ -36,7 +36,8 @@ class Area {
         // Dentro de public na class Area:
 
         // funcoes de calculo
-        double calcularLotacaoArea();
+        double calcularLotacaoArea() const;
+        double calcularFatorSuperlotacao() const;
         double getSacoGastoIndividual(string id, SacaRacao** relatorioRacoes);
         ConsumoRacao getSacosGastosNaArea(SacaRacao** relatorioRacoes);
 
@@ -45,7 +46,7 @@ class Area {
         void escreverNoArquivo(std::ofstream& out, std::string idDono, std::string nomeFazenda);
         void removerAnimal(string idAnimal);
         Animal* extrairAnimal(string idAnimal);
-        void promoverAnimal();
+        int promoverAnimal();
         Animal* buscarAnimal(string id);
         double getGastoIndividual(string id, double precoLeite, SacaRacao** relatorioRacoes);
         virtual double getGastoDaArea(double precoLeite, SacaRacao** relatorioRacoes);

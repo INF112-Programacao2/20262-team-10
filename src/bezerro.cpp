@@ -6,6 +6,8 @@
 Bezerro::Bezerro(std::string id, char s, double p) : Animal(id, s, p) {
     consumoLeiteLitros = 4.0;
     ganhoPesoMedioDiario = 0.7;
+    ganhoMedioPeso = ganhoPesoMedioDiario;
+    pesoNascimento = p;
     desmamado = false;
     idadeDesmameMeses = 0;
 }
@@ -13,7 +15,9 @@ Bezerro::Bezerro(std::string id, char s, double p) : Animal(id, s, p) {
 Bezerro::Bezerro() : Animal(), consumoLeiteLitros(0.0), ganhoPesoMedioDiario(0.0), idadeDesmameMeses(0), desmamado(false) {}
 
 Bezerro::Bezerro(std::string id, char s, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais, double cLL, double gPMD, int iDM, bool d) 
-: Animal(id, s, p, iM, qtdF, qtdV, filhosIniciais), consumoLeiteLitros(cLL), ganhoPesoMedioDiario(gPMD), idadeDesmameMeses(iDM), desmamado(d) {}
+: Animal(id, s, p, iM, qtdF, qtdV, filhosIniciais), consumoLeiteLitros(cLL), ganhoPesoMedioDiario(gPMD), idadeDesmameMeses(iDM), desmamado(d) {
+    ganhoMedioPeso = gPMD;
+}
 
 Bezerro::~Bezerro() {}
 
@@ -54,6 +58,7 @@ void Bezerro::setConsumoLeiteLitros(double c) {
 void Bezerro::setGanhoPesoMedioDiario(double g) {
     if (g < 0.0) throw std::invalid_argument("O ganho de peso diario nao pode ser negativo!");
     ganhoPesoMedioDiario = g;
+    ganhoMedioPeso = g;
 }
 
 void Bezerro::setIdadeDesmameMeses(int i) {
@@ -70,17 +75,26 @@ void Bezerro::setDesmamado(bool d) {
     }
 }
 
-void Bezerro::realizarDesmame() {
+bool Bezerro::realizarDesmame() {
     if (desmamado) {
         std::cout << "Este bezerro ja foi desmamado aos " << idadeDesmameMeses << " meses.\n";
-        return;
+        return false;
     }
     if (idadeMeses >= 7) {
         desmamado = true;
         idadeDesmameMeses = idadeMeses;
         consumoLeiteLitros = 0.0;
+        return true;
     } else {
         std::cout << "O bezerro nao esta com a idade adequada para o desmame.\n";
+        return false;
+    }
+}
+
+void Bezerro::registrarPesagem(double novoPeso, int novaIdadeMeses) {
+    Animal::registrarPesagem(novoPeso, novaIdadeMeses);
+    if (ganhoMedioPeso > 0.0) {
+        ganhoPesoMedioDiario = ganhoMedioPeso;
     }
 }
 
@@ -123,6 +137,11 @@ std::string Bezerro::recomendarDestinoMaturidade() {
     const double SCORE_MINIMO_TOURO = 60.0;
     if(sexo=='F') return "vaca";
     return (scoreGenetico >= SCORE_MINIMO_TOURO) ? "touro" : "boicorte";
+}
+
+void Bezerro::escreverLinhaArquivo(std::ofstream& out) const {
+    escreverBase(out);
+    out << " " << consumoLeiteLitros << " " << ganhoPesoMedioDiario << " " << idadeDesmameMeses << " " << desmamado << "\n";
 }
 
 void Bezerro::salvarEmArquivo() {
@@ -182,6 +201,11 @@ Bezerro* Bezerro::carregarBezerro(std::string id) {
         while(bezerroCarregado->carregarBase(arquivo) &&
               (arquivo >> bezerroCarregado->consumoLeiteLitros >> bezerroCarregado->ganhoPesoMedioDiario >> bezerroCarregado->idadeDesmameMeses >> bezerroCarregado->desmamado)) {
             if(bezerroCarregado->_id == id) {
+                if (bezerroCarregado->ganhoMedioPeso <= 0.0 && bezerroCarregado->ganhoPesoMedioDiario > 0.0) {
+                    bezerroCarregado->ganhoMedioPeso = bezerroCarregado->ganhoPesoMedioDiario;
+                } else if (bezerroCarregado->ganhoPesoMedioDiario <= 0.0 && bezerroCarregado->ganhoMedioPeso > 0.0) {
+                    bezerroCarregado->ganhoPesoMedioDiario = bezerroCarregado->ganhoMedioPeso;
+                }
                 arquivo.close();
                 return bezerroCarregado;
             }

@@ -1,13 +1,14 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <filesystem>
 #include <cstdio>
 #include "vaca.hpp"
 
 Vaca::Vaca(std::string id, double p, int iM, int qtdF, int qtdV, std::string* filhosIniciais)
-: Animal(id, 'F', p, iM, qtdF, qtdV, filhosIniciais), producaoLeiteDia(0.0), emLactacao(false), prenha(false) {}
+: Animal(id, 'F', p, iM, qtdF, qtdV, filhosIniciais), producaoLeiteDia(0.0), ultimaProducaoLeiteDia(0.0), emLactacao(false), prenha(false) {}
 
-Vaca::Vaca() : Animal(), producaoLeiteDia(0.0), emLactacao(false), prenha(false) {
+Vaca::Vaca() : Animal(), producaoLeiteDia(0.0), ultimaProducaoLeiteDia(0.0), emLactacao(false), prenha(false) {
     sexo = 'F';
 }
 
@@ -15,29 +16,42 @@ Vaca::~Vaca(){}
 
 //gets
 double Vaca:: getProducaoLeiteDia()const {return producaoLeiteDia;}
+double Vaca:: getUltimaProducaoLeiteDia()const {return ultimaProducaoLeiteDia;}
 bool Vaca:: getEmLactacao()const {return emLactacao;}
 std::string Vaca::getTipo() const {return "vaca";}
 std::string Vaca::getIdTouroPai() const {return idTouroPai;}
 bool Vaca::podeSerPromovido() const {return false;}
 bool Vaca::getPrenha()const {return prenha;}
 
-// producao de leite em relacao a referencia de 20 L/dia (so conta se a vaca esta produzindo)
+// producao de leite em relacao a referencia de 20 L/dia (usa ultima producao conhecida quando seca)
 bool Vaca::obterRazaoProducao(double& razao) const {
-    if (!emLactacao || producaoLeiteDia <= 0.0) return false;
-    razao = producaoLeiteDia / 20.0;
+    double producaoRef = (emLactacao && producaoLeiteDia > 0.0) ? producaoLeiteDia : ultimaProducaoLeiteDia;
+    if (producaoRef <= 0.0) return false;
+    razao = producaoRef / 20.0;
     return true;
 }
 //sets
 void Vaca::setProducaoLeiteDia(double p) {
     if (p < 0.0) throw std::invalid_argument("A producao de leite nao pode ser negativa!");
     producaoLeiteDia = p;
+    if (p > 0.0) {
+        ultimaProducaoLeiteDia = p;
+    }
 }
 
 void Vaca::setEmLactacao(bool l) {
     emLactacao = l;
-    if (emLactacao && producaoLeiteDia <= 0.0) {
-        producaoLeiteDia = 15.0; // producao media base em litros/dia
-    } else if (!emLactacao) {
+    if (emLactacao) {
+        if (producaoLeiteDia <= 0.0) {
+            producaoLeiteDia = (ultimaProducaoLeiteDia > 0.0) ? ultimaProducaoLeiteDia : 15.0; // producao media base em litros/dia
+        }
+        if (producaoLeiteDia > 0.0) {
+            ultimaProducaoLeiteDia = producaoLeiteDia;
+        }
+    } else {
+        if (producaoLeiteDia > 0.0) {
+            ultimaProducaoLeiteDia = producaoLeiteDia;
+        }
         producaoLeiteDia = 0.0;
     }
 }
@@ -120,6 +134,11 @@ void Vaca::adicionarFilho(std::string idFilho){
     qtdFilhos++;
 }
 
+void Vaca::escreverLinhaArquivo(std::ofstream& out) const {
+    escreverBase(out);
+    out << " " << producaoLeiteDia << " " << emLactacao << " " << prenha << " " << formatarTextoSalvar(idTouroPai) << " " << ultimaProducaoLeiteDia << "\n";
+}
+
 void Vaca::salvarEmArquivo() {
     if(_id.empty()) throw std::invalid_argument("ID da vaca invalido!");
     std::filesystem::create_directories("./data");
@@ -137,13 +156,19 @@ void Vaca::salvarEmArquivo() {
             while(aux.carregarBase(leitura) &&
                   (leitura >> aux.producaoLeiteDia >> aux.emLactacao >> aux.prenha >> aux.idTouroPai)) {
                 aux.idTouroPai = formatarTextoCarregar(aux.idTouroPai);
+                std::string restoLinha;
+                std::getline(leitura, restoLinha);
+                std::istringstream issResto(restoLinha);
+                if (!(issResto >> aux.ultimaProducaoLeiteDia)) {
+                    aux.ultimaProducaoLeiteDia = aux.emLactacao ? aux.producaoLeiteDia : 0.0;
+                }
                 if(aux._id == _id) {
                     escreverBase(temp);
-                    temp << " " << producaoLeiteDia << " " << emLactacao << " " << prenha << " " << formatarTextoSalvar(idTouroPai) << "\n";
+                    temp << " " << producaoLeiteDia << " " << emLactacao << " " << prenha << " " << formatarTextoSalvar(idTouroPai) << " " << ultimaProducaoLeiteDia << "\n";
                     vacaAtualizada = true;
                 } else {
                     aux.escreverBase(temp);
-                    temp << " " << aux.producaoLeiteDia << " " << aux.emLactacao << " " << aux.prenha << " " << formatarTextoSalvar(aux.idTouroPai) << "\n";
+                    temp << " " << aux.producaoLeiteDia << " " << aux.emLactacao << " " << aux.prenha << " " << formatarTextoSalvar(aux.idTouroPai) << " " << aux.ultimaProducaoLeiteDia << "\n";
                 }
             }
             leitura.close();
@@ -151,7 +176,7 @@ void Vaca::salvarEmArquivo() {
 
         if(!vacaAtualizada) {
             escreverBase(temp);
-            temp << " " << producaoLeiteDia << " " << emLactacao << " " << prenha << " " << formatarTextoSalvar(idTouroPai) << "\n";
+            temp << " " << producaoLeiteDia << " " << emLactacao << " " << prenha << " " << formatarTextoSalvar(idTouroPai) << " " << ultimaProducaoLeiteDia << "\n";
         }
     } catch (...) {
         if(leitura.is_open()) leitura.close();
@@ -181,6 +206,12 @@ Vaca* Vaca::carregarVaca(std::string id) {
                          >> idTouroLido)) break;
 
             vacaCarregada->idTouroPai = vacaCarregada->formatarTextoCarregar(idTouroLido);
+            std::string restoLinha;
+            std::getline(arquivo, restoLinha);
+            std::istringstream issResto(restoLinha);
+            if (!(issResto >> vacaCarregada->ultimaProducaoLeiteDia)) {
+                vacaCarregada->ultimaProducaoLeiteDia = vacaCarregada->emLactacao ? vacaCarregada->producaoLeiteDia : 0.0;
+            }
 
             if(vacaCarregada->_id == id) {
                 arquivo.close();

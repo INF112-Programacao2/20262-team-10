@@ -43,6 +43,7 @@ public:
     virtual std::string getTipoRacao() const = 0;
     virtual double calcularSacosDiarios(SacaRacao** relatorioRacao) const = 0;
     virtual void salvarEmArquivo() = 0;
+    virtual void escreverLinhaArquivo(std::ofstream& out) const = 0;
     virtual ~Animal();
 
     // gets
@@ -71,11 +72,12 @@ public:
     void setAjusteDescendentes(double pontos);
 
     // score genetico
-    void registrarPesagem(double novoPeso, int novaIdadeMeses);
+    virtual void registrarPesagem(double novoPeso, int novaIdadeMeses);
     double calcularScoreBase();
     void recalcularScoreGenetico(int qtdAncestrais, double ajusteAncestrais);
     double getFatorPrecoGenetico() const;
     void copiarDadosGeneticosDe(const Animal& outro);
+    void copiarEstadoParaPromocao(const Animal& outro);
 
     // cria um registro plano para a tabela compartilhada de ancestrais
     SnapshotAncestral criarSnapshot(const std::string& status = "ativo") const;

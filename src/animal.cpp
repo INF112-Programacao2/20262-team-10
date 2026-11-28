@@ -193,6 +193,33 @@ void Animal::copiarDadosGeneticosDe(const Animal &outro)
     scoreGenetico = outro.scoreGenetico;
 }
 
+void Animal::copiarEstadoParaPromocao(const Animal &outro)
+{
+    if (this == &outro) return;
+
+    estadoSaude = outro.estadoSaude;
+    temperamento = outro.temperamento;
+    EmQuarentena = outro.EmQuarentena;
+    idPai = outro.idPai;
+    idMae = outro.idMae;
+
+    if (idFilhos != nullptr) {
+        delete[] idFilhos;
+        idFilhos = nullptr;
+    }
+    qtdFilhos = 0;
+
+    if (outro.qtdFilhos > 0 && outro.idFilhos != nullptr) {
+        idFilhos = new std::string[outro.qtdFilhos];
+        for (int i = 0; i < outro.qtdFilhos; i++) {
+            idFilhos[i] = outro.idFilhos[i];
+        }
+        qtdFilhos = outro.qtdFilhos;
+    }
+
+    copiarDadosGeneticosDe(outro);
+}
+
 Animal::~Animal()
 {
     delete[] idFilhos;

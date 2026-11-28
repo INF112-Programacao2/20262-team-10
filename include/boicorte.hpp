@@ -36,6 +36,7 @@ public:
     double calcularArrobaLiquidas();
     bool obterRazaoProducao(double& razao) const override;
     void salvarEmArquivo() override;
+    void escreverLinhaArquivo(std::ofstream& out) const override;
     static Boicorte* carregarBoicorte(std::string id);
 };
 

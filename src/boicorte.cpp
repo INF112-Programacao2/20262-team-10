@@ -90,6 +90,11 @@ double Boicorte::calcularReceitaDiaria(double valorMercado) { //precoLeite alias
     return ((rendimentoCarcaca*0.7)/15) * valorMercado;
 }
 
+void Boicorte::escreverLinhaArquivo(std::ofstream& out) const {
+    escreverBase(out);
+    out << " " << rendimentoCarcaca << " " << metaAbatePeso << " " << faseEngorda << "\n";
+}
+
 void Boicorte::salvarEmArquivo() {
     if(_id.empty()) throw std::invalid_argument("ID do boi de corte invalido!");
     std::filesystem::create_directories("./data");

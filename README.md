@@ -18,19 +18,19 @@ Um gerenciador de registros tradicional apenas armazena e consulta dados (CRUD).
    * Calcula polimorficamente o consumo diário individual de cada animal conforme peso vivo, categoria (`vaca`, `touro`, `boicorte`, `bezerro`) e fase produtiva (lactação, engorda, desmame/recria).
    * Converte o consumo em **sacos de ração por dia** e projeta a demanda para **30 dias**, separada por tipo (`Ração Engorda`, `Ração Avulsa` e `Ração Recria`), além do custo diário em reais (`R$`).
 2. **Controle de Lotação e Penalidade Financeira por Superlotação (`Area`):**
-   * Calcula a capacidade máxima de cabeças/hectare conforme a qualidade do pasto (`seco` = 0,5; `ruim` = 1,0; `intermediario` = 2,0; `bom` = 3,0; `muito bom` = 4,0) e exibe a taxa de ocupação percentual.
-   * **Impacto real no custo:** quando uma área ultrapassa **100% da capacidade**, o sistema aplica um **fator multiplicador proporcional (`lotação / 100.0`)** sobre o consumo de sacos e sobre o gasto diário de ração dos animais daquela área, simulando a necessidade maior de suplementação em pasto superlotado.
+   * Calcula a capacidade máxima de cabeças/hectare conforme a qualidade do pasto (`seco` = 0,5; `ruim` = 1,0; `intermediario` = 2,0; `bom` = 3,0; `muito bom` = 4,0 — com normalização e validação de entrada) e exibe a taxa de ocupação percentual.
+   * **Impacto real no custo com teto fisiológico:** quando uma área ultrapassa **100% da capacidade**, `Area::calcularFatorSuperlotacao()` aplica um **fator multiplicador proporcional (`lotação / 100.0`) limitado ao teto fisiológico de `2,0x`** sobre o consumo de sacos e sobre o gasto diário de ração dos animais daquela área, simulando o aumento de suplementação em pasto superlotado sem distorcer fisicamente a capacidade de ingestão.
 3. **Análise Financeira e Ponto de Equilíbrio (*Break-Even*):**
    * Cruza a receita diária estimada (produção de leite, ganho de peso com ágio por sexo/idade e rendimento de carcaça) contra o gasto diário com alimentação e manejo.
    * No relatório de *Break-Even* (`emitirRelatorioBreakEvenEVendas`), informa se o caixa já está positivo, **quantos dias faltam no ritmo atual para empatar o caixa**, ou alerta quando a operação diária está no prejuízo.
 4. **Algoritmo de Score Genético em $O(N \log N)$ (`Farm::recalcularScoresGeneticos`):**
-   * Ordena animais vivos e registros históricos (`SnapshotAncestral`) com **MergeSort** próprio e realiza cruzamentos com **Busca Binária** (sem `std::vector` ou `std::sort`), escalando com eficiência para milhares de animais.
-   * Calcula o `scoreBase` (0 a 100) ponderando peso atual vs. peso esperado para a idade, ganho médio diário e indicador produtivo (leite na vaca / rendimento de carcaça no boi de corte).
+   * Modularizado em 4 etapas claras (`coletarAnimaisVivosOrdenados`, `atualizarAncestraisComVinculo`, `calcularAjusteDeDescendentes` e `aplicarScoresFinais`), ordena os arrays dinâmicos brutos de animais vivos e `SnapshotAncestral` com `std::sort` (`<algorithm>`) e realiza cruzamentos via **Busca Binária** (sem coleções da STL como `std::vector`), escalando com eficiência para milhares de animais.
+   * Calcula o `scoreBase` (0 a 100) ponderando peso atual vs. peso esperado para a idade, ganho médio diário e indicador produtivo (leite na vaca — preservando a última produção conhecida `ultimaProducaoLeiteDia` durante o período seco sem gerar receita — e rendimento de carcaça no boi de corte).
    * Ajusta o `scoreGenetico` percorrendo recursivamente até **3 gerações de ancestrais** (com decaimento de peso `0,5` por geração), somando a contribuição de **todos os descendentes** ($\ge 6$ meses, inclusive já vendidos/removidos) em relação à média do rebanho e aplicando penalidade quando falta histórico genealógico.
    * Mantém a tabela compartilhada de ancestrais enxuta via coleta/limpeza recursiva (`limpezaDeAncestrais`), preservando apenas registros ligados a animais vivos na fazenda.
 5. **Apoio à Decisão Reprodutiva e de Maturidade:**
    * **Bloqueio de consanguinidade (`Vaca::emprenhar`):** impede coberturas entre parentes próximos (mesmo pai, mesma mãe ou relação pai/filha e mãe/filho) e valida idade mínima reprodutiva (15 meses) e status de quarentena.
-   * **Recomendação automática na promoção (`Bezerro::recomendarDestinoMaturidade` & `Area::promoverAnimal`):** ao atingir 12 meses, fêmeas são direcionadas para `vaca` e machos são recomendados para `touro` (se `scoreGenetico >= 60`) ou `boicorte` (caso contrário). Durante a promoção, o sistema preserva `idPai`, `idMae` e os dados de score genético (`copiarDadosGeneticosDe`) na nova categoria.
+   * **Recomendação automática na promoção (`Bezerro::recomendarDestinoMaturidade` & `Area::promoverAnimal`):** ao atingir 12 meses, fêmeas são direcionadas para `vaca` e machos são recomendados para `touro` (se `scoreGenetico >= 60`) ou `boicorte` (caso contrário). Durante a promoção, `Animal::copiarEstadoParaPromocao` preserva estado de saúde, temperamento, quarentena, `idPai`, `idMae`, filhos e dados de score genético na nova categoria.
 
 ---
 
@@ -57,22 +57,22 @@ Com a fazenda aberta, o menu principal oferece:
   * *Relatório Operacional:* total do rebanho por categoria, receita/gasto/lucro diário e consumo diário e mensal (30 dias) de sacos de ração.
   * *Relatório de Caixa e Break-Even:* saldo em caixa, total acumulado em vendas, prejuízo acumulado, lucro diário e estimativa de dias para atingir o ponto de equilíbrio.
 * **`[2] Gerenciar Áreas` (`menuGerenciarAreas`):**
-  * Listar áreas/pastos (com hectares, estado do pasto, lotação atual/máxima e contagem por tipo de animal), criar nova área, selecionar área ativa e listar seu rebanho, editar estado do pasto ou hectares, consultar resumo de gasto e sacos de ração da área e remover áreas vazias.
+  * Listar áreas/pastos (com hectares, estado do pasto, lotação atual/máxima e contagem por tipo de animal), criar nova área (com normalização e validação do estado do pasto), selecionar área ativa e listar seu rebanho, editar estado do pasto ou hectares, consultar resumo de gasto e sacos de ração da área e remover áreas vazias.
 * **`[3] Gerenciar Animais` (`menuGerenciarAnimais`):**
-  * Adicionar `Vaca`, `Touro`, `Boicorte` ou `Bezerro` na área atual (com geração automática de IDs: `VC`, `TR`, `BC`, `BZ`).
-  * Buscar animal por ID (exibe ficha completa e gasto diário individual).
-  * Atualizar fase produtiva (lactação e produção de leite, fase de engorda ou desmame).
-  * Remover animal (venda, morte ou saída).
+  * Adicionar `Vaca`, `Touro`, `Boicorte` ou `Bezerro` na área atual (com geração automática de IDs `VC`, `TR`, `BC`, `BZ` e validação de peso, idade, vacinas, valores e sexo `M`/`F`).
+  * Buscar animal por ID (exibe ficha completa, área real onde o animal se encontra com sua lotação via `Farm::buscarAreaDoAnimal` e gasto diário individual já considerando o fator de superlotação).
+  * Atualizar fase produtiva (lactação e produção de leite, fase de engorda ou desmame com verificação efetiva de mudança de estado).
+  * Remover animal (venda, morte ou saída), apagando automaticamente o registro órfão do `.txt` da espécie.
   * Consultar genealogia (árvore de ancestrais e lista de filhos, ativos ou históricos).
 * **`[4] Movimentação e Reprodução` (`menuMovimentacaoReproducao`):**
   * Transferir um animal ou um lote de animais entre áreas.
   * Realizar cobertura (`Touro x Vaca`) com validação de parentesco e idade.
   * Registrar nascimento (cria o bezerro na área escolhida, vincula pai/mãe e atualiza scores genéticos).
-  * Promover bezerros elegíveis ($\ge 12$ meses) com recomendação automática de destino e preservação genética.
+  * Promover bezerros elegíveis ($\ge 12$ meses) com recomendação automática de destino, preservação completa de estado/genética e remoção do registro antigo em `bezerros.txt`.
   * Recalcular manualmente os scores genéticos de todo o rebanho.
 * **`[5] Cotações e Rações` (`menuCotacoesRacoes`):**
   * Visualizar valores atuais (dólar, litro do leite, arroba do boi, arroba da vaca, peso e preço das sacas de ração).
-  * **Atualização via APIs + Manual:** busca automaticamente a cotação do dólar (`economia.awesomeapi.com.br`) e da arroba do boi/vaca (`agrodocai.com.br/api/v1/cotacao`) via `curl` com parser próprio de JSON, solicitando em seguida os valores locais de leite e rações.
+  * **Atualização via APIs + Manual:** busca automaticamente a cotação do dólar (`economia.awesomeapi.com.br`) e da arroba do boi/vaca (`agrodocai.com.br/api/v1/cotacao`) via `curl` com parser próprio de JSON, solicitando em seguida os valores locais de leite e rações com validação de números positivos.
   * **Edição individual:** permite alterar manualmente qualquer um dos 10 parâmetros de mercado e salvar imediatamente.
 * **`[6] Importar Lote (.txt)`:**
   * Importa áreas (`AREA`), animais (`ANIMAL`) e registros históricos (`ANCESTRAL`) a partir de arquivos de texto estruturados, recalculando os scores genéticos e salvando ao final. Também é possível passar o caminho do arquivo diretamente como argumento na linha de comando (`./bin/main arquivo.txt`).
@@ -106,13 +106,15 @@ Todos os dados do sistema são salvos localmente no diretório `./data/` em arqu
 * `./data/usuarios.txt` — credenciais (hash da senha), perfil, cotações e preços/pesos de ração por usuário.
 * `./data/fazendas.txt` — metadados das fazendas, saldos financeiros, dia da simulação e próximo ID global.
 * `./data/areas.txt` — áreas/pastos de cada fazenda e vínculo dos animais alocados.
-* `./data/vacas.txt`, `./data/touros.txt`, `./data/boicortes.txt`, `./data/bezerros.txt` — dados específicos de cada categoria animal.
+* `./data/vacas.txt`, `./data/touros.txt`, `./data/boicortes.txt`, `./data/bezerros.txt` — dados específicos de cada categoria animal (incluindo o histórico `ultimaProducaoLeiteDia` em `vacas.txt` com leitura retrocompatível).
 * `./data/ancestrais.txt` — tabela compartilhada de `SnapshotAncestral` para consulta genealógica e cálculo genético mesmo após venda/remoção de parentes.
 
 **Como funciona o salvamento:**
 * Alterações feitas nos menus de áreas, animais e movimentação/reprodução marcam a sessão para **salvamento automático** ao retornar ao painel principal (inclusive em caso de exceção tratada após alteração).
+* **Salvamento otimizado em 1 passada por espécie:** `Farm::salvarFazenda()` utiliza o método polimórfico `Animal::escreverLinhaArquivo()` em `salvarAnimaisPorTipoEmLote()`, preservando dados de outras fazendas/usuários e reescrevendo cada arquivo de espécie apenas uma vez (permitindo recalcular scores e salvar 5.000 animais em fração de segundo).
+* **Sem registros órfãos:** ao remover um animal (`Area::removerAnimal`) ou promover um bezerro (`Area::promoverAnimal`), o registro correspondente é removido do arquivo `.txt` da categoria anterior.
 * Importações em lote, edições de cotações, troca de fazenda e logout também salvam os dados automaticamente.
-* A gravação em disco utiliza arquivos temporários (`*_temp.txt`) antes de substituir o arquivo final, evitando corrupção em caso de falha durante a escrita.
+* A gravação em disco utiliza arquivos temporários (`*_temp.txt` / `*.tmp`) antes de substituir o arquivo final, evitando corrupção em caso de falha durante a escrita.
 
 ---
 

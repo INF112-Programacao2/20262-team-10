@@ -40,6 +40,10 @@ class Farm {
         Animal* encontrarAnimalOpcional(const std::string& identificador) const;
         // media do score base de todos os animais 
         double calcularMediaScoreBase() const; 
+        int coletarAnimaisVivosOrdenados(Animal** destino);
+        void atualizarAncestraisComVinculo(Animal** vivos, int qtdVivos);
+        void calcularAjusteDeDescendentes(Animal** vivos, int qtdVivos, double mediaRebanho, double* ajusteDesc) const;
+        void aplicarScoresFinais(Animal** vivos, int qtdVivos, double mediaRebanho, const double* ajusteDesc);
        
 
     public:
@@ -65,11 +69,12 @@ class Farm {
         void removerArea(Area* a);
         void selecionarArea(std::string n);
         Animal* buscarAnimalGlobal(std::string id);
+        Area* buscarAreaDoAnimal(const std::string& id) const;
         bool transferirAnimalEntreAreas(std::string idAnimal, std::string nomeArea);
         bool transferirLoteDeAnimaisEntreAreas(std::string* ids, int qtdAnimais, std::string areaDestino);
         bool enviarParaQuarentena(std::string motivo, std::string idAnimal, int dias);
         bool liberarDaQuarentena(std::string idAnimal);
-        void promoverAnimalGlobal();
+        int promoverAnimalGlobal();
         std::string registrarNascimento(const std::string& idFemea, const std::string& nomeArea, char sexo, double peso, std::string id = "");
         void adicionarAnimalNaArea(const std::string& nomeArea, Animal* a, bool silencioso = false);
         std::string gerarProximoId(const std::string& tipo);

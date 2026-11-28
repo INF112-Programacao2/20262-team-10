@@ -35,10 +35,12 @@ public:
     void imprimirFichaParcial()const override;
     //metodos exclusivos
     double calcularValorVendaMercado();
-    void realizarDesmame();
+    bool realizarDesmame();
+    void registrarPesagem(double novoPeso, int novaIdadeMeses) override;
     bool atingiuIdadeAdulta() const;
     std::string recomendarDestinoMaturidade();
     void salvarEmArquivo() override;
+    void escreverLinhaArquivo(std::ofstream& out) const override;
     static Bezerro* carregarBezerro(std::string id);
 };
 

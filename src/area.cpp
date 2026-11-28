@@ -1,6 +1,9 @@
 #include <iostream>
 #include <stdexcept>
 #include <fstream>
+#include <sstream>
+#include <cstdio>
+#include <cctype>
 #include <limits>
 #include "area.hpp"
 #include "farm.hpp"
@@ -12,12 +15,30 @@
 #include "user.hpp"
 #include "sacaRacao.hpp"
 
+static std::string normalizarEValidarEstadoPasto(std::string estado) {
+    size_t inicio = 0;
+    while (inicio < estado.size() && std::isspace(static_cast<unsigned char>(estado[inicio]))) inicio++;
+    size_t fim = estado.size();
+    while (fim > inicio && std::isspace(static_cast<unsigned char>(estado[fim - 1]))) fim--;
+    estado = estado.substr(inicio, fim - inicio);
+
+    for (size_t i = 0; i < estado.size(); i++) {
+        estado[i] = static_cast<char>(std::tolower(static_cast<unsigned char>(estado[i])));
+    }
+
+    if (estado != "seco" && estado != "ruim" && estado != "intermediario" &&
+        estado != "bom" && estado != "muito bom") {
+        throw std::invalid_argument("Estado de pasto invalido! Use: seco, ruim, intermediario, bom ou muito bom.");
+    }
+    return estado;
+}
+
 Area::Area(string n, string estado, double a) {
     if (a <= 0) {
         throw std::runtime_error("A area deve ser maior que zero.");
     }
+    estadoPasto = normalizarEValidarEstadoPasto(estado);
     nome = n;
-    estadoPasto = estado;
     area = a;
     qtdAtualDeAnimais = 0;
     rebanho = new Animal*[1];
@@ -40,6 +61,40 @@ static std::string formatarTextoAreaSalvar(std::string texto) {
     return formatado;
 }
 
+static void removerAnimalDoArquivo(const std::string& tipo, const std::string& id) {
+    std::string caminho;
+    if (tipo == "vaca") caminho = "./data/vacas.txt";
+    else if (tipo == "touro") caminho = "./data/touros.txt";
+    else if (tipo == "boicorte") caminho = "./data/boicortes.txt";
+    else if (tipo == "bezerro") caminho = "./data/bezerros.txt";
+    else return;
+
+    std::ifstream leitura(caminho);
+    if (!leitura.is_open()) return;
+
+    std::string idFormatado = formatarTextoAreaSalvar(id);
+    std::string caminhoTemp = caminho + ".tmp";
+    std::ofstream temp(caminhoTemp);
+    if (!temp.is_open()) {
+        leitura.close();
+        return;
+    }
+
+    std::string linha;
+    while (std::getline(leitura, linha)) {
+        std::istringstream iss(linha);
+        std::string idLido;
+        if ((iss >> idLido) && idLido != idFormatado) {
+            temp << linha << "\n";
+        }
+    }
+
+    leitura.close();
+    temp.close();
+    std::remove(caminho.c_str());
+    std::rename(caminhoTemp.c_str(), caminho.c_str());
+}
+
 void Area::atualizarCapacidadeMaxima() {
     double cabecasPorHectare = 2.0; // padrao intermediario
     if (estadoPasto == "seco") cabecasPorHectare = 0.5;
@@ -54,11 +109,21 @@ void Area::atualizarCapacidadeMaxima() {
     }
 }
 
-double Area::calcularLotacaoArea() {
+double Area::calcularLotacaoArea() const {
     if (capacidadeMaxima <= 0) {
         return 0.0;
     }
     return (qtdAtualDeAnimais * 100.0) / capacidadeMaxima;
+}
+
+double Area::calcularFatorSuperlotacao() const {
+    static const double FATOR_MAXIMO_SUPERLOTACAO = 2.0;
+    double lotacao = calcularLotacaoArea();
+    if (lotacao <= 100.0) {
+        return 1.0;
+    }
+    double fator = lotacao / 100.0;
+    return (fator > FATOR_MAXIMO_SUPERLOTACAO) ? FATOR_MAXIMO_SUPERLOTACAO : fator;
 }
 
 void Area::adicionarAnimal(Animal* a, bool silencioso) {
@@ -117,12 +182,15 @@ void Area::removerAnimal(string idAnimal) {
         return;
     }
 
+    removerAnimalDoArquivo(animalParaAbate->getTipo(), animalParaAbate->getId());
     delete animalParaAbate;
     std::cout << "Animal removido e deletado com sucesso!" << std::endl;
 }
 
-void Area::promoverAnimal() {
+int Area::promoverAnimal() {
     if (rebanho == nullptr) throw std::runtime_error("Rebanho da area nao foi alocado!");
+
+    int promovidos = 0;
 
     for (int i = 0; i < qtdAtualDeAnimais; i++) {
         if (rebanho[i] == nullptr)
@@ -147,38 +215,40 @@ void Area::promoverAnimal() {
                     if (destino == "touro") {
                         Touro* t = new Touro(rebanho[i]->getId(),
                             rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), 0, rebanho[i]->getQtdvacinas(), nullptr, 0.0);
-                        t->setIdPai(rebanho[i]->getPai());
-                        t->setIdMae(rebanho[i]->getMae());
-                        t->copiarDadosGeneticosDe(*rebanho[i]);
+                        t->copiarEstadoParaPromocao(*rebanho[i]);
 
+                        removerAnimalDoArquivo("bezerro", rebanho[i]->getId());
                         delete rebanho[i];
                         rebanho[i] = t;
+                        promovidos++;
                         std::cout << "Bezerro promovido a touro com sucesso!\n";
                     } else {
                         Boicorte* b = new Boicorte(rebanho[i]->getId(),
                             rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), 0, rebanho[i]->getQtdvacinas());
-                        b->setIdPai(rebanho[i]->getPai());
-                        b->setIdMae(rebanho[i]->getMae());
-                        b->copiarDadosGeneticosDe(*rebanho[i]);
+                        b->copiarEstadoParaPromocao(*rebanho[i]);
 
+                        removerAnimalDoArquivo("bezerro", rebanho[i]->getId());
                         delete rebanho[i];
                         rebanho[i] = b;
+                        promovidos++;
                         std::cout << "Bezerro promovido a boi de corte com sucesso!\n";
                     }
                 } else if (rebanho[i]->getSexo() == 'F') {
                     Vaca* v = new Vaca(rebanho[i]->getId(),
                         rebanho[i]->getPeso(), rebanho[i]->getIdadeMeses(), 0, rebanho[i]->getQtdvacinas(), nullptr);
-                    v->setIdPai(rebanho[i]->getPai());
-                    v->setIdMae(rebanho[i]->getMae());
-                    v->copiarDadosGeneticosDe(*rebanho[i]);
+                    v->copiarEstadoParaPromocao(*rebanho[i]);
 
+                    removerAnimalDoArquivo("bezerro", rebanho[i]->getId());
                     delete rebanho[i];
                     rebanho[i] = v;
+                    promovidos++;
                     std::cout << "Bezerro promovido a vaca com sucesso!\n";
                 }
             }
         }
     }
+
+    return promovidos;
 }
 
 ContagemRebanho Area::getContagemPorTipo() const {
@@ -263,10 +333,7 @@ double Area::getSacoGastoIndividual(string id, SacaRacao** relatorioRacoes) {
     if (animalAchado == nullptr) throw std::runtime_error("Esse animal nao foi encontrado");
 
     double sacos = animalAchado->calcularSacosDiarios(relatorioRacoes);
-    if (calcularLotacaoArea() > 100) {
-        return sacos * (calcularLotacaoArea() / 100.0);
-    }
-    return sacos;
+    return sacos * calcularFatorSuperlotacao();
 }
 
 ConsumoRacao Area::getSacosGastosNaArea(SacaRacao** relatorioRacoes) {
@@ -283,12 +350,10 @@ ConsumoRacao Area::getSacosGastosNaArea(SacaRacao** relatorioRacoes) {
         else if (tipoRacao == "Racao Recria") total.recria += sacos;
     }
 
-    if (calcularLotacaoArea() > 100) {
-        double fator = calcularLotacaoArea() / 100.0;
-        total.engorda *= fator;
-        total.avulsa *= fator;
-        total.recria *= fator;
-    }
+    double fator = calcularFatorSuperlotacao();
+    total.engorda *= fator;
+    total.avulsa *= fator;
+    total.recria *= fator;
 
     return total;
 }
@@ -298,15 +363,15 @@ double Area::getGastoIndividual(string id, double precoLeite, SacaRacao** relato
     if (animalAchado == nullptr) throw std::runtime_error("Esse animal nao foi encontrado");
 
     double gastoBase = animalAchado->calcularGastoDiario(precoLeite, relatorioRacoes);
-    if (calcularLotacaoArea() > 100 && !animalAchado->getTipoRacao().empty()) {
-        return gastoBase * (calcularLotacaoArea() / 100.0);
+    if (!animalAchado->getTipoRacao().empty()) {
+        return gastoBase * calcularFatorSuperlotacao();
     }
     return gastoBase;
 }
 
 double Area::getGastoDaArea(double precoLeite, SacaRacao** relatorioRacoes) {
     double total = 0.0;
-    double fatorLotacao = (calcularLotacaoArea() > 100) ? (calcularLotacaoArea() / 100.0) : 1.0;
+    double fatorLotacao = calcularFatorSuperlotacao();
 
     for (int i = 0; i < qtdAtualDeAnimais; i++) {
         if (rebanho[i] != nullptr) {
@@ -334,7 +399,7 @@ void Area::setNomeArea(string n) {
 }
 
 void Area::setEstadoPasto(string estado) {
-    estadoPasto = estado;
+    estadoPasto = normalizarEValidarEstadoPasto(estado);
     atualizarCapacidadeMaxima();
     if (qtdAtualDeAnimais > capacidadeMaxima) {
         std::cout << "Atencao: com o novo estado do pasto, a lotacao subiu para " << calcularLotacaoArea() << "%" << std::endl;

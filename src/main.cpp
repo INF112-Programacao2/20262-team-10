@@ -662,23 +662,23 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual, bool& alterou)
             int idade, vacinas;
 
             std::cout << "Peso (kg): ";
-            if (!(std::cin >> peso)) {
+            if (!(std::cin >> peso) || peso <= 0.0) {
                 limparBuffer();
-                throw std::invalid_argument("Peso invalido.");
+                throw std::invalid_argument("Peso invalido. Deve ser maior que zero.");
             }
             limparBuffer();
 
             std::cout << "Idade (meses): ";
-            if (!(std::cin >> idade)) {
+            if (!(std::cin >> idade) || idade < 0) {
                 limparBuffer();
-                throw std::invalid_argument("Idade invalida.");
+                throw std::invalid_argument("Idade invalida. Nao pode ser negativa.");
             }
             limparBuffer();
 
             std::cout << "Quantidade de vacinas aplicadas: ";
-            if (!(std::cin >> vacinas)) {
+            if (!(std::cin >> vacinas) || vacinas < 0) {
                 limparBuffer();
-                throw std::invalid_argument("Quantidade de vacinas invalida.");
+                throw std::invalid_argument("Quantidade de vacinas invalida. Nao pode ser negativa.");
             }
             limparBuffer();
 
@@ -693,9 +693,9 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual, bool& alterou)
 
                 if (lact == 'S' || lact == 's') {
                     std::cout << "Producao diaria de leite (L): ";
-                    if (!(std::cin >> litros)) {
+                    if (!(std::cin >> litros) || litros < 0.0) {
                         limparBuffer();
-                        throw std::invalid_argument("Litros invalidos.");
+                        throw std::invalid_argument("Litros invalidos. Nao pode ser negativo.");
                     }
                     limparBuffer();
                 }
@@ -713,9 +713,9 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual, bool& alterou)
             else if (tipoOp == 2) {
                 double valorDose;
                 std::cout << "Valor da dose de semen (R$): ";
-                if (!(std::cin >> valorDose)) {
+                if (!(std::cin >> valorDose) || valorDose < 0.0) {
                     limparBuffer();
-                    throw std::invalid_argument("Valor invalido.");
+                    throw std::invalid_argument("Valor invalido. Nao pode ser negativo.");
                 }
                 limparBuffer();
 
@@ -749,6 +749,9 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual, bool& alterou)
                 limparBuffer();
 
                 char sexoFmt = static_cast<char>(std::toupper(static_cast<unsigned char>(sexo)));
+                if (sexoFmt != 'M' && sexoFmt != 'F') {
+                    throw std::invalid_argument("Sexo invalido. Informe M ou F.");
+                }
                 bool desmamado = (idade >= 7);
                 double consumoLeite = desmamado ? 0.0 : 4.0;
                 int idadeDesmame = desmamado ? idade : 0;
@@ -783,16 +786,18 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual, bool& alterou)
 
             double gastoDia = animal->calcularGastoDiario(usuarioAtual->getPrecoLeite(), usuarioAtual->getRelatorioRacao());
             double sacosDia = animal->calcularSacosDiarios(usuarioAtual->getRelatorioRacao());
+            Area* areaDoAnimal = fazendaAtual->buscarAreaDoAnimal(id);
 
-            if (!fazendaAtual->getAreaAtual().empty()) {
-                Area* areaSel = fazendaAtual->buscarArea(fazendaAtual->getAreaAtual());
-                if (areaSel != nullptr && areaSel->buscarAnimal(id) != nullptr) {
-                    gastoDia = areaSel->getGastoIndividual(id, usuarioAtual->getPrecoLeite(), usuarioAtual->getRelatorioRacao());
-                    sacosDia = areaSel->getSacoGastoIndividual(id, usuarioAtual->getRelatorioRacao());
-                }
+            if (areaDoAnimal != nullptr) {
+                gastoDia = areaDoAnimal->getGastoIndividual(id, usuarioAtual->getPrecoLeite(), usuarioAtual->getRelatorioRacao());
+                sacosDia = areaDoAnimal->getSacoGastoIndividual(id, usuarioAtual->getRelatorioRacao());
             }
 
             std::cout << std::fixed << std::setprecision(2);
+            if (areaDoAnimal != nullptr) {
+                std::cout << "Area atual: " << areaDoAnimal->getNomeArea()
+                          << " (Lotacao: " << areaDoAnimal->calcularLotacaoArea() << "%)\n";
+            }
             std::cout << "Pai: " << (animal->getPai().empty() ? "Nao registrado" : animal->getPai()) << "\n"
             << "Mae: " << (animal->getMae().empty() ? "Nao registrada" : animal->getMae()) << "\n"
             << "Racao: " << (animal->getTipoRacao().empty() ? "Leite" : animal->getTipoRacao())
@@ -844,10 +849,9 @@ void menuGerenciarAnimais(Farm* fazendaAtual, User* usuarioAtual, bool& alterou)
             }
             else if (tipo == "bezerro") {
                 Bezerro* bz = dynamic_cast<Bezerro*>(animal);
-                bz->realizarDesmame();
-                if (bz->getDesmamado()) {
+                if (bz->realizarDesmame()) {
                     alterou = true;
-                    std::cout << "Status de desmame verificado/atualizado!\n";
+                    std::cout << "Desmame realizado com sucesso!\n";
                 }
             }
             else {
@@ -1032,8 +1036,12 @@ void menuMovimentacaoReproducao(Farm* fazendaAtual, bool& alterou) {
         else if (opcao == 5) {
             std::cout << "Recalculando scores e promovendo animais, aguarde...\n" << std::flush;
             fazendaAtual->recalcularScoresGeneticos();
-            fazendaAtual->promoverAnimalGlobal();
-            alterou = true;
+            int promovidos = fazendaAtual->promoverAnimalGlobal();
+            if (promovidos > 0) {
+                alterou = true;
+            } else {
+                std::cout << "Nenhum animal foi promovido.\n";
+            }
             pausarTela();
         }
         else if (opcao == 6) {

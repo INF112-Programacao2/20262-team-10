@@ -8,6 +8,7 @@ class Touro;
 class Vaca : public Animal{
 private:
     double producaoLeiteDia;
+    double ultimaProducaoLeiteDia;
     bool emLactacao, prenha;
     std::string idTouroPai;
     Vaca();
@@ -19,6 +20,7 @@ public:
     ~Vaca();
     //gets
     double getProducaoLeiteDia()const;
+    double getUltimaProducaoLeiteDia()const;
     bool getEmLactacao()const;
     std::string getTipoRacao() const override;
     double calcularSacosDiarios(SacaRacao** relatorioRacao) const override;
@@ -39,6 +41,7 @@ public:
     std::string parir();
     void adicionarFilho(std::string idFilho);
     void salvarEmArquivo() override;
+    void escreverLinhaArquivo(std::ofstream& out) const override;
     static Vaca* carregarVaca(std::string id);
 };
 
