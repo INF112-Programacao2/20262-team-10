@@ -193,42 +193,56 @@ void Vaca::salvarEmArquivo() {
     std::rename("./data/vacas_temp.txt", "./data/vacas.txt");
 }
 
+Vaca* Vaca::carregarProximo(std::ifstream& arquivo) {
+    Vaca* vacaCarregada = new Vaca();
+    try {
+        if (!vacaCarregada->carregarBase(arquivo)) {
+            delete vacaCarregada;
+            return nullptr;
+        }
+        std::string idTouroLido;
+        if (!(arquivo >> vacaCarregada->producaoLeiteDia
+                     >> vacaCarregada->emLactacao
+                     >> vacaCarregada->prenha
+                     >> idTouroLido)) {
+            delete vacaCarregada;
+            return nullptr;
+        }
+
+        vacaCarregada->idTouroPai = vacaCarregada->formatarTextoCarregar(idTouroLido);
+        std::string restoLinha;
+        std::getline(arquivo, restoLinha);
+        std::istringstream issResto(restoLinha);
+        if (!(issResto >> vacaCarregada->ultimaProducaoLeiteDia)) {
+            vacaCarregada->ultimaProducaoLeiteDia = vacaCarregada->emLactacao ? vacaCarregada->producaoLeiteDia : 0.0;
+        }
+        return vacaCarregada;
+    } catch (...) {
+        delete vacaCarregada;
+        throw;
+    }
+}
+
 Vaca* Vaca::carregarVaca(std::string id) {
     if(id.empty()) throw std::invalid_argument("ID invalido para carregar vaca!");
 
     std::ifstream arquivo("./data/vacas.txt");
     if(!arquivo.is_open()) return nullptr;
 
-    Vaca* vacaCarregada = new Vaca();
     try {
-        while(vacaCarregada->carregarBase(arquivo)) {
-            std::string idTouroLido;
-            if (!(arquivo >> vacaCarregada->producaoLeiteDia
-                         >> vacaCarregada->emLactacao
-                         >> vacaCarregada->prenha
-                         >> idTouroLido)) break;
-
-            vacaCarregada->idTouroPai = vacaCarregada->formatarTextoCarregar(idTouroLido);
-            std::string restoLinha;
-            std::getline(arquivo, restoLinha);
-            std::istringstream issResto(restoLinha);
-            if (!(issResto >> vacaCarregada->ultimaProducaoLeiteDia)) {
-                vacaCarregada->ultimaProducaoLeiteDia = vacaCarregada->emLactacao ? vacaCarregada->producaoLeiteDia : 0.0;
-            }
-
+        while(Vaca* vacaCarregada = carregarProximo(arquivo)) {
             if(vacaCarregada->_id == id) {
                 arquivo.close();
                 return vacaCarregada;
             }
+            delete vacaCarregada;
         }
     } catch (...) {
         arquivo.close();
-        delete vacaCarregada;
         throw;
     }
 
     arquivo.close();
-    delete vacaCarregada;
     return nullptr;
 }
 

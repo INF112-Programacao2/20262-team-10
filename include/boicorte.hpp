@@ -38,6 +38,7 @@ public:
     bool obterRazaoProducao(double& razao) const override;
     void salvarEmArquivo() override;
     void escreverLinhaArquivo(std::ofstream& out) const override;
+    static Boicorte* carregarProximo(std::ifstream& arquivo);
     static Boicorte* carregarBoicorte(std::string id);
 };
 

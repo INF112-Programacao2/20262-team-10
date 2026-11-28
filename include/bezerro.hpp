@@ -42,6 +42,7 @@ public:
     std::string recomendarDestinoMaturidade();
     void salvarEmArquivo() override;
     void escreverLinhaArquivo(std::ofstream& out) const override;
+    static Bezerro* carregarProximo(std::ifstream& arquivo);
     static Bezerro* carregarBezerro(std::string id);
 };
 

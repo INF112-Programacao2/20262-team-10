@@ -150,6 +150,21 @@ void Boicorte::salvarEmArquivo() {
     std::rename("./data/boicortes_temp.txt", "./data/boicortes.txt");
 }
 
+Boicorte* Boicorte::carregarProximo(std::ifstream& arquivo) {
+    Boicorte* boiCarregado = new Boicorte();
+    try {
+        if (!boiCarregado->carregarBase(arquivo) ||
+            !(arquivo >> boiCarregado->rendimentoCarcaca >> boiCarregado->metaAbatePeso >> boiCarregado->faseEngorda)) {
+            delete boiCarregado;
+            return nullptr;
+        }
+        return boiCarregado;
+    } catch (...) {
+        delete boiCarregado;
+        throw;
+    }
+}
+
 Boicorte* Boicorte::carregarBoicorte(std::string id) {
     if(id.empty()) throw std::invalid_argument("ID invalido para carregar boi de corte!");
 
@@ -158,23 +173,20 @@ Boicorte* Boicorte::carregarBoicorte(std::string id) {
         return nullptr;
     }
 
-    Boicorte* boiCarregado = new Boicorte();
     try {
-        while(boiCarregado->carregarBase(arquivo) &&
-              (arquivo >> boiCarregado->rendimentoCarcaca >> boiCarregado->metaAbatePeso >> boiCarregado->faseEngorda)) {
+        while(Boicorte* boiCarregado = carregarProximo(arquivo)) {
             if(boiCarregado->_id == id) {
                 arquivo.close();
                 return boiCarregado;
             }
+            delete boiCarregado;
         }
     } catch (...) {
         arquivo.close();
-        delete boiCarregado;
         throw;
     }
 
     arquivo.close();
-    delete boiCarregado;
     return nullptr;
 }
 

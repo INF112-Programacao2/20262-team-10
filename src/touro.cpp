@@ -136,6 +136,21 @@ void Touro::salvarEmArquivo() {
     std::rename("./data/touros_temp.txt", "./data/touros.txt");
 }
 
+Touro* Touro::carregarProximo(std::ifstream& arquivo) {
+    Touro* touroCarregado = new Touro();
+    try {
+        if (!touroCarregado->carregarBase(arquivo) ||
+            !(arquivo >> touroCarregado->valorDoseSemen >> touroCarregado->dosesEstoque >> touroCarregado->qtdCoberturas)) {
+            delete touroCarregado;
+            return nullptr;
+        }
+        return touroCarregado;
+    } catch (...) {
+        delete touroCarregado;
+        throw;
+    }
+}
+
 Touro* Touro::carregarTouro(std::string id) {
     if(id.empty()) throw std::invalid_argument("ID invalido para carregar touro!");
 
@@ -144,23 +159,20 @@ Touro* Touro::carregarTouro(std::string id) {
         return nullptr;
     }
 
-    Touro* touroCarregado = new Touro();
     try {
-        while(touroCarregado->carregarBase(arquivo) &&
-              (arquivo >> touroCarregado->valorDoseSemen >> touroCarregado->dosesEstoque >> touroCarregado->qtdCoberturas)) {
+        while(Touro* touroCarregado = carregarProximo(arquivo)) {
             if(touroCarregado->_id == id) {
                 arquivo.close();
                 return touroCarregado;
             }
+            delete touroCarregado;
         }
     } catch (...) {
         arquivo.close();
-        delete touroCarregado;
         throw;
     }
 
     arquivo.close();
-    delete touroCarregado;
     return nullptr;
 }
 

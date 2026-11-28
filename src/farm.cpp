@@ -1205,6 +1205,67 @@ void Farm::salvarFazenda() {
     }
 }
 
+struct IndiceAnimalCarregar {
+    std::string id;
+    std::string tipo;
+    Area* area;
+    bool carregado;
+};
+
+static bool compararIndiceCarregarPorId(const IndiceAnimalCarregar& a, const IndiceAnimalCarregar& b) {
+    return a.id < b.id;
+}
+
+static int buscarIndiceCarregarBinario(const IndiceAnimalCarregar* arr, int n, const std::string& id) {
+    int esq = 0, dir = n - 1;
+    while (esq <= dir) {
+        int meio = esq + (dir - esq) / 2;
+        if (arr[meio].id == id) return meio;
+        if (arr[meio].id < id) esq = meio + 1;
+        else dir = meio - 1;
+    }
+    return -1;
+}
+
+static void carregarAnimaisDeArquivoPorTipo(const std::string& tipo, const std::string& caminho,
+                                           IndiceAnimalCarregar* indice, int qtdIndice) {
+    bool precisa = false;
+    for (int i = 0; i < qtdIndice; i++) {
+        if (indice[i].tipo == tipo) {
+            precisa = true;
+            break;
+        }
+    }
+    if (!precisa) return;
+
+    std::ifstream arq(caminho);
+    if (!arq.is_open()) return;
+
+    try {
+        while (true) {
+            Animal* a = nullptr;
+            if (tipo == "vaca") a = Vaca::carregarProximo(arq);
+            else if (tipo == "touro") a = Touro::carregarProximo(arq);
+            else if (tipo == "boicorte") a = Boicorte::carregarProximo(arq);
+            else if (tipo == "bezerro") a = Bezerro::carregarProximo(arq);
+
+            if (a == nullptr) break;
+
+            int idx = buscarIndiceCarregarBinario(indice, qtdIndice, a->getId());
+            if (idx != -1 && indice[idx].tipo == tipo && !indice[idx].carregado) {
+                indice[idx].carregado = true;
+                indice[idx].area->adicionarAnimal(a, true);
+            } else {
+                delete a;
+            }
+        }
+    } catch (...) {
+        arq.close();
+        throw;
+    }
+    arq.close();
+}
+
 Farm* Farm::carregarFazenda(User* proprietario, std::string nomeFazenda) {
     if (proprietario == nullptr) throw std::invalid_argument("Proprietario invalido!");
 
@@ -1216,6 +1277,9 @@ Farm* Farm::carregarFazenda(User* proprietario, std::string nomeFazenda) {
     std::string idDono = proprietario->getId();
     Farm* fazendaCarregada = nullptr;
     std::string areaSelecionadaSalva = "";
+    IndiceAnimalCarregar* indice = nullptr;
+    int qtdIndice = 0;
+    int capIndice = 0;
 
     try {
         std::string donoLido, nomeLido, locLida, areaAtualLida;
@@ -1263,26 +1327,26 @@ Farm* Farm::carregarFazenda(User* proprietario, std::string nomeFazenda) {
                         formatarTextoFarmCarregar(estadoLido),
                         hectaresLidos
                     );
+                    fazendaCarregada->adicionarArea(novaArea, true);
 
                     for (int i = 0; i < qtdAnimaisLida; i++) {
                         std::string tipoLido, idAnimalLido;
                         if (!(arqAreas >> tipoLido >> idAnimalLido)) break;
 
-                        std::string tipoFmt = formatarTextoFarmCarregar(tipoLido);
-                        std::string idFmt = formatarTextoFarmCarregar(idAnimalLido);
-                        Animal* animalCarregado = nullptr;
-
-                        if (tipoFmt == "vaca") animalCarregado = Vaca::carregarVaca(idFmt);
-                        else if (tipoFmt == "touro") animalCarregado = Touro::carregarTouro(idFmt);
-                        else if (tipoFmt == "boicorte") animalCarregado = Boicorte::carregarBoicorte(idFmt);
-                        else if (tipoFmt == "bezerro") animalCarregado = Bezerro::carregarBezerro(idFmt);
-
-                        if (animalCarregado != nullptr) {
-                            novaArea->adicionarAnimal(animalCarregado, true);
+                        if (qtdIndice == capIndice) {
+                            int novaCap = (capIndice == 0) ? 64 : capIndice * 2;
+                            IndiceAnimalCarregar* novo = new IndiceAnimalCarregar[novaCap];
+                            for (int k = 0; k < qtdIndice; k++) novo[k] = indice[k];
+                            delete[] indice;
+                            indice = novo;
+                            capIndice = novaCap;
                         }
+                        indice[qtdIndice].id = formatarTextoFarmCarregar(idAnimalLido);
+                        indice[qtdIndice].tipo = formatarTextoFarmCarregar(tipoLido);
+                        indice[qtdIndice].area = novaArea;
+                        indice[qtdIndice].carregado = false;
+                        qtdIndice++;
                     }
-
-                    fazendaCarregada->adicionarArea(novaArea, true);
                 } else {
                     for (int i = 0; i < qtdAnimaisLida; i++) {
                         std::string tipoSkip, idSkip;
@@ -1293,12 +1357,24 @@ Farm* Farm::carregarFazenda(User* proprietario, std::string nomeFazenda) {
             arqAreas.close();
         }
 
+        if (qtdIndice > 0) {
+            std::sort(indice, indice + qtdIndice, compararIndiceCarregarPorId);
+            carregarAnimaisDeArquivoPorTipo("vaca", "./data/vacas.txt", indice, qtdIndice);
+            carregarAnimaisDeArquivoPorTipo("touro", "./data/touros.txt", indice, qtdIndice);
+            carregarAnimaisDeArquivoPorTipo("boicorte", "./data/boicortes.txt", indice, qtdIndice);
+            carregarAnimaisDeArquivoPorTipo("bezerro", "./data/bezerros.txt", indice, qtdIndice);
+        }
+
+        delete[] indice;
+        indice = nullptr;
+
         if (!areaSelecionadaSalva.empty()) {
             fazendaCarregada->areaAtual = areaSelecionadaSalva;
         }
 
         return fazendaCarregada;
     } catch (...) {
+        delete[] indice;
         delete fazendaCarregada;
         throw;
     }

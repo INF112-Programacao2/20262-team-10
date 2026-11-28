@@ -201,6 +201,26 @@ void Bezerro::salvarEmArquivo() {
     std::rename("./data/bezerros_temp.txt", "./data/bezerros.txt");
 }
 
+Bezerro* Bezerro::carregarProximo(std::ifstream& arquivo) {
+    Bezerro* bezerroCarregado = new Bezerro();
+    try {
+        if (!bezerroCarregado->carregarBase(arquivo) ||
+            !(arquivo >> bezerroCarregado->consumoLeiteLitros >> bezerroCarregado->ganhoPesoMedioDiario >> bezerroCarregado->idadeDesmameMeses >> bezerroCarregado->desmamado)) {
+            delete bezerroCarregado;
+            return nullptr;
+        }
+        if (bezerroCarregado->ganhoMedioPeso <= 0.0 && bezerroCarregado->ganhoPesoMedioDiario > 0.0) {
+            bezerroCarregado->ganhoMedioPeso = bezerroCarregado->ganhoPesoMedioDiario;
+        } else if (bezerroCarregado->ganhoPesoMedioDiario <= 0.0 && bezerroCarregado->ganhoMedioPeso > 0.0) {
+            bezerroCarregado->ganhoPesoMedioDiario = bezerroCarregado->ganhoMedioPeso;
+        }
+        return bezerroCarregado;
+    } catch (...) {
+        delete bezerroCarregado;
+        throw;
+    }
+}
+
 Bezerro* Bezerro::carregarBezerro(std::string id) {
     if(id.empty()) throw std::invalid_argument("ID invalido para carregar bezerro!");
 
@@ -209,28 +229,20 @@ Bezerro* Bezerro::carregarBezerro(std::string id) {
         return nullptr;
     }
 
-    Bezerro* bezerroCarregado = new Bezerro();
     try {
-        while(bezerroCarregado->carregarBase(arquivo) &&
-              (arquivo >> bezerroCarregado->consumoLeiteLitros >> bezerroCarregado->ganhoPesoMedioDiario >> bezerroCarregado->idadeDesmameMeses >> bezerroCarregado->desmamado)) {
+        while(Bezerro* bezerroCarregado = carregarProximo(arquivo)) {
             if(bezerroCarregado->_id == id) {
-                if (bezerroCarregado->ganhoMedioPeso <= 0.0 && bezerroCarregado->ganhoPesoMedioDiario > 0.0) {
-                    bezerroCarregado->ganhoMedioPeso = bezerroCarregado->ganhoPesoMedioDiario;
-                } else if (bezerroCarregado->ganhoPesoMedioDiario <= 0.0 && bezerroCarregado->ganhoMedioPeso > 0.0) {
-                    bezerroCarregado->ganhoPesoMedioDiario = bezerroCarregado->ganhoMedioPeso;
-                }
                 arquivo.close();
                 return bezerroCarregado;
             }
+            delete bezerroCarregado;
         }
     } catch (...) {
         arquivo.close();
-        delete bezerroCarregado;
         throw;
     }
 
     arquivo.close();
-    delete bezerroCarregado;
     return nullptr;
 }
 

@@ -38,6 +38,7 @@ public:
     bool cobrirFemea(Vaca* femea);
     void salvarEmArquivo() override;
     void escreverLinhaArquivo(std::ofstream& out) const override;
+    static Touro* carregarProximo(std::ifstream& arquivo);
     static Touro* carregarTouro(std::string id);
 };
 

@@ -2,4 +2,6 @@ bin/
 build/
 teste_gigante.txt
 geradorTeste.py
+gui_local/
 data/*.txt
+RELATORIO_ALGORITMOS.md

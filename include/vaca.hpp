@@ -42,6 +42,7 @@ public:
     std::string parir();
     void salvarEmArquivo() override;
     void escreverLinhaArquivo(std::ofstream& out) const override;
+    static Vaca* carregarProximo(std::ifstream& arquivo);
     static Vaca* carregarVaca(std::string id);
 };
 

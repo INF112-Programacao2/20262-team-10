@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <stdexcept>
 
+//define os valores de referencia que esta utilizando para o score, calculo de cada tipo de animal
+//autoria (Marco Tulio)
 namespace {
     // parametros do score genetico
     const double SCORE_REFERENCIA = 50.0;
@@ -20,9 +22,11 @@ namespace {
     const double W_PESO = 0.30, W_GANHO = 0.35, W_PROD = 0.35;
 
     double limitar(double v, double lo, double hi) { return v < lo ? lo : (v > hi ? hi : v); }
+    //Marco Tulio explicar essa parte
 
     double razaoParaPontos(double razao) { return limitar(SCORE_REFERENCIA + (razao - 1.0) * 100.0, 0.0, 100.0); }
 
+    //valor de referencia calculado por animal
     double pesoAdultoReferencia(const std::string& tipo) {
         if (tipo == "vaca") return 550.0;
         if (tipo == "touro") return 900.0;
@@ -30,6 +34,7 @@ namespace {
         return 400.0; // bezerro
     }
 
+    //ganho referencia por tipo de animal tambem
     double ganhoReferencia(const std::string& tipo) {
         if (tipo == "vaca") return 0.50;
         if (tipo == "touro") return 0.60;
@@ -37,6 +42,8 @@ namespace {
     }
 }
 
+//construtor generico, para animais nascidos ate entao
+//autoria (Victor Mendes)
 Animal::Animal(std::string id, char s, double p)
     : _id(id), sexo(s), peso(p)
 {
@@ -47,6 +54,8 @@ Animal::Animal(std::string id, char s, double p)
 }
 
 // inicializador overload
+//o construtor e automaticamente selecionado pela quantidade de params
+//para animais comprados, promovidos, importados
 Animal::Animal(std::string id, char s, double p, int iM, int qtdF,
                int qtdV, std::string *filhosIniciais)
     : _id(id), sexo(s), peso(p), idadeMeses(iM),
@@ -118,6 +127,7 @@ void Animal::setValorVendaSugerido(double valor)
     valorVendaSugerido = valor;
 }
 
+//logica para adicionar um filho no array de filhos no array de filhos do animal
 void Animal::adicionarFilho(const std::string& idFilho)
 {
     if (idFilho.empty()) return;
@@ -135,7 +145,7 @@ void Animal::adicionarFilho(const std::string& idFilho)
     qtdFilhos++;
 }
 
-// score genetico
+//Autoria (Marco Tulio)
 bool Animal::obterRazaoProducao([[maybe_unused]] double &razao) const
 {
     return false;
