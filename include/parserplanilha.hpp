@@ -23,7 +23,32 @@ class ParserPlanilha {
         std::istringstream entrada; //linha atual reaproveitada a cada linha, nao cria stream por linha
         int numLinha;
         ResumoIportacao resumo;
-}
+        explicit ParserPlanilha(Farm& f); //so metodos estaticos criam um parser
+        //leitura
+        void lerFluxo(std::istream& fonte);
+        void processarlinha(std::string& texto);
+        void lerArea();
+        void lerAncestral();
+        void lerAnimal();
+        void esperaFimDaLinha();
+        bool hamaiscampos();
+        //genealogia que trem doidimais da conta gente sô
+        // acestrais anexados tem q voltar por referencia ( nn pode trazer nada se nn houver nd a ser "trazido"? )
+        void lerGenealogia(Animal& animal, SnapshotAncestral& snapPai, SnapshotAncestral& snapMae);
+        void LerSnapshot(SnapshotAncestral& destino, const char* campo);
+        void conferirAncestralAnexado(const SnapshotAncestral& snap, const std::string& idEsperado, const char* campo) const;
+        // volta de animal, porque? porque retorna o animal do new
+        Animal* criarAnimal(const std::string& tipo, const std::string& idToken);
+        Animal* criarVaca(const std::string& tipo, const std::string& idToken);
+        Animal* criarTouro(const std::string& tipo, const std::string& idToken);
+        Animal* criarBoicorte(const std::string& tipo, const std::string& idToken);
+        Animal* criarBezerro(const std::string& tipo, const std::string& idToken);
+        //leitura volta na referencia
+        void ler(std::string& destino, const char* campo);
+        void ler(double& destino, const char* campo);
+        
+
+};
 
 
 #endif 
